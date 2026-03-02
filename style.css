@@ -1,0 +1,19 @@
+    /* Container para referência */
+    .container {
+        position: relative; /* Necessário para posicionamento absoluto interno */
+        width: 300px;
+        height: 200px;
+        border: 1px solid #000;
+    }
+
+    /* Botão posicionado */
+    .meu-botao {
+        position: absolute; /* Permite mover livremente */
+        top: 50px;   /* Move para baixo */
+        left: 80px;  /* Move para a direita */
+        padding: 10px 20px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
