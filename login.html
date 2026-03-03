@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Sistema de Login</title>
+
+<script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/src/sha256.min.js"></script>
+
+</head>
+
+<body>
+
+<h2>Login</h2>
+
+Usuário:<br>
+<input id="usuario"><br><br>
+
+Senha:<br>
+<input type="password" id="senha"><br><br>
+
+<button onclick="login()">Confirmar</button>
+
+<h3 id="mensagem"></h3>
+
+<script>
+
+function baixarArquivo(texto) {
+
+    var blob = new Blob([texto], { type: "text/plain" });
+
+    var link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "login.txt";
+
+    link.click();
+}
+
+function login() {
+
+    var usuario = document.getElementById("usuario").value;
+    var senha = document.getElementById("senha").value;
+
+    var hash = sha256(senha);
+
+    var usuarioSalvo = localStorage.getItem("usuario");
+    var hashSalvo = localStorage.getItem("hash");
+
+    if (!usuarioSalvo) {
+
+        localStorage.setItem("usuario", usuario);
+        localStorage.setItem("hash", hash);
+
+        baixarArquivo("Usuario: " + usuario + "\nHash: " + hash);
+
+        document.getElementById("mensagem").innerText =
+            "Primeiro login salvo com sucesso!";
+
+        return;
+    }
+
+
+    if (usuario === usuarioSalvo) {
+
+        if (hash === hashSalvo) {
+            document.getElementById("mensagem").innerText =
+                "Senha correta!";
+        } else {
+            document.getElementById("mensagem").innerText =
+                "Senha incorreta!";
+        }
+
+    } else {
+        document.getElementById("mensagem").innerText =
+            "Usuário não encontrado.";
+    }
+}
+
+</script>
+
+</body>
+</html>
