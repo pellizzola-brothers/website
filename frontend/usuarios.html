@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criadores — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon">🎮</div>
+        <div class="brand-name">
+          Pellizzola Brothers
+          <span>Plataforma de Níveis</span>
+        </div>
+      </a>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Menu</div>
+        <a href="index.html" class="nav-item"><span class="icon">🏠</span> Início</a>
+        <a href="niveis.html" class="nav-item"><span class="icon">📋</span> Todos os Níveis</a>
+        <a href="usuarios.html" class="nav-item active"><span class="icon">👥</span> Criadores</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Conta</div>
+        <a href="login.html" class="nav-item" id="sidebar-auth"><span class="icon">🔑</span> Entrar</a>
+      </div>
+    </nav>
+    <div class="sidebar-user" id="sidebar-user-section" style="display:none;">
+      <a href="#" class="user-card" id="sidebar-user-card">
+        <div class="user-avatar">👤</div>
+        <div>
+          <div class="user-info-name" id="sidebar-username">—</div>
+          <div class="user-info-role">Meu Perfil</div>
+        </div>
+      </a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <span class="topbar-title">Criadores</span>
+      <div class="topbar-actions">
+        <a href="login.html" class="btn btn-primary btn-sm" id="topbar-auth">Entrar</a>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Criadores da Comunidade</div>
+          <div class="page-subtitle">Conheça quem faz a plataforma crescer</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">👥 Todos os criadores</span>
+        </div>
+        <div class="level-list" id="users-list">
+          <div class="level-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
+          <div class="level-item"><div class="skeleton" style="height:40px;width:100%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3000/api';
+const user = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+if (user) {
+  document.getElementById('topbar-auth').textContent = 'Meu Perfil';
+  document.getElementById('topbar-auth').href = `perfil_do_usuario.html?id=${user.id}`;
+  document.getElementById('sidebar-auth').innerHTML = '<span class="icon">👤</span> Meu Perfil';
+  document.getElementById('sidebar-auth').href = `perfil_do_usuario.html?id=${user.id}`;
+  document.getElementById('sidebar-user-section').style.display = '';
+  document.getElementById('sidebar-username').textContent = user.username;
+  document.getElementById('sidebar-user-card').href = `perfil_do_usuario.html?id=${user.id}`;
+}
+
+async function loadUsers() {
+  let users = [];
+  try {
+    users = await fetch(`${API}/users`).then(r => r.json());
+  } catch(e) {
+    users = [
+      {id:1,username:'xx_poste_xx',bio:'Viva Jesus',total_levels:2,downloaded_levels:11,liked_levels:9},
+      {id:2,username:'JacaboMassola',bio:null,total_levels:1,downloaded_levels:0,liked_levels:0},
+      {id:3,username:'BillyShears',bio:'The one and only Billy Shears!',total_levels:2,downloaded_levels:0,liked_levels:0},
+    ];
+  }
+
+  document.getElementById('users-list').innerHTML = users.map((u, i) => `
+    <a href="perfil_do_usuario.html?id=${u.id}" class="level-item">
+      <div class="level-thumb" style="font-size:22px;">👤</div>
+      <div class="level-item-info">
+        <div class="level-item-name">${u.username}</div>
+        <div class="level-item-meta">${u.bio ? '"' + u.bio + '"' : 'Sem biografia'}</div>
+      </div>
+      <div class="level-item-stats">
+        <span class="stat-badge">📋 ${u.total_levels} nível${u.total_levels !== 1 ? 'is' : ''}</span>
+      </div>
+      <span class="badge badge-blue" style="margin-left:8px;">#${i + 1}</span>
+    </a>`).join('');
+}
+
+loadUsers();
+</script>
+</body>
+</html>

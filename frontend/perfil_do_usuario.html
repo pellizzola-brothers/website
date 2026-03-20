@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="niveis.html">Níveis</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+  </ul>
+</nav>
+
+<div class="page" id="main">
+  <div class="user-hero">
+    <div class="user-avatar skeleton" style="width:155px;height:155px;"></div>
+    <div style="flex:1;">
+      <div class="skeleton" style="height:26px;width:45%;margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:13px;width:32%;margin-bottom:14px;"></div>
+      <div class="skeleton" style="height:13px;width:26%;margin-bottom:4px;"></div>
+      <div class="skeleton" style="height:13px;width:26%;margin-bottom:4px;"></div>
+      <div class="skeleton" style="height:13px;width:26%;margin-bottom:20px;"></div>
+      <div class="skeleton" style="height:34px;width:110px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3000/api';
+const EMOJIS = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const emojiFor = id => EMOJIS[(id - 1) % EMOJIS.length];
+
+const loggedUser = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+if (loggedUser) {
+  document.getElementById('nav-auth').textContent = loggedUser.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + loggedUser.id;
+}
+
+const getUserId = function() { return parseInt(new URLSearchParams(location.search).get('id')) || 1; };
+const isOwn = function(id) { return loggedUser && loggedUser.id === id; };
+
+async function loadProfile() {
+  const id = getUserId();
+  let u;
+  try {
+    u = await fetch(API + '/users/' + id).then(function(r) { if (!r.ok) throw new Error(); return r.json(); });
+  } catch(e) {
+    u = { id:1, username:'xx_poste_xx', bio:'Viva Jesus', downloaded_levels:11, liked_levels:9,
+      levels:[
+        {id:1,name:'Meu Nivel Bacana',description:'Bacanices Bananas',downloads:11,likes:10},
+        {id:2,name:'Meu Nivel Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9},
+      ]
+    };
+  }
+
+  document.title = u.username + ' — Pellizzola Brothers';
+
+  var own = isOwn(u.id);
+  var actionBtn = own
+    ? '<button class="btn btn-outline btn-sm" onclick="logout()">Sair da conta</button>'
+    : '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">Seguir</button>';
+
+  var createdCards = (u.levels||[]).map(function(l) {
+    return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="created-card">' +
+      '<div class="created-card-thumb">' + emojiFor(l.id) + '</div>' +
+      '<div class="created-card-info">' +
+        '<div class="created-card-name">' + l.name + '</div>' +
+        '<div class="created-card-desc">' + (l.description ? '"' + l.description + '"' : '') + '</div>' +
+        '<div class="created-card-stats">' +
+          '<div>Downloads: ' + l.downloads + '</div>' +
+          '<div>Curtidas: ' + l.likes + '</div>' +
+        '</div>' +
+      '</div>' +
+    '</a>';
+  }).join('');
+
+  var moreCard = '<a href="niveis.html" class="created-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;">' +
+    '<div style="text-align:center;padding:16px;color:var(--text-muted);">' +
+      '<div style="font-size:20px;margin-bottom:6px;">→</div>' +
+      '<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Ver todos</div>' +
+    '</div>' +
+  '</a>';
+
+  document.getElementById('main').innerHTML =
+    '<div class="user-hero">' +
+      '<div class="user-avatar">👤</div>' +
+      '<div class="user-hero-info">' +
+        '<div class="user-name">' + u.username + '</div>' +
+        '<div class="user-bio">' + (u.bio ? '"' + u.bio + '"' : '') + '</div>' +
+        '<div class="user-stats">' +
+          '<div class="user-stat">Seguidores: —</div>' +
+          '<div class="user-stat">Fases jogadas: ' + u.downloaded_levels + '</div>' +
+          '<div class="user-stat">Fases curtidas: ' + u.liked_levels + '</div>' +
+        '</div>' +
+        actionBtn +
+      '</div>' +
+    '</div>' +
+    ((u.levels && u.levels.length > 0) ?
+      '<div class="created-title">Níveis Criados</div>' +
+      '<div class="created-strip">' + createdCards + moreCard + '</div>'
+    : '');
+}
+
+function toggleFollow(btn) {
+  if (btn.textContent === 'Seguir') { btn.textContent = '✓ Seguindo'; btn.classList.replace('btn-green','btn-outline'); }
+  else { btn.textContent = 'Seguir'; btn.classList.replace('btn-outline','btn-green'); }
+}
+
+function logout() { sessionStorage.removeItem('pb_user'); window.location.href = 'index.html'; }
+
+loadProfile();
+</script>
+</body>
+</html>

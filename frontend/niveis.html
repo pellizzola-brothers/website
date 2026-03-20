@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Níveis — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="niveis.html" class="active">Níveis</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="search-bar-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-bar" id="searchInput" type="text" placeholder="Pesquisar..." oninput="filterLevels()">
+  </div>
+
+  <div id="levels-list">
+    <div class="level-row">
+      <div class="level-row-thumb skeleton"></div>
+      <div class="level-row-info"><span class="skeleton" style="height:13px;width:55%;margin-bottom:5px;"></span><span class="skeleton" style="height:11px;width:38%;"></span></div>
+    </div>
+    <div class="level-row">
+      <div class="level-row-thumb skeleton"></div>
+      <div class="level-row-info"><span class="skeleton" style="height:13px;width:45%;margin-bottom:5px;"></span><span class="skeleton" style="height:11px;width:30%;"></span></div>
+    </div>
+    <div class="level-row">
+      <div class="level-row-thumb skeleton"></div>
+      <div class="level-row-info"><span class="skeleton" style="height:13px;width:65%;margin-bottom:5px;"></span><span class="skeleton" style="height:11px;width:42%;"></span></div>
+    </div>
+  </div>
+  <div id="empty-state" class="empty-state" style="display:none;">Nenhum nível encontrado.</div>
+</div>
+
+<script>
+const API = 'http://localhost:3000/api';
+const EMOJIS = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const emojiFor = function(id) { return EMOJIS[(id - 1) % EMOJIS.length]; };
+
+const user = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+if (user) {
+  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
+}
+
+let allLevels = [];
+
+async function loadLevels() {
+  try {
+    allLevels = await fetch(API + '/levels').then(function(r) { return r.json(); });
+  } catch(e) {
+    allLevels = [
+      {id:1,name:'Meu Nivel Bacana',description:'Bacanices Bananas',downloads:11,likes:10,author_name:'xx_poste_xx',file_id:1},
+      {id:2,name:'Meu Nivel Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9,author_name:'xx_poste_xx',file_id:2},
+      {id:3,name:'A Extraordinaria Jornada de Henrique',description:'I have a feeling this album will become a classic.',downloads:0,likes:0,author_name:'BillyShears',file_id:null},
+      {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6,author_name:'BillyShears',file_id:null},
+      {id:5,name:'Eu Acompanho as Botas Douradas',description:'JacaboMassola',downloads:3,likes:2,author_name:'JacaboMassola',file_id:null},
+    ];
+  }
+  renderLevels(allLevels);
+}
+
+function filterLevels() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderLevels(allLevels.filter(function(l) {
+    return l.name.toLowerCase().includes(q) || (l.description||'').toLowerCase().includes(q);
+  }));
+}
+
+function renderLevels(levels) {
+  const empty = document.getElementById('empty-state');
+  const list  = document.getElementById('levels-list');
+  if (!levels.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  list.innerHTML = levels.map(function(l) {
+    return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="level-row-link">' +
+      '<div class="level-row">' +
+        '<div class="level-row-thumb">' + emojiFor(l.id) + '</div>' +
+        '<div class="level-row-info">' +
+          '<div class="level-row-name">' + l.name + '</div>' +
+          '<div class="level-row-desc">' + (l.description ? '"' + l.description + '"' : '') + '</div>' +
+        '</div>' +
+        '<div class="level-row-stats">' +
+          '<span>Downloads: ' + l.downloads + '</span>' +
+          '<span>Curtidas: ' + l.likes + '</span>' +
+        '</div>' +
+        '<button class="btn-dl" onclick="handleDl(event,' + l.id + ',' + (l.file_id || 'null') + ',this)">⬇</button>' +
+      '</div>' +
+    '</a>';
+  }).join('');
+}
+
+// ── Download da lista: incrementa contador e baixa o arquivo ─
+async function handleDl(e, id, fileId, btn) {
+  e.preventDefault();
+  e.stopPropagation();
+  btn.textContent = '⏳';
+  btn.disabled = true;
+
+  // Incrementa downloads
+  try { await fetch(API + '/levels/' + id + '/download', {method:'POST'}); } catch(_){}
+
+  if (!fileId) {
+    // Sem arquivo vinculado: apenas conta
+    btn.textContent = '✓';
+    btn.style.background = '#2d7a30';
+    setTimeout(function(){ btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false; }, 2500);
+    return;
+  }
+
+  // Baixa o arquivo real
+  try {
+    var resp = await fetch(API + '/files/' + fileId);
+    var dados = await resp.json();
+    if (!dados.error) {
+      var a = document.createElement('a');
+      a.href = API + '/upload/level/' + dados.hash;
+      a.download = dados.hash;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    btn.textContent = '✓';
+    btn.style.background = '#2d7a30';
+    setTimeout(function(){ btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false; }, 2500);
+  } catch(err) {
+    btn.textContent = '⬇';
+    btn.style.background = '';
+    btn.disabled = false;
+  }
+}
+
+loadLevels();
+</script>
+</body>
+</html>

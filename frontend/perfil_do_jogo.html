@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Jogo — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="niveis.html">Níveis</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+  </ul>
+</nav>
+
+<div class="page" id="main">
+  <div class="level-hero">
+    <div class="level-hero-thumb skeleton" style="width:270px;min-height:190px;"></div>
+    <div class="level-hero-info">
+      <div class="skeleton" style="height:22px;width:65%;margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:13px;width:45%;margin-bottom:16px;"></div>
+      <div class="skeleton" style="height:13px;width:28%;margin-bottom:4px;"></div>
+      <div class="skeleton" style="height:13px;width:28%;margin-bottom:20px;"></div>
+      <div class="skeleton" style="height:34px;width:120px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3000/api';
+const EMOJIS = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const emojiFor = function(id) { return EMOJIS[(id - 1) % EMOJIS.length]; };
+
+const user = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+if (user) {
+  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
+}
+
+const getLevelId = function() { return parseInt(new URLSearchParams(location.search).get('id')) || 1; };
+
+// Armazena o file_id do nível atual para uso no download
+var currentFileId = null;
+
+async function loadLevel() {
+  const id = getLevelId();
+  let level;
+  try {
+    level = await fetch(API + '/levels/' + id).then(function(r) { if (!r.ok) throw new Error(); return r.json(); });
+  } catch(e) {
+    level = {
+      id:1, name:'Meu Nivel Bacana', description:'Bacanices Bananas',
+      downloads:11, likes:10, author_id:1, author_name:'xx_poste_xx',
+      file_id: null,
+      similar: [
+        {id:2,name:'Meu Nivel Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9},
+        {id:6,name:"Sgt. Pepper's...",description:'Your day brea...',downloads:11,likes:10},
+        {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6},
+      ]
+    };
+  }
+
+  currentFileId = level.file_id;
+  document.title = level.name + ' — Pellizzola Brothers';
+
+  // Verifica se o usuário logado já curtiu este nível
+  var alreadyLiked = false;
+  if (user && level.id) {
+    try {
+      var likedResp = await fetch(API + '/levels/' + level.id + '/liked?user_id=' + user.id);
+      var likedData = await likedResp.json();
+      alreadyLiked = likedData.liked;
+    } catch(e) {}
+  }
+
+  var simCards = (level.similar||[]).map(function(s) {
+    return '<a href="perfil_do_jogo.html?id=' + s.id + '" class="similar-card">' +
+      '<div class="similar-thumb">' + emojiFor(s.id) + '</div>' +
+      '<div class="similar-info"><div class="similar-name">' + s.name + '</div>' +
+      '<div class="similar-desc">' + (s.description ? '"' + s.description + '"' : '') + '</div></div>' +
+      '<div class="similar-stats"><span>⬇ ' + s.downloads + '</span><span>♥ ' + s.likes + '</span></div>' +
+    '</a>';
+  }).join('');
+
+  var moreCard = '<a href="niveis.html" class="similar-card" style="border-style:dashed;">' +
+    '<div class="similar-thumb" style="background:var(--bg);font-size:20px;">→</div>' +
+    '<div class="similar-info"><div class="similar-name">Ver mais</div></div>' +
+  '</a>';
+
+  // Botão de like: desabilitado se já curtiu ou se não está logado
+  var likeBtnDisabled = alreadyLiked || !user;
+  var likeBtnText = alreadyLiked ? '♥ Curtido!' : 'Curtir';
+  var likeBtnStyle = alreadyLiked ? 'background:var(--accent);color:#fff;' : '';
+  var likeBtnTitle = !user ? 'Faça login para curtir' : (alreadyLiked ? 'Você já curtiu este nível' : '');
+
+  document.getElementById('main').innerHTML =
+    '<div class="level-hero">' +
+      '<div class="level-hero-thumb">' + emojiFor(level.id) + '</div>' +
+      '<div class="level-hero-info">' +
+        '<div class="level-hero-name">' + level.name + '</div>' +
+        '<div class="level-hero-desc">' + (level.description ? '"' + level.description + '"' : '') + '</div>' +
+        '<div class="level-hero-stats">' +
+          '<div class="level-hero-stat">Downloads: <strong id="dl-count">' + level.downloads + '</strong></div>' +
+          '<div class="level-hero-stat">Curtidas: <strong id="like-count">' + level.likes + '</strong></div>' +
+        '</div>' +
+        '<div class="level-hero-actions">' +
+          '<button class="btn btn-green" id="dl-btn" onclick="handleDownload(' + level.id + ',' + (level.file_id || 'null') + ')">⬇ Download</button>' +
+          '<button class="btn btn-outline" id="like-btn" onclick="handleLike(' + level.id + ')" ' +
+            (likeBtnDisabled ? 'disabled' : '') + ' style="' + likeBtnStyle + '" title="' + likeBtnTitle + '">' + likeBtnText + '</button>' +
+          '<a href="perfil_do_usuario.html?id=' + level.author_id + '" class="btn btn-outline">👤 ' + level.author_name + '</a>' +
+        '</div>' +
+        (!user ? '<p style="font-size:12px;color:var(--text-muted);margin-top:8px;"><a href="login.html">Faça login</a> para curtir este nível.</p>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="similar-title">Níveis Semelhantes</div>' +
+    '<div class="similar-grid">' + simCards + moreCard + '</div>';
+}
+
+// ── Download: incrementa contador E baixa o arquivo real ────
+async function handleDownload(nivelId, fileId) {
+  var btn = document.getElementById('dl-btn');
+  btn.textContent = '⏳ Baixando...';
+  btn.disabled = true;
+
+  // Incrementa o contador de downloads
+  try { await fetch(API + '/levels/' + nivelId + '/download', {method:'POST'}); } catch(_){}
+  var el = document.getElementById('dl-count');
+  if (el) el.textContent = parseInt(el.textContent) + 1;
+
+  // Se não tem arquivo vinculado, apenas conta o download
+  if (!fileId) {
+    btn.textContent = '✓ Baixado!';
+    setTimeout(function(){ btn.textContent = '⬇ Download'; btn.disabled = false; }, 2500);
+    return;
+  }
+
+  // Busca metadados do arquivo no banco e dispara o download real
+  try {
+    var resp = await fetch(API + '/files/' + fileId);
+    var dados = await resp.json();
+
+    if (dados.error) {
+      btn.textContent = '❌ Arquivo não encontrado';
+      btn.style.background = 'var(--danger, #c0392b)';
+      setTimeout(function(){ btn.textContent = '⬇ Download'; btn.disabled = false; btn.style.background = ''; }, 3000);
+      return;
+    }
+
+    // Cria link invisível e dispara o download
+    var a = document.createElement('a');
+    a.href = API + '/upload/level/' + dados.hash;
+    a.download = dados.hash;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    btn.textContent = '✓ Baixado!';
+    setTimeout(function(){ btn.textContent = '⬇ Download'; btn.disabled = false; }, 2500);
+
+  } catch(e) {
+    btn.textContent = '❌ Erro na conexão';
+    setTimeout(function(){ btn.textContent = '⬇ Download'; btn.disabled = false; }, 3000);
+  }
+}
+
+// ── Like: apenas uma vez por usuário logado ──────────────────
+async function handleLike(id) {
+  if (!user) return; // não logado, não faz nada (botão já está desabilitado)
+
+  var btn = document.getElementById('like-btn');
+  btn.disabled = true;
+
+  try {
+    var resp = await fetch(API + '/levels/' + id + '/like', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: user.id })
+    });
+    var data = await resp.json();
+
+    if (resp.status === 409 || data.already_liked) {
+      // Já curtiu (não deveria chegar aqui pois botão já estaria desabilitado)
+      btn.textContent = '♥ Curtido!';
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#fff';
+      return;
+    }
+
+    if (data.ok) {
+      btn.textContent = '♥ Curtido!';
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#fff';
+      // Botão fica permanentemente desabilitado (curtiu de verdade)
+      var el = document.getElementById('like-count');
+      if (el) el.textContent = parseInt(el.textContent) + 1;
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Curtir';
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = 'Curtir';
+  }
+}
+
+loadLevel();
+</script>
+</body>
+</html>
