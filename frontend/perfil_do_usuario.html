@@ -63,7 +63,10 @@ async function loadProfile() {
 
   var own = isOwn(u.id);
   var actionBtn = own
-    ? '<button class="btn btn-outline btn-sm" onclick="logout()">Sair da conta</button>'
+    ? '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+        '<a href="upload.html" class="btn btn-green btn-sm">📤 Enviar Nível</a>' +
+        '<button class="btn btn-outline btn-sm" onclick="logout()">Sair da conta</button>' +
+      '</div>'
     : '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">Seguir</button>';
 
   var createdCards = (u.levels||[]).map(function(l) {
