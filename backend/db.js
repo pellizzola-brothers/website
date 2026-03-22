@@ -1,33 +1,27 @@
-// db.js — Pool de conexão singleton com SQL Server
-const sql = require('mssql');
+// db.js — Pool de conexão singleton com PostgreSQL
+const { Pool } = require('pg');
 require('dotenv').config();
 
-const config = {
-  server:   process.env.DB_SERVER   || 'sqlexpress',
-  database: process.env.DB_DATABASE || 'pauro',
-  user:     process.env.DB_USER     || 'aluno',
-  password: process.env.DB_PASSWORD || 'aluno',
-  port:     parseInt(process.env.DB_PORT || '1433'),
-  options: {
-    encrypt:                false, // true se usar Azure
-    trustServerCertificate: true,  // aceita certificado autoassinado (dev)
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000,
-  },
-};
+const pool = process.env.DATABASE_URL
+  ? new Pool({ connectionString: process.env.DATABASE_URL })
+  : new Pool({
+      host:     process.env.DB_SERVER   || 'localhost',
+      user:     process.env.DB_USER     || 'postgres',
+      password: process.env.DB_PASSWORD || '',
+      database: process.env.DB_DATABASE || 'pauro',
+      port:     parseInt(process.env.DB_PORT || '5432'),
+    });
 
 // Pool único reutilizado em toda a aplicação
-let pool = null;
-
 async function getPool() {
-  if (!pool) {
-    pool = await sql.connect(config);
-    console.log('[DB] Conectado ao SQL Server — banco: pauro');
+  if (!pool._connected) {
+    // Validate connectivity on first call
+    await pool.query('SELECT 1');
+    pool._connected = true;
+    console.log('[DB] Conectado ao PostgreSQL — banco: ' + (process.env.DB_DATABASE || 'pauro'));
   }
   return pool;
 }
 
-module.exports = { getPool, sql };
+module.exports = { getPool, pool };
+
