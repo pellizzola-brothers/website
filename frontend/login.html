@@ -68,7 +68,9 @@
 </div>
 
 <script>
-const API = 'http://localhost:3000/api';
+const API = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/api'
+  : window.location.origin + '/api';
 const existing = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
 if (existing) window.location.href = 'perfil_do_usuario.html?id=' + existing.id;
 
