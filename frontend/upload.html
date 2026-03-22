@@ -220,6 +220,10 @@
 </div>
 
 <script>
+var API = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/api'
+  : window.location.origin + '/api';
+
 var usuario = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
 
 if (usuario != null) {
@@ -328,7 +332,7 @@ function enviar() {
     mostrarMsg('erro', 'Erro de conexão. Verifique se o servidor está rodando.');
   });
 
-  xhr.open('POST', 'http://localhost:3000/api/upload/level');
+  xhr.open('POST', API + '/upload/level');
   xhr.send(formData);
 }
 
