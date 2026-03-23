@@ -4,7 +4,7 @@ const router   = express.Router();
 const multer   = require('multer');
 const path     = require('path');
 const fs       = require('fs');
-const { getPool, sql } = require('../db');
+const { getPool } = require('../db');
 
 // ── Garante que a pasta levels existe ───────────────────────
 const LEVELS_DIR = path.join(__dirname, '../../levels');
@@ -56,33 +56,26 @@ router.post('/level', upload.single('file'), async (req, res) => {
     const pool = await getPool();
 
     // Salva registro na tabela files
-    const fileResult = await pool.request()
-      .input('user_id', sql.Int,         authorId)
-      .input('hash',    sql.VarChar(255), req.file.filename)
-      .query(`
-        INSERT INTO dbo.files (user_id, hash)
-        OUTPUT INSERTED.id
-        VALUES (@user_id, @hash)
-      `);
+    const fileResult = await pool.query(
+      `INSERT INTO files (user_id, hash)
+       VALUES ($1, $2)
+       RETURNING id`,
+      [authorId, req.file.filename]
+    );
 
-    const fileId = fileResult.recordset[0].id;
+    const fileId = fileResult.rows[0].id;
 
     // Cria o nível vinculado ao arquivo
-    const levelResult = await pool.request()
-      .input('name',        sql.VarChar(200),  name)
-      .input('description', sql.VarChar(1000), description || null)
-      .input('author',      sql.Int,           authorId)
-      .input('file_id',     sql.Int,           fileId)
-      .query(`
-        INSERT INTO dbo.levels (name, description, author, file_id)
-        OUTPUT INSERTED.id, INSERTED.name, INSERTED.description,
-               INSERTED.downloads, INSERTED.likes
-        VALUES (@name, @description, @author, @file_id)
-      `);
+    const levelResult = await pool.query(
+      `INSERT INTO levels (name, description, author, file_id)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, name, description, downloads, likes`,
+      [name, description || null, authorId, fileId]
+    );
 
     res.status(201).json({
       ok: true,
-      level: levelResult.recordset[0],
+      level: levelResult.rows[0],
       file: {
         id:       fileId,
         filename: req.file.filename,

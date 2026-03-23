@@ -1,7 +1,7 @@
 // routes/users.js
 const express = require('express');
 const router  = express.Router();
-const { getPool, sql } = require('../db');
+const { getPool } = require('../db');
 
 // ── GET /api/users/:id ──────────────────────────────────────
 // Retorna dados do usuário + seus níveis criados
@@ -13,30 +13,28 @@ router.get('/:id', async (req, res) => {
     const pool = await getPool();
 
     // Dados do usuário
-    const userResult = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`
-        SELECT id, username, bio, downloaded_levels, liked_levels
-        FROM dbo.users
-        WHERE id = @id
-      `);
+    const userResult = await pool.query(
+      `SELECT id, username, bio, downloaded_levels, liked_levels
+       FROM users
+       WHERE id = $1`,
+      [id]
+    );
 
-    if (userResult.recordset.length === 0)
+    if (userResult.rows.length === 0)
       return res.status(404).json({ error: 'Usuário não encontrado' });
 
-    const user = userResult.recordset[0];
+    const user = userResult.rows[0];
 
     // Níveis criados pelo usuário
-    const levelsResult = await pool.request()
-      .input('author', sql.Int, id)
-      .query(`
-        SELECT id, name, description, downloads, likes
-        FROM dbo.levels
-        WHERE author = @author
-        ORDER BY downloads DESC, likes DESC
-      `);
+    const levelsResult = await pool.query(
+      `SELECT id, name, description, downloads, likes
+       FROM levels
+       WHERE author = $1
+       ORDER BY downloads DESC, likes DESC`,
+      [id]
+    );
 
-    user.levels = levelsResult.recordset;
+    user.levels = levelsResult.rows;
     res.json(user);
 
   } catch (err) {
@@ -50,16 +48,16 @@ router.get('/:id', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await pool.request().query(`
+    const result = await pool.query(`
       SELECT u.id, u.username, u.bio,
              u.downloaded_levels, u.liked_levels,
              COUNT(l.id) AS total_levels
-      FROM dbo.users u
-      LEFT JOIN dbo.levels l ON l.author = u.id
+      FROM users u
+      LEFT JOIN levels l ON l.author = u.id
       GROUP BY u.id, u.username, u.bio, u.downloaded_levels, u.liked_levels
       ORDER BY total_levels DESC
     `);
-    res.json(result.recordset);
+    res.json(result.rows);
   } catch (err) {
     console.error('[GET /users]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -76,22 +74,21 @@ router.post('/', async (req, res) => {
     const pool = await getPool();
 
     // Verifica duplicata
-    const dup = await pool.request()
-      .input('username', sql.VarChar(100), username)
-      .query(`SELECT id FROM dbo.users WHERE username = @username`);
-    if (dup.recordset.length > 0)
+    const dup = await pool.query(
+      `SELECT id FROM users WHERE username = $1`,
+      [username]
+    );
+    if (dup.rows.length > 0)
       return res.status(409).json({ error: 'Nome de usuário já existe' });
 
-    const result = await pool.request()
-      .input('username', sql.VarChar(100), username)
-      .input('bio',      sql.VarChar(500), bio || null)
-      .query(`
-        INSERT INTO dbo.users (username, bio)
-        OUTPUT INSERTED.id, INSERTED.username, INSERTED.bio
-        VALUES (@username, @bio)
-      `);
+    const result = await pool.query(
+      `INSERT INTO users (username, bio)
+       VALUES ($1, $2)
+       RETURNING id, username, bio`,
+      [username, bio || null]
+    );
 
-    res.status(201).json(result.recordset[0]);
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('[POST /users]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });

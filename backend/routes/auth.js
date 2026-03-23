@@ -2,7 +2,7 @@
 const express = require('express');
 const router  = express.Router();
 const crypto  = require('crypto');
-const { getPool, sql } = require('../db');
+const { getPool } = require('../db');
 
 function sha256(text) {
   return crypto.createHash('sha256').update(text).digest('hex');
@@ -20,25 +20,23 @@ router.post('/register', async (req, res) => {
     const pool = await getPool();
 
     // Verifica duplicata
-    const dup = await pool.request()
-      .input('username', sql.VarChar(100), username)
-      .query(`SELECT id FROM dbo.users WHERE username = @username`);
-    if (dup.recordset.length > 0)
+    const dup = await pool.query(
+      `SELECT id FROM users WHERE username = $1`,
+      [username]
+    );
+    if (dup.rows.length > 0)
       return res.status(409).json({ error: 'Nome de usuário já existe' });
 
     const hash = sha256(password);
 
-    const result = await pool.request()
-      .input('username',      sql.VarChar(100), username)
-      .input('bio',           sql.VarChar(500),  bio || null)
-      .input('password_hash', sql.VarChar(64),   hash)
-      .query(`
-        INSERT INTO dbo.users (username, bio, password_hash)
-        OUTPUT INSERTED.id, INSERTED.username, INSERTED.bio
-        VALUES (@username, @bio, @password_hash)
-      `);
+    const result = await pool.query(
+      `INSERT INTO users (username, bio, password_hash)
+       VALUES ($1, $2, $3)
+       RETURNING id, username, bio`,
+      [username, bio || null, hash]
+    );
 
-    res.status(201).json({ ok: true, user: result.recordset[0] });
+    res.status(201).json({ ok: true, user: result.rows[0] });
   } catch (err) {
     console.error('[POST /auth/register]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -53,18 +51,17 @@ router.post('/login', async (req, res) => {
 
   try {
     const pool = await getPool();
-    const result = await pool.request()
-      .input('username', sql.VarChar(100), username)
-      .query(`
-        SELECT id, username, bio, password_hash
-        FROM dbo.users
-        WHERE username = @username
-      `);
+    const result = await pool.query(
+      `SELECT id, username, bio, password_hash
+       FROM users
+       WHERE username = $1`,
+      [username]
+    );
 
-    if (result.recordset.length === 0)
+    if (result.rows.length === 0)
       return res.status(401).json({ error: 'Usuário não encontrado' });
 
-    const user = result.recordset[0];
+    const user = result.rows[0];
     const hash = sha256(password);
 
     if (hash !== user.password_hash)

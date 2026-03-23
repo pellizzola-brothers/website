@@ -1,7 +1,7 @@
 // routes/levels.js — liked_by como lista de IDs na própria tabela levels
 const express = require('express');
 const router  = express.Router();
-const { getPool, sql } = require('../db');
+const { getPool } = require('../db');
 
 // Helpers para manipular a coluna liked_by ('1,3,7' <-> [1,3,7])
 function parseLikedBy(str) {
@@ -18,20 +18,19 @@ router.get('/', async (req, res) => {
   const search = req.query.q || '';
   try {
     const pool = await getPool();
-    const result = await pool.request()
-      .input('search', sql.VarChar(200), `%${search}%`)
-      .query(`
-        SELECT l.id, l.name, l.description, l.downloads, l.likes,
-               l.liked_by, l.file_id,
-               u.id   AS author_id,
-               u.username AS author_name
-        FROM dbo.levels l
-        INNER JOIN dbo.users u ON u.id = l.author
-        WHERE l.name LIKE @search
-           OR l.description LIKE @search
-        ORDER BY l.downloads DESC, l.likes DESC
-      `);
-    res.json(result.recordset);
+    const result = await pool.query(
+      `SELECT l.id, l.name, l.description, l.downloads, l.likes,
+              l.liked_by, l.file_id,
+              u.id   AS author_id,
+              u.username AS author_name
+       FROM levels l
+       INNER JOIN users u ON u.id = l.author
+       WHERE l.name ILIKE $1
+          OR l.description ILIKE $1
+       ORDER BY l.downloads DESC, l.likes DESC`,
+      [`%${search}%`]
+    );
+    res.json(result.rows);
   } catch (err) {
     console.error('[GET /levels]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -42,18 +41,18 @@ router.get('/', async (req, res) => {
 router.get('/featured', async (req, res) => {
   try {
     const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT TOP 1
-             l.id, l.name, l.description, l.downloads, l.likes,
+    const result = await pool.query(`
+      SELECT l.id, l.name, l.description, l.downloads, l.likes,
              l.liked_by, l.file_id,
              u.id AS author_id, u.username AS author_name
-      FROM dbo.levels l
-      INNER JOIN dbo.users u ON u.id = l.author
+      FROM levels l
+      INNER JOIN users u ON u.id = l.author
       ORDER BY l.downloads DESC, l.likes DESC
+      LIMIT 1
     `);
-    if (result.recordset.length === 0)
+    if (result.rows.length === 0)
       return res.status(404).json({ error: 'Nenhum nível cadastrado' });
-    res.json(result.recordset[0]);
+    res.json(result.rows[0]);
   } catch (err) {
     console.error('[GET /levels/featured]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -68,41 +67,38 @@ router.get('/:id', async (req, res) => {
   try {
     const pool = await getPool();
 
-    const levelResult = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`
-        SELECT l.id, l.name, l.description, l.downloads, l.likes,
-               l.liked_by, l.file_id,
-               u.id   AS author_id,
-               u.username AS author_name,
-               u.bio  AS author_bio
-        FROM dbo.levels l
-        INNER JOIN dbo.users u ON u.id = l.author
-        WHERE l.id = @id
-      `);
+    const levelResult = await pool.query(
+      `SELECT l.id, l.name, l.description, l.downloads, l.likes,
+              l.liked_by, l.file_id,
+              u.id   AS author_id,
+              u.username AS author_name,
+              u.bio  AS author_bio
+       FROM levels l
+       INNER JOIN users u ON u.id = l.author
+       WHERE l.id = $1`,
+      [id]
+    );
 
-    if (levelResult.recordset.length === 0)
+    if (levelResult.rows.length === 0)
       return res.status(404).json({ error: 'Nível não encontrado' });
 
-    const level = levelResult.recordset[0];
+    const level = levelResult.rows[0];
 
-    const similarResult = await pool.request()
-      .input('id',     sql.Int, id)
-      .input('author', sql.Int, level.author_id)
-      .query(`
-        SELECT TOP 3
-               l.id, l.name, l.description, l.downloads, l.likes,
-               l.liked_by, l.file_id,
-               u.username AS author_name
-        FROM dbo.levels l
-        INNER JOIN dbo.users u ON u.id = l.author
-        WHERE l.id <> @id
-        ORDER BY
-          CASE WHEN l.author = @author THEN 0 ELSE 1 END,
-          l.downloads DESC
-      `);
+    const similarResult = await pool.query(
+      `SELECT l.id, l.name, l.description, l.downloads, l.likes,
+              l.liked_by, l.file_id,
+              u.username AS author_name
+       FROM levels l
+       INNER JOIN users u ON u.id = l.author
+       WHERE l.id <> $1
+       ORDER BY
+         CASE WHEN l.author = $2 THEN 0 ELSE 1 END,
+         l.downloads DESC
+       LIMIT 3`,
+      [id, level.author_id]
+    );
 
-    level.similar = similarResult.recordset;
+    level.similar = similarResult.rows;
     res.json(level);
 
   } catch (err) {
@@ -119,18 +115,13 @@ router.post('/', async (req, res) => {
 
   try {
     const pool = await getPool();
-    const result = await pool.request()
-      .input('name',        sql.VarChar(200),  name)
-      .input('description', sql.VarChar(1000), description || null)
-      .input('author',      sql.Int,           author)
-      .input('file_id',     sql.Int,           file_id)
-      .query(`
-        INSERT INTO dbo.levels (name, description, author, file_id)
-        OUTPUT INSERTED.id, INSERTED.name, INSERTED.description,
-               INSERTED.downloads, INSERTED.likes, INSERTED.liked_by, INSERTED.file_id
-        VALUES (@name, @description, @author, @file_id)
-      `);
-    res.status(201).json(result.recordset[0]);
+    const result = await pool.query(
+      `INSERT INTO levels (name, description, author, file_id)
+       VALUES ($1, $2, $3, $4)
+       RETURNING id, name, description, downloads, likes, liked_by, file_id`,
+      [name, description || null, author, file_id]
+    );
+    res.status(201).json(result.rows[0]);
   } catch (err) {
     console.error('[POST /levels]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -144,9 +135,10 @@ router.post('/:id/download', async (req, res) => {
 
   try {
     const pool = await getPool();
-    await pool.request()
-      .input('id', sql.Int, id)
-      .query(`UPDATE dbo.levels SET downloads = downloads + 1 WHERE id = @id`);
+    await pool.query(
+      `UPDATE levels SET downloads = downloads + 1 WHERE id = $1`,
+      [id]
+    );
     res.json({ ok: true });
   } catch (err) {
     console.error('[POST /levels/:id/download]', err);
@@ -169,14 +161,15 @@ router.post('/:id/like', async (req, res) => {
     const pool = await getPool();
 
     // Lê o liked_by atual
-    const current = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`SELECT liked_by FROM dbo.levels WHERE id = @id`);
+    const current = await pool.query(
+      `SELECT liked_by FROM levels WHERE id = $1`,
+      [id]
+    );
 
-    if (current.recordset.length === 0)
+    if (current.rows.length === 0)
       return res.status(404).json({ error: 'Nível não encontrado' });
 
-    const likedBy = parseLikedBy(current.recordset[0].liked_by);
+    const likedBy = parseLikedBy(current.rows[0].liked_by);
 
     // Verifica se o usuário já curtiu
     if (likedBy.includes(userId))
@@ -186,15 +179,13 @@ router.post('/:id/like', async (req, res) => {
     likedBy.push(userId);
     const newLikedBy = serializeLikedBy(likedBy);
 
-    await pool.request()
-      .input('id',       sql.Int,         id)
-      .input('liked_by', sql.VarChar(sql.MAX), newLikedBy)
-      .query(`
-        UPDATE dbo.levels
-        SET likes    = likes + 1,
-            liked_by = @liked_by
-        WHERE id = @id
-      `);
+    await pool.query(
+      `UPDATE levels
+       SET likes    = likes + 1,
+           liked_by = $1
+       WHERE id = $2`,
+      [newLikedBy, id]
+    );
 
     res.json({ ok: true, liked_by: likedBy });
   } catch (err) {
@@ -213,14 +204,15 @@ router.get('/:id/liked', async (req, res) => {
 
   try {
     const pool = await getPool();
-    const result = await pool.request()
-      .input('id', sql.Int, id)
-      .query(`SELECT liked_by FROM dbo.levels WHERE id = @id`);
+    const result = await pool.query(
+      `SELECT liked_by FROM levels WHERE id = $1`,
+      [id]
+    );
 
-    if (result.recordset.length === 0)
+    if (result.rows.length === 0)
       return res.status(404).json({ error: 'Nível não encontrado' });
 
-    const likedBy = parseLikedBy(result.recordset[0].liked_by);
+    const likedBy = parseLikedBy(result.rows[0].liked_by);
     res.json({ liked: likedBy.includes(userId), liked_by: likedBy });
   } catch (err) {
     console.error('[GET /levels/:id/liked]', err);
