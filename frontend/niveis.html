@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Levels — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <style>
+    .filtros-wrap {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .filtros-wrap select {
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    .filtros-wrap select:focus { outline: none; border-color: var(--accent); }
+    .resultado-count { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+    .resultado-count strong { color: var(--text); }
+    .list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .list-title {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .level-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 6px;
+      transition: border-color .15s, background .15s, transform .1s;
+      will-change: transform;
+    }
+    .level-row:hover { border-color: var(--accent); background: var(--bg-card2); transform: translateX(2px); }
+    .level-row-thumb {
+      width: 60px; height: 46px;
+      background: linear-gradient(135deg, #1a4a1a 0%, #0a2040 100%);
+      border-radius: var(--radius);
+      border: 2px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; flex-shrink: 0;
+    }
+    .level-row-info { flex: 1; min-width: 0; }
+    .level-row-name {
+      font-family: var(--font-title);
+      font-size: 14px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .level-row-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .level-row-desc { font-size: 12px; color: var(--text-muted); font-style: italic; }
+    .level-row-author { font-size: 11px; color: var(--text-dim); }
+    .level-row-author::before { content: '· '; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 2px 7px; border-radius: 20px;
+      font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .badge-ok   { background: rgba(61,158,66,.18); color: #4ab050; border: 1px solid rgba(61,158,66,.3); }
+    .badge-none { background: rgba(255,255,255,.05); color: var(--text-dim); border: 1px solid var(--border); }
+    .level-row-stats {
+      display: flex; flex-direction: column; align-items: flex-end;
+      gap: 3px; font-size: 12px; color: var(--text-muted);
+      flex-shrink: 0; min-width: 54px; text-align: right;
+    }
+    .stat-hot { color: var(--yellow); font-weight: 700; }
+    .btn-dl {
+      width: 36px; height: 36px; padding: 0; font-size: 16px;
+      background: var(--accent); color: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 2px 0 var(--accent-dark);
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s, transform .1s;
+    }
+    .btn-dl:hover { background: #4ab050; }
+    .btn-dl:active { transform: translateY(2px); box-shadow: none; }
+    .btn-dl:disabled { opacity: .6; cursor: default; transform: none; }
+    .pagination {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .page-btn {
+      padding: 7px 14px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-family: var(--font-title);
+      font-size: 12px; font-weight: 700; letter-spacing: 1px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
+    .page-btn.active { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .page-btn:disabled { opacity: .35; cursor: default; }
+    .page-info { font-size: 12px; color: var(--text-dim); }
+    #progress-bar {
+      position: fixed; top: 50px; left: 0; right: 0; height: 3px;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent-glow);
+      transform-origin: left; transform: scaleX(0);
+      transition: transform .3s ease, opacity .3s;
+      z-index: 500; opacity: 0;
+    }
+    #progress-bar.active { opacity: 1; }
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-nav); border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg); padding: 10px 20px;
+      font-size: 13px; color: var(--text);
+      opacity: 0; transition: opacity .2s, transform .2s;
+      pointer-events: none; white-space: nowrap; z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, var(--border-light) 50%, var(--border) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite;
+      border-radius: var(--radius); display: block;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+    @media (max-width: 500px) {
+      .level-row { padding: 10px 12px; gap: 10px; }
+      .level-row-thumb { width: 46px; height: 38px; font-size: 18px; }
+      .badge { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="toast"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="levels.html" class="active">Níveis</a></li>
+    <li><a href="usuarios.html">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+        <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <div class="search-bar-wrap" style="margin-bottom:14px;">
+    <span class="search-icon">🔍</span>
+    <input class="search-bar" id="searchInput" type="text"
+           placeholder="Pesquisar por nome, descrição ou autor..."
+           autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="filtros-wrap">
+    <select id="filtroAutor">
+      <option value="">👤 Todos os autores</option>
+    </select>
+    <select id="filtroArquivo">
+      <option value="">📦 Todos</option>
+      <option value="sim">✅ Com arquivo</option>
+      <option value="nao">⚠️ Sem arquivo</option>
+    </select>
+    <select id="ordenacao">
+      <option value="downloads">⬇ Mais baixados</option>
+      <option value="likes">♥ Mais curtidos</option>
+      <option value="nome">🔤 A → Z</option>
+      <option value="recentes">🕐 Mais recentes</option>
+    </select>
+  </div>
+
+  <div class="list-header">
+    <div id="resultado-count" class="resultado-count" style="display:none;"></div>
+    <div class="list-title" id="list-title">Todos os levels</div>
+  </div>
+
+  <div id="levels-list">
+    <div class="level-row">
+      <div class="level-row-thumb skeleton"></div>
+      <div class="level-row-info">
+        <span class="skeleton" style="height:13px;width:55%;display:block;margin-bottom:7px;"></span>
+        <span class="skeleton" style="height:11px;width:38%;display:block;"></span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-row-thumb skeleton"></div>
+      <div class="level-row-info">
+        <span class="skeleton" style="height:13px;width:45%;display:block;margin-bottom:7px;"></span>
+        <span class="skeleton" style="height:11px;width:30%;display:block;"></span>
+      </div>
+    </div>
+    <div class="level-row">
+      <div class="level-row-thumb skeleton"></div>
+      <div class="level-row-info">
+        <span class="skeleton" style="height:13px;width:65%;display:block;margin-bottom:7px;"></span>
+        <span class="skeleton" style="height:11px;width:42%;display:block;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="empty-state" class="empty-state" style="display:none;">😕 Nenhum level encontrado.</div>
+  <div class="pagination" id="pagination" style="display:none;"></div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ── CONSTANTES ── */
+const EMOJIS     = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const POR_PAGINA = 20;
+const CACHE_TTL  = 2 * 60 * 1000; // 2 minutos — levels novos de outros usuários aparecem em até 2 min
+const DEBOUNCE_MS = 250;
+
+const emojiFor = id => EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length];
+
+let todosLevels     = [];
+let levelsFiltrados = [];
+let paginaAtual     = 1;
+let debounceTimer   = null;
+
+/* ── SESSÃO ── */
+const user = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+if (user) {
+  const el = document.getElementById('nav-auth');
+  el.textContent = user.username.toUpperCase();
+  el.href = 'perfil_do_usuario.html?id=' + user.id;
+}
+
+/* ── UTILS ── */
+function showToast(msg, ms) {
+  ms = ms || 2200;
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, ms);
+}
+
+function setProgress(pct) {
+  const bar = document.getElementById('progress-bar');
+  if (pct >= 100) {
+    bar.style.transform = 'scaleX(1)';
+    setTimeout(function() { bar.classList.remove('active'); bar.style.transform = 'scaleX(0)'; }, 300);
+  } else {
+    bar.classList.add('active');
+    bar.style.transform = 'scaleX(' + (pct / 100) + ')';
+  }
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ── CACHE COM TTL ── */
+function cacheSave(key, data) {
+  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data })); } catch(e) {}
+}
+function cacheLoad(key) {
+  try {
+    var raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    var obj = JSON.parse(raw);
+    if (Date.now() - obj.ts > CACHE_TTL) { sessionStorage.removeItem(key); return null; }
+    return obj.data;
+  } catch(e) { return null; }
+}
+
+/* ── FETCH ── */
+async function carregarNiveis() {
+  setProgress(20);
+  var cached = cacheLoad('pb_niveis_v2');
+  if (cached) {
+    todosLevels = cached;
+    setProgress(100);
+    _inicializarFiltros();
+    aplicarFiltros();
+    return;
+  }
+  try {
+    setProgress(45);
+    var resp = await fetch(API + '/levels');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    todosLevels = await resp.json();
+    cacheSave('pb_niveis_v2', todosLevels);
+    setProgress(100);
+  } catch(err) {
+    todosLevels = [
+      {id:1,name:'Meu Nivel Bacana',description:'Bacanices Bananas',downloads:11,likes:10,author_name:'xx_poste_xx',author_id:1,file_id:1},
+      {id:2,name:'Meu Nivel Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9,author_name:'xx_poste_xx',author_id:1,file_id:2},
+      {id:3,name:'A Extraordinaria Jornada de Henrique',description:'Um clássico!',downloads:0,likes:0,author_name:'BillyShears',author_id:3,file_id:null},
+      {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6,author_name:'BillyShears',author_id:3,file_id:null},
+      {id:5,name:'Eu Acompanho as Botas Douradas',description:'Bacanices',downloads:3,likes:2,author_name:'JacaboMassola',author_id:2,file_id:null},
+    ];
+    setProgress(100);
+    showToast('⚠️ Exibindo dados offline');
+  }
+  _inicializarFiltros();
+  aplicarFiltros();
+}
+
+/* ── FILTROS ── */
+function _inicializarFiltros() {
+  var autores = [];
+  var seen = {};
+  todosLevels.forEach(function(l) {
+    if (!seen[l.author_name]) { seen[l.author_name] = true; autores.push(l.author_name); }
+  });
+  autores.sort();
+  var sel = document.getElementById('filtroAutor');
+  while (sel.options.length > 1) sel.remove(1);
+  autores.forEach(function(a) {
+    var opt = document.createElement('option');
+    opt.value = a; opt.textContent = '👤 ' + a;
+    sel.appendChild(opt);
+  });
+}
+
+function onBuscaInput() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(aplicarFiltros, DEBOUNCE_MS);
+}
+
+function aplicarFiltros() {
+  var q       = document.getElementById('searchInput').value.toLowerCase().trim();
+  var autor   = document.getElementById('filtroAutor').value;
+  var arquivo = document.getElementById('filtroArquivo').value;
+  var ordem   = document.getElementById('ordenacao').value;
+
+  levelsFiltrados = todosLevels.filter(function(l) {
+    var buscaOk = !q ||
+      l.name.toLowerCase().indexOf(q) !== -1 ||
+      (l.description || '').toLowerCase().indexOf(q) !== -1 ||
+      l.author_name.toLowerCase().indexOf(q) !== -1;
+    var autorOk = !autor || l.author_name === autor;
+    var arqOk   = !arquivo || (arquivo === 'sim' ? !!l.file_id : !l.file_id);
+    return buscaOk && autorOk && arqOk;
+  });
+
+  levelsFiltrados.sort(function(a, b) {
+    if (ordem === 'downloads') return b.downloads - a.downloads;
+    if (ordem === 'likes')     return b.likes - a.likes;
+    if (ordem === 'nome')      return a.name.localeCompare(b.name, 'pt-BR');
+    if (ordem === 'recentes')  return b.id - a.id;
+    return 0;
+  });
+
+  var countEl = document.getElementById('resultado-count');
+  var titleEl = document.getElementById('list-title');
+  if (q || autor || arquivo) {
+    countEl.style.display = '';
+    countEl.innerHTML = '<strong>' + levelsFiltrados.length + '</strong> nível' +
+      (levelsFiltrados.length !== 1 ? 'is' : '') + ' encontrado' +
+      (levelsFiltrados.length !== 1 ? 's' : '');
+    titleEl.style.display = 'none';
+    // Atualiza título da aba para refletir o filtro ativo (UX + SEO)
+    var titleParts = [];
+    if (q) titleParts.push('"' + q + '"');
+    if (autor) titleParts.push('por ' + autor);
+    document.title = 'Levels' + (titleParts.length ? ' — ' + titleParts.join(', ') : '') + ' — Pellizzola Brothers';
+  } else {
+    countEl.style.display = 'none';
+    titleEl.style.display = '';
+    titleEl.textContent = 'Todos os levels (' + levelsFiltrados.length + ')';
+    document.title = 'Levels — Pellizzola Brothers';
+  }
+
+  paginaAtual = 1;
+  renderizarPagina();
+}
+
+/* ── PAGINAÇÃO ── */
+function renderizarPagina() {
+  var totalPaginas = Math.max(1, Math.ceil(levelsFiltrados.length / POR_PAGINA));
+  paginaAtual = Math.min(paginaAtual, totalPaginas);
+  var inicio = (paginaAtual - 1) * POR_PAGINA;
+  var fim    = Math.min(inicio + POR_PAGINA, levelsFiltrados.length);
+  renderLevels(levelsFiltrados.slice(inicio, fim));
+  renderizarPaginacao(totalPaginas);
+}
+
+/* ── RENDER COM FRAGMENT (sem lag) ── */
+function renderLevels(niveis) {
+  var empty = document.getElementById('empty-state');
+  var list  = document.getElementById('levels-list');
+  if (!niveis.length) { list.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  requestAnimationFrame(function() {
+    var frag = document.createDocumentFragment();
+    niveis.forEach(function(l, idx) {
+      var isHot  = l.downloads >= 10;
+      var temArq = !!l.file_id;
+      var link = document.createElement('a');
+      link.href = 'perfil_do_jogo.html?id=' + l.id;
+      link.className = 'level-row-link card-anim';
+      link.style.animationDelay = (idx % 10 * 0.04) + 's';
+      link.innerHTML =
+        '<div class="level-row">' +
+          '<div class="level-row-thumb">' + emojiFor(l.id) + '</div>' +
+          '<div class="level-row-info">' +
+            '<div class="level-row-name">' + escHtml(l.name) + '</div>' +
+            '<div class="level-row-meta">' +
+              (l.description ? '<span class="level-row-desc">&ldquo;' + escHtml(l.description) + '&rdquo;</span>' : '') +
+              '<span class="level-row-author">' + escHtml(l.author_name) + '</span>' +
+            '</div>' +
+            '<span class="badge ' + (temArq ? 'badge-ok' : 'badge-none') + '">' +
+              (temArq ? '✅ Disponível' : '⚠️ Sem arquivo') +
+            '</span>' +
+          '</div>' +
+          '<div class="level-row-stats" id="stats-' + l.id + '">' +
+            '<span class="' + (isHot ? 'stat-hot' : '') + '">⬇ ' + l.downloads + '</span>' +
+            '<span>♥ ' + l.likes + '</span>' +
+          '</div>' +
+          '<button class="btn-dl" onclick="handleDl(event,' + l.id + ',' + (l.file_id || 'null') + ',this,\'stats-' + l.id + '\')" title="Baixar nível">⬇</button>' +
+        '</div>';
+      frag.appendChild(link);
+    });
+    list.innerHTML = '';
+    list.appendChild(frag);
+  });
+}
+
+/* ── BOTÕES DE PÁGINA ── */
+function renderizarPaginacao(total) {
+  var cont = document.getElementById('pagination');
+  if (total <= 1) { cont.style.display = 'none'; return; }
+  cont.style.display = 'flex';
+
+  var janela = 2;
+  var ini = Math.max(1, paginaAtual - janela);
+  var fim = Math.min(total, paginaAtual + janela);
+  if (fim - ini < 4) { if (ini === 1) fim = Math.min(total, ini + 4); else ini = Math.max(1, fim - 4); }
+
+  var frag = document.createDocumentFragment();
+
+  function mkBtn(label, pg, disabled, active) {
+    var b = document.createElement('button');
+    b.className = 'page-btn' + (active ? ' active' : '');
+    b.textContent = label; b.disabled = disabled;
+    if (!disabled && !active) b.onclick = function() { irParaPagina(pg); };
+    return b;
+  }
+
+  frag.appendChild(mkBtn('← Anterior', paginaAtual - 1, paginaAtual === 1, false));
+  if (ini > 1) {
+    frag.appendChild(mkBtn('1', 1, false, false));
+    if (ini > 2) { var d1 = document.createElement('span'); d1.className = 'page-info'; d1.textContent = '…'; frag.appendChild(d1); }
+  }
+  for (var i = ini; i <= fim; i++) frag.appendChild(mkBtn(String(i), i, false, i === paginaAtual));
+  if (fim < total) {
+    if (fim < total - 1) { var d2 = document.createElement('span'); d2.className = 'page-info'; d2.textContent = '…'; frag.appendChild(d2); }
+    frag.appendChild(mkBtn(String(total), total, false, false));
+  }
+  frag.appendChild(mkBtn('Próxima →', paginaAtual + 1, paginaAtual === total, false));
+
+  cont.innerHTML = '';
+  cont.appendChild(frag);
+}
+
+function irParaPagina(pg) {
+  paginaAtual = pg;
+  renderizarPagina();
+  document.getElementById('levels-list').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── DOWNLOAD (otimista + fire-and-forget) ── */
+async function handleDl(e, id, fileId, btn, statsId) {
+  e.preventDefault(); e.stopPropagation();
+  btn.textContent = '⏳'; btn.disabled = true;
+
+  // Atualiza UI imediatamente
+  var statsEl = document.getElementById(statsId);
+  if (statsEl) {
+    var span = statsEl.querySelector('span');
+    if (span) {
+      var atual = parseInt(span.textContent.replace('⬇ ', '')) || 0;
+      span.textContent = '⬇ ' + (atual + 1);
+      if (atual + 1 >= 10) span.classList.add('stat-hot');
+    }
+  }
+  var nivel = todosLevels.find(function(l) { return l.id === id; });
+  if (nivel) nivel.downloads++;
+  sessionStorage.removeItem('pb_niveis_v2');
+
+  // POST em background
+  fetch(API + '/levels/' + id + '/download', { method: 'POST' }).catch(function() {});
+
+  if (!fileId) {
+    showToast('⚠️ Este nível não tem arquivo para baixar.');
+    btn.textContent = '⬇'; btn.disabled = false;
+    return;
+  }
+
+  try {
+    var resp = await fetch(API + '/files/' + fileId);
+    var dados = await resp.json();
+    if (dados && !dados.error) {
+      var a = document.createElement('a');
+      a.href = API + '/upload/level/' + dados.hash;
+      a.download = dados.hash;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      showToast('✅ Download iniciado!');
+    } else {
+      showToast('❌ Arquivo não encontrado.');
+    }
+    btn.textContent = '✓'; btn.style.background = '#2d7a30';
+    setTimeout(function() { btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false; }, 2500);
+  } catch(err) {
+    showToast('❌ Erro ao baixar. Tente novamente.');
+    btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false;
+  }
+}
+
+/* ── EVENTOS ── */
+document.getElementById('searchInput').addEventListener('input', onBuscaInput);
+document.getElementById('filtroAutor').addEventListener('change', aplicarFiltros);
+document.getElementById('filtroArquivo').addEventListener('change', aplicarFiltros);
+document.getElementById('ordenacao').addEventListener('change', aplicarFiltros);
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { e.target.value = ''; aplicarFiltros(); }
+});
+
+// Preenche busca a partir do parâmetro ?q= na URL (vindo da navbar)
+(function() {
+  var urlQ = new URLSearchParams(location.search).get('q');
+  if (urlQ) {
+    var si = document.getElementById('searchInput');
+    if (si) si.value = urlQ;
+  }
+})();
+carregarNiveis();
+</script>
+<script>
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById("nav-search").value.trim();
+  if (q) window.location.href = "levels.html?q=" + encodeURIComponent(q);
+}
+</script>
+</body>
+</html>

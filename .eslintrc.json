@@ -1,0 +1,18 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "rules": {
+    "no-undef": "error"
+  },
+  "globals": {
+    "API": "readonly",
+    "saveSession": "readonly",
+    "getToken": "readonly",
+    "getUser": "readonly",
+    "clearSession": "readonly",
+    "isLoggedIn": "readonly",
+    "api": "readonly"
+  }
+}

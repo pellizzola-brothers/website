@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Página não encontrada — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    .notfound-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 60vh;
+      text-align: center; padding: 40px 24px;
+    }
+    .notfound-code {
+      font-family: var(--font-title); font-size: 96px; font-weight: 700;
+      color: var(--accent); letter-spacing: 8px; line-height: 1;
+      text-shadow: 0 0 40px var(--accent-glow);
+      animation: pulse404 2s ease-in-out infinite;
+    }
+    @keyframes pulse404 {
+      0%,100% { opacity:1; transform: scale(1); }
+      50%      { opacity:.7; transform: scale(.97); }
+    }
+    .notfound-emoji { font-size: 56px; margin: 12px 0; }
+    .notfound-title {
+      font-family: var(--font-title); font-size: 20px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 2px; color: var(--text);
+      margin-bottom: 10px;
+    }
+    .notfound-desc { font-size: 14px; color: var(--text-muted); margin-bottom: 28px; max-width: 360px; }
+    .notfound-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="levels.html">Levels</a></li>
+    <li><a href="usuarios.html">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="notfound-wrap">
+    <div class="notfound-code">404</div>
+    <div class="notfound-emoji">👾</div>
+    <div class="notfound-title">Fase não encontrada</div>
+    <div class="notfound-desc">
+      O level que você estava procurando foi apagado, nunca existiu,
+      ou você digitou o endereço errado.
+    </div>
+    <div class="notfound-actions">
+      <a href="levels.html" class="btn btn-green">Ver Levels</a>
+      <a href="index.html" class="btn btn-outline">← Voltar ao Início</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* CORRIGIDO: usa getUser() de auth.js em vez de sessionStorage direto */
+const user = getUser();
+if (user) {
+  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
+}
+function navSearch(e) {
+  e.preventDefault();
+  const q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+</script>
+</body>
+</html>
