@@ -1,5 +1,10 @@
-// server.js — Entrada principal do backend Pellizzola Brothers
 require('dotenv').config();
+
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET environment variable is not set. Refusing to start.');
+  process.exit(1);
+}
+
 const express   = require('express');
 const cors      = require('cors');
 const path      = require('path');
