@@ -6,6 +6,8 @@
   <title>Levels — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="cache.js"></script>
   <style>
     .filtros-wrap {
       display: flex;
@@ -384,7 +386,7 @@ let paginaAtual     = 1;
 let debounceTimer   = null;
 
 /* ── SESSÃO ── */
-const user = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+const user = getUser();
 if (user) {
   const el = document.getElementById('nav-auth');
   el.textContent = user.username.toUpperCase();
@@ -447,20 +449,6 @@ function limparBusca(e) {
   e.preventDefault();
   document.getElementById('searchInput').value = '';
   aplicarFiltros();
-}
-
-/* ── CACHE COM TTL ── */
-function cacheSave(key, data) {
-  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data })); } catch(e) {}
-}
-function cacheLoad(key) {
-  try {
-    var raw = sessionStorage.getItem(key);
-    if (!raw) return null;
-    var obj = JSON.parse(raw);
-    if (Date.now() - obj.ts > CACHE_TTL) { sessionStorage.removeItem(key); return null; }
-    return obj.data;
-  } catch(e) { return null; }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -659,7 +647,7 @@ document.addEventListener('click', function(e) {
 /* ── FETCH ── */
 async function carregarNiveis() {
   setProgress(20);
-  var cached = cacheLoad('pb_niveis_v2');
+  var cached = cacheLoad('pb_niveis_v2', CACHE_TTL);
   if (cached) {
     todosLevels = cached;
     setProgress(100);
@@ -679,7 +667,6 @@ async function carregarNiveis() {
     var resp = await fetch(API + '/levels');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     todosLevels = await resp.json();
-    // CORREÇÃO 5: cacheSave só no bloco try — dados reais apenas
     cacheSave('pb_niveis_v2', todosLevels);
     setProgress(100);
   } catch(err) {
@@ -690,11 +677,9 @@ async function carregarNiveis() {
       {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6,author_name:'BillyShears',author_id:3,file_id:null},
       {id:5,name:'Eu Acompanho as Botas Douradas',description:'Bacanices',downloads:3,likes:2,author_name:'JacaboMassola',author_id:2,file_id:null},
     ];
-    // CORREÇÃO 5: NÃO chamar cacheSave aqui — dados de fallback nunca vão pro cache
     setProgress(100);
     showToast('⚠️ Exibindo dados offline');
   }
-  // CORREÇÃO 2d: usa autorInit em vez de _inicializarFiltros
   autorInit(todosLevels);
   // Restore persisted author selection (must run after autorInit sets _autorTodos)
   if (window._pendingAutores && window._pendingAutores.length) {
@@ -716,7 +701,6 @@ function onBuscaInput() {
 function aplicarFiltros() {
   saveFilterState();
   var q       = document.getElementById('searchInput').value.toLowerCase().trim();
-  // CORREÇÃO 2e: usa autorGetSelected() em vez de filtroAutor.value
   var autoresSelecionados = autorGetSelected();
   var arquivo = document.getElementById('filtroArquivo').value;
   var ordem   = document.getElementById('ordenacao').value;
@@ -726,7 +710,6 @@ function aplicarFiltros() {
       l.name.toLowerCase().indexOf(q) !== -1 ||
       (l.description || '').toLowerCase().indexOf(q) !== -1 ||
       l.author_name.toLowerCase().indexOf(q) !== -1;
-    // CORREÇÃO 2e: predicado multi-select
     var autorOk = autoresSelecionados.length === 0 || autoresSelecionados.indexOf(l.author_name) !== -1;
     var arqOk   = !arquivo || (arquivo === 'sim' ? !!l.file_id : !l.file_id);
     return buscaOk && autorOk && arqOk;
@@ -742,7 +725,6 @@ function aplicarFiltros() {
 
   var countEl = document.getElementById('resultado-count');
   var titleEl = document.getElementById('list-title');
-  // CORREÇÃO 2e: inclui autoresSelecionados.length > 0 como condição de filtro ativo
   if (q || autoresSelecionados.length > 0 || arquivo) {
     countEl.style.display = '';
     countEl.innerHTML = '<strong>' + levelsFiltrados.length + '</strong> nível' +
@@ -888,7 +870,11 @@ async function handleDl(e, id, fileId, btn, statsId) {
   if (nivel) nivel.downloads++;
   sessionStorage.removeItem('pb_niveis_v2');
 
-  fetch(API + '/levels/' + id + '/download', { method: 'POST' }).catch(function() {});
+  fetch(API + '/levels/' + id + '/download', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(user ? { user_id: user.id } : {})
+  }).catch(function() {});
 
   if (!fileId) {
     showToast('⚠️ Este nível não tem arquivo para baixar.');
@@ -942,7 +928,6 @@ document.getElementById('searchInput').addEventListener('keydown', function(e) {
 
 carregarNiveis();
 
-/* CORREÇÃO 3: navSearch declarada uma única vez — aqui no bloco principal */
 function navSearch(e) {
   e.preventDefault();
   var q = document.getElementById('nav-search').value.trim();

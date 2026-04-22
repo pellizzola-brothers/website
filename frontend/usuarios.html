@@ -6,6 +6,8 @@
   <title>Criadores — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="cache.js"></script>
   <style>
     /* ── TABS ── */
     .tabs-wrap {
@@ -297,7 +299,7 @@ let abaAtual      = 'todos';
 let debTimer      = null;
 
 /* ════════ SESSÃO ════════ */
-const user = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+const user = getUser();
 if (user) {
   var el = document.getElementById('nav-auth');
   el.textContent = user.username.toUpperCase();
@@ -350,24 +352,10 @@ function escHtml(s) {
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-/* ════════ CACHE ════════ */
-function cacheSave(key, data) {
-  try { sessionStorage.setItem(key, JSON.stringify({ ts: Date.now(), data: data })); } catch(e) {}
-}
-function cacheLoad(key) {
-  try {
-    var raw = sessionStorage.getItem(key);
-    if (!raw) return null;
-    var obj = JSON.parse(raw);
-    if (Date.now() - obj.ts > CACHE_TTL) { sessionStorage.removeItem(key); return null; }
-    return obj.data;
-  } catch(e) { return null; }
-}
-
 /* ════════ FETCH ════════ */
 async function carregarUsuarios() {
   setProgress(20);
-  var cached = cacheLoad('pb_usuarios_v2');
+  var cached = cacheLoad('pb_usuarios_v2', CACHE_TTL);
   if (cached) {
     todosUsuarios = cached; setProgress(100);
     filtrar(); return;

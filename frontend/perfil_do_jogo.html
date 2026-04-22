@@ -195,7 +195,6 @@
 const EMOJIS   = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
 const emojiFor = function(id) { return EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length]; };
 
-/* CORRIGIDO: usa getUser()/getToken() de auth.js em vez de sessionStorage direto */
 const user  = getUser();
 const token = getToken();
 

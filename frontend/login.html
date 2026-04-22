@@ -342,7 +342,6 @@
 <script>
 'use strict';
 
-/* ── Redireciona se já logado — CORRIGIDO: usa getUser() de auth.js ── */
 const existing = getUser();
 if (existing) window.location.href = 'perfil_do_usuario.html?id=' + existing.id;
 
@@ -637,7 +636,6 @@ function showMsg(id, text, ok) {
   el.textContent = text;
 }
 
-/* CORRIGIDO: usa saveSession() de auth.js em vez de sessionStorage direto */
 async function doLogin() {
   const username = (document.getElementById('login-user').value || '').trim().toLowerCase();
   const password = document.getElementById('login-pass').value;
@@ -740,7 +738,6 @@ function checkRecPassConfirm() {
   else { hint.textContent = '✗ Senhas não coincidem'; hint.style.color = '#e74c3c'; }
 }
 
-/* CORRIGIDO: usa saveSession() de auth.js em vez de sessionStorage direto */
 async function doRegister() {
   const username = (document.getElementById('reg-user').value || '').trim().toLowerCase();
   const bio      = (document.getElementById('reg-bio').value || '').trim();

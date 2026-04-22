@@ -1,48 +1,18 @@
-// ============================================================
-//  frontend/auth.js — Gerenciamento de sessão centralizado
-//  PROBLEMA 4 CORRIGIDO: usa localStorage em todas as páginas
-//
-//  COMO USAR: adicione <script src="auth.js"></script> em TODAS
-//  as páginas, ANTES de qualquer script que precise do token/user.
-// ============================================================
+const jwt = require('jsonwebtoken');
 
-/**
- * Salva usuário e token no localStorage (persiste entre abas e sessões).
- */
-function saveSession(user, token) {
-  localStorage.setItem('pb_user',  JSON.stringify(user));
-  localStorage.setItem('pb_token', token || '');
-}
+function authMiddleware(req, res, next) {
+  const header = req.headers['authorization'] || '';
+  const token  = header.startsWith('Bearer ') ? header.slice(7) : null;
 
-/**
- * Retorna o token JWT armazenado, ou string vazia se não houver.
- */
-function getToken() {
-  return localStorage.getItem('pb_token') || '';
-}
+  if (!token)
+    return res.status(401).json({ error: 'Token de autenticação ausente' });
 
-/**
- * Retorna o objeto do usuário logado, ou null se não houver sessão.
- */
-function getUser() {
   try {
-    return JSON.parse(localStorage.getItem('pb_user') || 'null');
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
   } catch (_) {
-    return null;
+    return res.status(401).json({ error: 'Token inválido ou expirado' });
   }
 }
 
-/**
- * Retorna true se há um usuário logado com token válido.
- */
-function isLoggedIn() {
-  return !!getToken() && !!getUser();
-}
-
-/**
- * Remove a sessão do storage (logout).
- */
-function clearSession() {
-  localStorage.removeItem('pb_user');
-  localStorage.removeItem('pb_token');
-}
+module.exports = { authMiddleware };

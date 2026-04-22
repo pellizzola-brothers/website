@@ -67,7 +67,6 @@
 </div>
 
 <script>
-/* CORRIGIDO: usa getUser() de auth.js em vez de sessionStorage direto */
 const user = getUser();
 if (user) {
   document.getElementById('nav-auth').textContent = user.username.toUpperCase();

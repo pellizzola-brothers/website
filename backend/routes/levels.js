@@ -338,14 +338,17 @@ router.delete('/:id/comment/:commentId', authMiddleware, async (req, res) => {
   if (isNaN(commentId)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
-    const pool  = await getPool();
-    const check = await pool.query(`SELECT user_id FROM comments WHERE id = $1`, [commentId]);
-    if (check.rows.length === 0)
-      return res.status(404).json({ error: 'Comentário não encontrado' });
-    if (check.rows[0].user_id !== userId)
+    const pool   = await getPool();
+    const result = await pool.query(
+      `DELETE FROM comments WHERE id = $1 AND user_id = $2 RETURNING id`,
+      [commentId, userId]
+    );
+    if (result.rowCount === 0) {
+      const check = await pool.query(`SELECT id FROM comments WHERE id = $1`, [commentId]);
+      if (check.rows.length === 0)
+        return res.status(404).json({ error: 'Comentário não encontrado' });
       return res.status(403).json({ error: 'Sem permissão para deletar este comentário' });
-
-    await pool.query(`DELETE FROM comments WHERE id = $1`, [commentId]);
+    }
     res.json({ ok: true });
   } catch (err) {
     console.error('[DELETE /levels/:id/comment/:commentId]', err);

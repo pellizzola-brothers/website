@@ -166,6 +166,7 @@
     }
   </style>
   <script src="config.js"></script>
+  <script src="auth.js"></script>
 </head>
 <body>
 
@@ -231,7 +232,7 @@
 
 <script>
 
-var usuario = JSON.parse(sessionStorage.getItem('pb_user') || 'null');
+var usuario = getUser();
 
 if (usuario != null) {
   document.getElementById('nav-auth').textContent = usuario.username.toUpperCase();
@@ -351,8 +352,7 @@ function enviar() {
   });
 
   xhr.open('POST', API + '/upload/level');
-  // Fix: envia JWT para autenticação no backend
-  var token = sessionStorage.getItem('pb_token') || '';
+  var token = getToken();
   if (token) xhr.setRequestHeader('Authorization', 'Bearer ' + token);
   xhr.send(formData);
 }

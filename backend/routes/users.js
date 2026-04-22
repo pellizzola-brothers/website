@@ -12,23 +12,25 @@ router.get('/:id', async (req, res) => {
   try {
     const pool = await getPool();
 
-    const userResult = await pool.query(
-      `SELECT id, username, bio, downloaded_levels, liked_levels
-       FROM users WHERE id = $1`,
-      [id]
-    );
+    const [userResult, levelsResult] = await Promise.all([
+      pool.query(
+        `SELECT id, username, bio, downloaded_levels, liked_levels
+         FROM users WHERE id = $1`,
+        [id]
+      ),
+      pool.query(
+        `SELECT id, name, description, downloads, likes
+         FROM levels WHERE author = $1
+         ORDER BY downloads DESC, likes DESC`,
+        [id]
+      ),
+    ]);
 
     if (userResult.rows.length === 0)
       return res.status(404).json({ error: 'Usuário não encontrado' });
 
     const user = userResult.rows[0];
-
-    user.levels = (await pool.query(
-      `SELECT id, name, description, downloads, likes
-       FROM levels WHERE author = $1
-       ORDER BY downloads DESC, likes DESC`,
-      [id]
-    )).rows;
+    user.levels = levelsResult.rows;
 
     res.json(user);
   } catch (err) {

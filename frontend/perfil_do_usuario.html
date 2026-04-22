@@ -172,7 +172,6 @@ const EMOJIS  = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','
 const AVATARS = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
 const emojiFor = id => EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length];
 
-/* ── Sessão — CORRIGIDO: usa getUser()/getToken() de auth.js ── */
 const loggedUser = getUser();
 const authToken  = getToken();
 
@@ -263,7 +262,6 @@ async function saveBio() {
     document.querySelectorAll('.user-bio').forEach(function(el) { el.textContent = bio ? '"' + bio + '"' : ''; });
     if (loggedUser && loggedUser.id === currentProfileId) {
       loggedUser.bio = bio;
-      /* CORRIGIDO: usa saveSession() de auth.js para persistir a mudança */
       saveSession(loggedUser, authToken);
     }
   } catch (_) { setStoredBio(currentProfileId, bio); }
@@ -316,10 +314,6 @@ async function changePassword(oldPass, newPass) {
   } catch (_) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Erro de conexão.'; return false; }
 }
 
-/* ── Delete Level — CORRIGIDO:
-   - URL: API + '/levels/' + id  (sem duplicar /api)
-   - Token: usa authToken de getToken() 
-─────────────────────────────────────────────────────────── */
 function openDeleteModal(levelId, levelName) {
   pendingDeleteId = levelId;
   document.getElementById('delete-level-name').textContent = levelName;
@@ -336,7 +330,6 @@ async function confirmDelete() {
   closeModal('modal-delete');
   pendingDeleteId = null;
   try {
-    /* CORRIGIDO: URL correta — API já inclui /api, não duplicar */
     const res = await fetch(API + '/levels/' + id, {
       method: 'DELETE',
       headers: { 'Authorization': 'Bearer ' + authToken }
@@ -389,9 +382,6 @@ function renderDownloadHistory() {
   return '<div class="created-title" style="margin-top:28px;">📥 Meus Downloads Recentes</div><div class="created-strip">' + cards + '</div>';
 }
 
-/* ── Load Profile — CORRIGIDO:
-   - getDeletedLevels() removida — backend já filtra levels deletados
-─────────────────────────────────────────────────────────── */
 async function loadProfile() {
   const id = getUserId();
   currentProfileId = id;
@@ -410,7 +400,6 @@ async function loadProfile() {
   const own    = isOwn(u.id);
   const avatar = getStoredAvatar(u.id);
   const bio    = getStoredBio(u.id, u.bio);
-  /* CORRIGIDO: levels vêm direto do backend, sem filtro de deletados local */
   const levels = u.levels || [];
 
   window._currentBio = bio;
@@ -468,7 +457,6 @@ async function loadProfile() {
     (own ? renderDownloadHistory() : '');
 }
 
-/* CORRIGIDO: escHtml definida apenas uma vez aqui (removida da duplicata) */
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -498,7 +486,6 @@ function toggleFollow(btn) {
   else { btn.textContent = 'Seguir'; btn.classList.replace('btn-outline','btn-green'); }
 }
 
-/* CORRIGIDO: usa clearSession() de auth.js em vez de sessionStorage.removeItem direto */
 function logout() {
   clearSession();
   window.location.href = 'index.html';

@@ -1,5 +1,4 @@
 // routes/upload.js — Upload + criação de level em uma só chamada (PROTEGIDO por JWT)
-// ATUALIZADO: multer v2 — fileFilter usa cb(null, false) em vez de cb(new Error())
 const express = require('express');
 const router  = express.Router();
 const multer  = require('multer');
