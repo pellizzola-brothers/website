@@ -41,12 +41,13 @@ const corsOptions = {
     // Lista vazia = desenvolvimento, permite tudo
     if (ALLOWED_ORIGINS.length === 0) return callback(null, true);
     if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: origem não permitida — ${origin}`));
+    callback(null, false);
   },
   credentials: true,
 };
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(globalLimiter);
 app.use(express.static(path.join(__dirname, '../frontend')));
