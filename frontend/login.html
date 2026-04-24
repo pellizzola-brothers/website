@@ -432,7 +432,7 @@ async function requestCode() {
   const nextBtn = document.getElementById('rec-next-btn');
   nextBtn.disabled = true; nextBtn.textContent = 'Enviando...';
   try {
-    const resp = await fetch(API + '/auth/recovery/request', {
+    const resp = await fetch(API + '/api/auth/recovery/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username })
@@ -467,7 +467,7 @@ async function verifyCode() {
   const nextBtn = document.getElementById('rec-next-btn');
   nextBtn.disabled = true; nextBtn.textContent = 'Verificando...';
   try {
-    const resp = await fetch(API + '/auth/recovery/verify', {
+    const resp = await fetch(API + '/api/auth/recovery/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: recUser, code })
@@ -495,7 +495,7 @@ async function resetPassword() {
   const nextBtn = document.getElementById('rec-next-btn');
   nextBtn.disabled = true; nextBtn.textContent = 'Salvando...';
   try {
-    const resp = await fetch(API + '/auth/recovery/reset', {
+    const resp = await fetch(API + '/api/auth/recovery/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + recToken },
       body: JSON.stringify({ password: pass })
@@ -516,7 +516,7 @@ async function resendCode() {
   const btn = document.getElementById('resend-btn');
   btn.disabled = true;
   try {
-    const resp = await fetch(API + '/auth/recovery/request', {
+    const resp = await fetch(API + '/api/auth/recovery/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: recUser })
@@ -642,7 +642,7 @@ async function doLogin() {
   if (!username || !password) { showMsg('login-msg', 'Preencha todos os campos.', false); return; }
   if (/\s/.test(username)) { showMsg('login-msg', 'O nome de usuário não pode ter espaços.', false); return; }
   try {
-    const res  = await fetch(API + '/auth/login', {
+    const res  = await fetch(API + '/api/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
@@ -752,7 +752,7 @@ async function doRegister() {
   if (password.toLowerCase().includes(username.toLowerCase())) { showMsg('reg-msg', 'A senha não pode conter o nome de usuário.', false); return; }
   if (password !== pass2) { showMsg('reg-msg', 'As senhas não coincidem.', false); return; }
   try {
-    const res  = await fetch(API + '/auth/register', {
+    const res  = await fetch(API + '/api/auth/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, bio, password })
     });
