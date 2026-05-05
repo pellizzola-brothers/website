@@ -1,0 +1,11 @@
+backend/node_modules/*
+node_modules/*
+.DS_Store
+
+# ── SEGURANÇA: nunca versionar arquivos .env ─────────────────
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Versão Online — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .online-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 70vh;
+    }
+
+    .online-box {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .online-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      display: block;
+      animation: bob 2s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    .online-title {
+      font-family: var(--font-title);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .online-desc {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+
+    /* Botão de acesso ao site */
+    .btn-online {
+      display: inline-block;
+      padding: 14px 32px;
+      background: var(--yellow);
+      color: var(--bg-nav);
+      font-family: var(--font-title);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: var(--radius);
+      text-decoration: none;
+      transition: opacity .15s, transform .15s;
+    }
+
+    .btn-online:hover {
+      opacity: .85;
+      transform: translateY(-2px);
+    }
+
+    .online-back {
+      display: block;
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--text-dim);
+      text-decoration: none;
+    }
+
+    .online-back:hover { color: var(--yellow); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="levels.html">Levels</a></li>
+    <li><a href="usuarios.html">Criadores</a></li>
+    <li><a href="login.html">Entrar</a></li>
+  </ul>
+</nav>
+
+<div class="online-page">
+  <div class="online-box">
+    <span class="online-icon">🌐</span>
+    <div class="online-title">Versão Online</div>
+    <p class="online-desc">
+      Acesse o Pellizzola Brothers diretamente pelo navegador,<br>
+      sem precisar instalar nada!
+    </p>
+
+    <!-- Link para o site online -->
+    <a class="btn-online"
+       href="https://frontend-production-de25.up.railway.app/"
+       target="_blank" rel="noopener">
+      🚀 Acessar Agora
+    </a>
+
+    <a class="online-back" href="index.html">← Voltar ao início</a>
+  </div>
+</div>
+
+<script>
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById("nav-search").value.trim();
+  if (q) window.location.href = "levels.html?q=" + encodeURIComponent(q);
+}
+</script>
+</body>
+</html>

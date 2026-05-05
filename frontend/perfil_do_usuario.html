@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    .btn-red {
+      background: #c0392b; color: #fff; border: none;
+      box-shadow: 0 3px 0 #922b21; padding: 6px 14px;
+      font-family: var(--font-title); font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+      border-radius: var(--radius); display: inline-flex; align-items: center; gap: 6px;
+      text-decoration: none;
+    }
+    .btn-red:hover { background: #e74c3c; }
+    .btn-red:active { box-shadow: none; }
+    .btn-delete-level {
+      background: none; border: 1px solid #c0392b; color: #c0392b;
+      border-radius: var(--radius); padding: 4px 10px; font-size: 10px;
+      font-family: var(--font-title); font-weight: 700; text-transform: uppercase;
+      cursor: pointer; letter-spacing: .5px; transition: background .15s, color .15s;
+    }
+    .btn-delete-level:hover { background: #c0392b; color: #fff; }
+    .created-card-foot {
+      padding: 5px 8px; border-top: 1px solid var(--border);
+      display: flex; gap: 6px; justify-content: flex-end;
+      background: rgba(0,0,0,0.15);
+    }
+    .edit-field-row { margin-bottom: 10px; }
+    .edit-field-row textarea, .edit-field-row input {
+      width: 100%; background: var(--bg-input); border: 2px solid var(--border);
+      color: var(--text); font-family: var(--font-body); font-size: 14px;
+      padding: 9px 12px; border-radius: var(--radius); outline: none; resize: vertical;
+      transition: border-color .2s;
+    }
+    .edit-field-row textarea:focus, .edit-field-row input:focus { border-color: var(--accent); }
+    .change-pass-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .change-pass-toggle {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 12px; cursor: pointer; font-family: var(--font-body);
+      text-decoration: underline; text-underline-offset: 2px; padding: 0;
+    }
+    .change-pass-toggle:hover { color: var(--yellow); }
+    .btn-fav-creator {
+      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
+      background: none; border: 2px solid var(--border); border-radius: var(--radius);
+      color: var(--text-muted); font-family: var(--font-title); font-size: 12px;
+      font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .btn-fav-creator:hover { border-color: #e05070; color: #e05070; }
+    .btn-fav-creator.favoritado { border-color: #e05070; background: rgba(224,80,112,.12); color: #e05070; }
+    #toast-profile {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-nav); border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg); padding: 10px 20px;
+      font-size: 13px; color: var(--text);
+      opacity: 0; transition: opacity .2s, transform .2s;
+      pointer-events: none; white-space: nowrap; z-index: 999;
+    }
+    #toast-profile.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+
+<div id="toast-profile"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<!-- Modal: Alterar Avatar -->
+<div class="modal-overlay hidden" id="modal-avatar">
+  <div class="modal-box">
+    <div class="modal-header"><span data-i18n="modal.alterar_avatar">🖼 Alterar Avatar</span><button class="modal-close" onclick="closeModal('modal-avatar')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;" data-i18n="modal.escolher_avatar">Escolha um emoji como avatar:</p>
+      <div class="avatar-grid" id="avatar-grid"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-avatar')" data-i18n="modal.cancelar">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="saveAvatar()" data-i18n="modal.salvar">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Alterar Biografia -->
+<div class="modal-overlay hidden" id="modal-bio">
+  <div class="modal-box">
+    <div class="modal-header"><span data-i18n="modal.editar_perfil">✏ Editar Perfil</span><button class="modal-close" onclick="closeModal('modal-bio')">✕</button></div>
+    <div class="modal-body">
+      <div class="edit-field-row">
+        <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.biografia">Biografia</label>
+        <textarea id="bio-input" rows="4" maxlength="500" data-i18n-ph="modal.bio_placeholder" placeholder="Uma frase sobre você..."></textarea>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);text-align:right;margin-top:4px;"><span id="bio-counter">0</span>/500</div>
+      <div class="change-pass-section">
+        <button class="change-pass-toggle" onclick="toggleChangePass()" data-i18n="modal.alterar_senha">🔒 Alterar senha</button>
+        <div id="change-pass-fields" style="display:none;margin-top:12px;">
+          <div class="edit-field-row">
+            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.senha_atual">Senha Atual</label>
+            <input type="password" id="old-pass" data-i18n-ph="modal.senha_atual_ph" placeholder="Sua senha atual">
+          </div>
+          <div class="edit-field-row">
+            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.nova_senha">Nova Senha</label>
+            <input type="password" id="new-pass" data-i18n-ph="modal.nova_senha_ph" placeholder="Nova senha (mais de 7 caracteres)" oninput="checkNewPassRules()">
+          </div>
+          <div id="new-pass-rules" style="font-size:11px;margin-top:4px;display:none;flex-direction:column;gap:3px;">
+            <span id="np-rule-len"     style="color:var(--text-muted);">✗ Mais de 7 caracteres</span>
+            <span id="np-rule-upper"   style="color:var(--text-muted);">✗ Pelo menos uma letra maiúscula</span>
+            <span id="np-rule-special" style="color:var(--text-muted);">✗ Pelo menos um caractere especial</span>
+          </div>
+          <div id="change-pass-msg" style="font-size:12px;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-bio')" data-i18n="modal.cancelar">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="saveBio()" data-i18n="modal.salvar">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Apagar Level -->
+<div class="modal-overlay hidden" id="modal-delete">
+  <div class="modal-box">
+    <div class="modal-header" style="color:#e07070;"><span data-i18n="modal.apagar_fase">🗑 Apagar Fase</span><button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text);margin-bottom:8px;"><span data-i18n="modal.apagar_confirm">Tem certeza que deseja apagar a fase</span> <strong id="delete-level-name" style="color:var(--yellow);"></strong>?</p>
+      <p style="font-size:12px;color:var(--text-muted);" data-i18n="modal.apagar_aviso">⚠ Esta ação não pode ser desfeita.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-delete')" data-i18n="modal.cancelar">Cancelar</button>
+      <button class="btn-red" style="font-size:12px;padding:6px 14px;" id="confirm-delete-btn" onclick="confirmDelete()" data-i18n="modal.apagar_btn">🗑 Apagar</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="main">
+  <div class="user-hero">
+    <div class="user-avatar skeleton" style="width:155px;height:155px;"></div>
+    <div style="flex:1;">
+      <div class="skeleton" style="height:26px;width:45%;margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:13px;width:32%;margin-bottom:14px;"></div>
+      <div class="skeleton" style="height:13px;width:26%;margin-bottom:4px;"></div>
+      <div class="skeleton" style="height:13px;width:26%;margin-bottom:20px;"></div>
+      <div class="skeleton" style="height:34px;width:110px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const EMOJIS  = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const AVATARS = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
+const emojiFor = id => EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length];
+
+const loggedUser = getUser();
+const authToken  = getToken();
+
+if (loggedUser) {
+  document.getElementById('nav-auth').textContent = loggedUser.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + loggedUser.id;
+}
+
+const getUserId = () => parseInt(new URLSearchParams(location.search).get('id')) || 1;
+const isOwn     = id => loggedUser && loggedUser.id === id;
+
+function getStoredAvatar(userId) { return localStorage.getItem('pb_avatar_' + userId) || '👤'; }
+function setStoredAvatar(userId, emoji) { localStorage.setItem('pb_avatar_' + userId, emoji); }
+function getStoredBio(userId, fallback) {
+  var v = localStorage.getItem('pb_bio_' + userId);
+  return v !== null ? v : (fallback || '');
+}
+function setStoredBio(userId, bio) { localStorage.setItem('pb_bio_' + userId, bio); }
+function getLikedLevels() { return JSON.parse(localStorage.getItem('pb_liked_levels') || '[]'); }
+
+function showToast(msg, ms) {
+  ms = ms || 2000;
+  var t = document.getElementById('toast-profile');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, ms);
+}
+
+let pendingDeleteId  = null;
+let currentProfileId = null;
+let selectedAvatar   = null;
+
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(function(ov) {
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.classList.add('hidden'); });
+});
+
+function openAvatarModal() {
+  const current = getStoredAvatar(currentProfileId);
+  selectedAvatar = current;
+  document.getElementById('avatar-grid').innerHTML = AVATARS.map(function(a) {
+    return '<div class="avatar-opt' + (a === current ? ' selected' : '') + '" onclick="selectAvatar(this,\'' + a + '\')">' + a + '</div>';
+  }).join('');
+  openModal('modal-avatar');
+}
+function selectAvatar(el, emoji) {
+  document.querySelectorAll('.avatar-opt').forEach(function(o) { o.classList.remove('selected'); });
+  el.classList.add('selected');
+  selectedAvatar = emoji;
+}
+function saveAvatar() {
+  if (!selectedAvatar) return;
+  setStoredAvatar(currentProfileId, selectedAvatar);
+  document.querySelectorAll('.user-avatar').forEach(function(el) { el.textContent = selectedAvatar; });
+  closeModal('modal-avatar');
+  showToast(t('perfil.toast_avatar'));
+}
+
+function openBioModal(currentBio) {
+  const input = document.getElementById('bio-input');
+  input.value = currentBio || '';
+  document.getElementById('bio-counter').textContent = (currentBio || '').length;
+  input.oninput = function() { document.getElementById('bio-counter').textContent = input.value.length; };
+  document.getElementById('change-pass-fields').style.display = 'none';
+  document.getElementById('old-pass').value = '';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('change-pass-msg').textContent = '';
+  openModal('modal-bio');
+}
+
+async function saveBio() {
+  const bio    = (document.getElementById('bio-input').value || '').trim();
+  const oldPass = (document.getElementById('old-pass').value || '').trim();
+  const newPass = (document.getElementById('new-pass').value || '').trim();
+  const passSectionOpen = document.getElementById('change-pass-fields').style.display !== 'none';
+  if (passSectionOpen && (oldPass || newPass)) {
+    const ok = await changePassword(oldPass, newPass);
+    if (!ok) return;
+  }
+  try {
+    await fetch(API + '/users/' + currentProfileId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ bio })
+    });
+    setStoredBio(currentProfileId, bio);
+    window._currentBio = bio;
+    document.querySelectorAll('.user-bio').forEach(function(el) { el.textContent = bio ? '"' + bio + '"' : ''; });
+    if (loggedUser && loggedUser.id === currentProfileId) {
+      loggedUser.bio = bio;
+      saveSession(loggedUser, authToken);
+    }
+  } catch (_) { setStoredBio(currentProfileId, bio); }
+  closeModal('modal-bio');
+  showToast(t('perfil.toast_perfil'));
+}
+
+function toggleChangePass() {
+  const el = document.getElementById('change-pass-fields');
+  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
+  el.style.flexDirection = 'column';
+  if (el.style.display !== 'none') document.getElementById('old-pass').focus();
+}
+
+function checkNewPassRules() {
+  const pass = document.getElementById('new-pass').value;
+  const wrap = document.getElementById('new-pass-rules');
+  wrap.style.display = pass.length ? 'flex' : 'none';
+  if (!pass.length) return;
+  [['np-rule-len',     pass.length > 7,    (pass.length > 7    ? '✓' : '✗') + ' Mais de 7 caracteres'],
+   ['np-rule-upper',   /[A-Z]/.test(pass), (/[A-Z]/.test(pass) ? '✓' : '✗') + ' Pelo menos uma letra maiúscula'],
+   ['np-rule-special', /[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass), (/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass) ? '✓' : '✗') + ' Pelo menos um caractere especial']
+  ].forEach(function(r) {
+    var el = document.getElementById(r[0]);
+    if (el) { el.style.color = r[1] ? '#5dba60' : 'var(--text-muted)'; el.textContent = r[2]; }
+  });
+}
+
+async function changePassword(oldPass, newPass) {
+  const msgEl = document.getElementById('change-pass-msg');
+  if (!oldPass) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Informe a senha atual.'; return false; }
+  if (!newPass || newPass.length <= 7) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha deve ter mais de 7 caracteres.'; return false; }
+  if (!/[A-Z]/.test(newPass)) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha precisa de letra maiúscula.'; return false; }
+  if (!/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(newPass)) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha precisa de caractere especial.'; return false; }
+  try {
+    const loginResp = await fetch(API + '/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: loggedUser.username, password: oldPass })
+    });
+    if (!loginResp.ok) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Senha atual incorreta.'; return false; }
+    const loginData = await loginResp.json();
+    const tempToken = loginData.token;
+    const resetResp = await fetch(API + '/auth/recovery/reset', {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tempToken },
+      body: JSON.stringify({ password: newPass })
+    });
+    if (!resetResp.ok) { const err = await resetResp.json(); msgEl.style.color = '#e07070'; msgEl.textContent = err.error || 'Erro ao alterar senha.'; return false; }
+    msgEl.style.color = '#5dba60'; msgEl.textContent = '✓ Senha alterada com sucesso!';
+    return true;
+  } catch (_) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Erro de conexão.'; return false; }
+}
+
+function openDeleteModal(levelId, levelName) {
+  pendingDeleteId = levelId;
+  document.getElementById('delete-level-name').textContent = levelName;
+  const btn = document.getElementById('confirm-delete-btn');
+  btn.disabled = false; btn.textContent = '🗑 Apagar';
+  openModal('modal-delete');
+}
+
+async function confirmDelete() {
+  if (!pendingDeleteId) return;
+  const id  = pendingDeleteId;
+  const btn = document.getElementById('confirm-delete-btn');
+  btn.disabled = true; btn.textContent = 'Apagando...';
+  closeModal('modal-delete');
+  pendingDeleteId = null;
+  try {
+    const res = await fetch(API + '/levels/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + authToken }
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(function() { return {}; });
+      showToast('❌ ' + (err.error || res.status));
+      return;
+    }
+    const card = document.getElementById('level-card-' + id);
+    if (card) {
+      card.style.transition = 'opacity .3s, transform .3s';
+      card.style.opacity = '0'; card.style.transform = 'scale(0.95)';
+      setTimeout(function() { card.remove(); }, 300);
+    }
+    sessionStorage.removeItem('pb_niveis_v2');
+    showToast(t('perfil.toast_del_ok'));
+  } catch (_) { showToast(t('perfil.toast_del_err')); }
+}
+
+function renderLikedSection() {
+  const likedIds = getLikedLevels();
+  if (!likedIds.length) return '';
+  const cards = likedIds.map(function(id) {
+    return '<a href="perfil_do_jogo.html?id=' + id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
+      '<div class="created-card-thumb">' + emojiFor(id) + '</div>' +
+      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.curtido_por_vc') + '</div></div>' +
+      '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked(' + id + ',this.closest(\'a\'))">' + t('perfil.remover') + '</button></div>' +
+    '</a>';
+  }).join('');
+  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.fases_curtidas') + '</div><div class="created-strip">' + cards + '</div>';
+}
+
+function removeLiked(id, card) {
+  var list = getLikedLevels().filter(function(x) { return x !== id; });
+  localStorage.setItem('pb_liked_levels', JSON.stringify(list));
+  if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(function() { card.remove(); }, 300); }
+}
+
+function renderDownloadHistory() {
+  const history = JSON.parse(localStorage.getItem('pb_download_history') || '[]');
+  if (!history.length) return '';
+  const cards = history.slice(0, 12).map(function(item) {
+    var date = new Date(item.at).toLocaleDateString(getLang().replace('_','-'), { day:'2-digit', month:'short' });
+    return '<a href="perfil_do_jogo.html?id=' + item.id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
+      '<div class="created-card-thumb">' + emojiFor(item.id) + '</div>' +
+      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + item.id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.baixado_em') + ' ' + date + '</div></div>' +
+    '</a>';
+  }).join('');
+  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.downloads_rec') + '</div><div class="created-strip">' + cards + '</div>';
+}
+
+async function loadProfile() {
+  const id = getUserId();
+  currentProfileId = id;
+  let u;
+  try {
+    const resp = await fetch(API + '/users/' + id);
+    if (resp.status === 404) { window.location.href = '404.html'; return; }
+    if (!resp.ok) throw new Error('server');
+    u = await resp.json();
+  } catch (_) {
+    u = { id:1, username:'xx_poste_xx', bio:'Viva Jesus', downloaded_levels:11, liked_levels:9,
+          levels:[{id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10},{id:2,name:'Meu Level Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9}] };
+  }
+
+  document.title = u.username + ' — Pellizzola Brothers';
+  const own    = isOwn(u.id);
+  const avatar = getStoredAvatar(u.id);
+  const bio    = getStoredBio(u.id, u.bio);
+  const levels = u.levels || [];
+
+  window._currentBio = bio;
+
+  const actionBtn = own
+    ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+        '<a href="upload.html" class="btn btn-green btn-sm">' + t('perfil.enviar_fase') + '</a>' +
+        '<button class="btn btn-outline btn-sm" id="btn-bio" onclick="openBioModal(window._currentBio)">' + t('perfil.editar') + '</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="openAvatarModal()">' + t('perfil.avatar') + '</button>' +
+        '<button class="btn-red" onclick="logout()">' + t('perfil.sair') + '</button>' +
+      '</div>'
+    : (function() {
+        var fav = isFavCreator(u.id);
+        return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+          '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">' + t('perfil.seguir') + '</button>' +
+          '<button class="btn-fav-creator' + (fav ? ' favoritado' : '') + '" id="btn-fav-creator" onclick="onFavCreator(' + parseInt(u.id) + ')" title="' + (fav ? t('perfil.fav_rem') : t('perfil.fav_add')) + '">' + (fav ? t('perfil.favoritado') : t('perfil.favoritar')) + '</button>' +
+        '</div>';
+      })();
+
+  const createdCards = levels.map(function(l) {
+    return '<div class="created-card" id="level-card-' + l.id + '">' +
+      '<a href="perfil_do_jogo.html?id=' + l.id + '" style="text-decoration:none;color:inherit;display:block;">' +
+        '<div class="created-card-thumb">' + emojiFor(l.id) + '</div>' +
+        '<div class="created-card-info">' +
+          '<div class="created-card-name">' + escHtml(l.name) + '</div>' +
+          '<div class="created-card-desc">' + (l.description ? '"' + escHtml(l.description) + '"' : '') + '</div>' +
+          '<div class="created-card-stats"><div>Downloads: ' + l.downloads + '</div><div>Curtidas: ' + l.likes + '</div></div>' +
+        '</div>' +
+      '</a>' +
+      (own ? '<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal(' + l.id + ',' + JSON.stringify(l.name) + ')">' + t('modal.apagar_btn') + '</button></div>' : '') +
+    '</div>';
+  }).join('');
+
+  const moreCard = '<a href="levels.html" class="created-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;"><div style="text-align:center;padding:16px;color:var(--text-muted);"><div style="font-size:20px;margin-bottom:6px;">→</div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">' + t('perfil.ver_todos') + '</div></div></a>';
+
+  document.getElementById('main').innerHTML =
+    '<div class="user-hero">' +
+      '<div class="user-avatar"' + (own ? ' onclick="openAvatarModal()" style="cursor:pointer;transition:transform .15s;" onmouseenter="this.style.transform=\'scale(1.06)\'" onmouseleave="this.style.transform=\'scale(1)\'"' : '') + '>' + escHtml(avatar) + '</div>' +
+      '<div class="user-hero-info">' +
+        '<div class="user-name">' + escHtml(u.username) + '</div>' +
+        '<div class="user-bio">' + (bio ? '"' + escHtml(bio) + '"' : '') + '</div>' +
+        '<div class="user-stats">' +
+          '<div class="user-stat">' + t('perfil.fases_jogadas') + ': ' + u.downloaded_levels + '</div>' +
+          '<div class="user-stat">' + t('perfil.curtidas') + ': ' + u.liked_levels + '</div>' +
+          '<div class="user-stat">' + t('perfil.criadas') + ': ' + levels.length + '</div>' +
+          '<div class="user-stat" style="color:var(--text-dim);font-size:11px;">' + t('perfil.membro_desde') + parseInt(u.id) + '</div>' +
+        '</div>' +
+        actionBtn +
+      '</div>' +
+    '</div>' +
+    (levels.length > 0
+      ? '<div class="created-title">' + t('perfil.fases_criadas') + '</div><div class="created-strip">' + createdCards + moreCard + '</div>'
+      : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">' + t('perfil.nenhuma_fase') + '</div>') +
+    (own ? renderLikedSection() : '') +
+    (own ? renderDownloadHistory() : '');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function getFavCreators() { try { return JSON.parse(localStorage.getItem('pb_criadores_fav') || '[]'); } catch(e) { return []; } }
+function isFavCreator(id) { return getFavCreators().indexOf(id) !== -1; }
+function toggleFavCreator(id) {
+  var favs = getFavCreators();
+  var idx  = favs.indexOf(id);
+  if (idx === -1) { favs.push(id); } else { favs.splice(idx, 1); }
+  localStorage.setItem('pb_criadores_fav', JSON.stringify(favs));
+  return idx === -1;
+}
+
+function onFavCreator(id) {
+  var nowFav = toggleFavCreator(id);
+  var btn    = document.getElementById('btn-fav-creator');
+  if (!btn) return;
+  btn.classList.toggle('favoritado', nowFav);
+  btn.innerHTML = nowFav ? t('perfil.favoritado') : t('perfil.favoritar');
+  btn.title     = nowFav ? t('perfil.fav_rem') : t('perfil.fav_add');
+  showToast(nowFav ? t('perfil.fav_add') : t('perfil.fav_rem'));
+}
+
+function toggleFollow(btn) {
+  if (btn.textContent === t('perfil.seguir')) { btn.textContent = t('perfil.seguindo'); btn.classList.replace('btn-green','btn-outline'); }
+  else { btn.textContent = t('perfil.seguir'); btn.classList.replace('btn-outline','btn-green'); }
+}
+
+function logout() {
+  clearSession();
+  window.location.href = 'index.html';
+}
+
+loadProfile();
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+</script>
+</body>
+</html>
