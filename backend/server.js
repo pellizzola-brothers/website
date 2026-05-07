@@ -7,6 +7,7 @@ if (!process.env.JWT_SECRET) {
 
 const express   = require('express');
 const cors      = require('cors');
+const path      = require('path');
 const rateLimit = require('express-rate-limit');
 
 const usersRouter  = require('./routes/users');
@@ -49,6 +50,7 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(globalLimiter);
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // ── Rotas da API ─────────────────────────────────────────────
 app.use('/api/users',  usersRouter);
@@ -63,6 +65,11 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '6' }));
 // ── 404 para rotas /api/* desconhecidas ───────────────────────
 app.use('/api/*', (_req, res) => {
   res.status(404).json({ error: 'Rota não encontrada' });
+});
+
+// ── Catch-all para SPA: serve 404.html para rotas desconhecidas
+app.get('*', (_req, res) => {
+  res.status(404).sendFile(path.join(__dirname, '../frontend', '404.html'));
 });
 
 // ── Inicia servidor ──────────────────────────────────────────

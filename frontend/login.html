@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entrar — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <style>
@@ -105,10 +108,10 @@
 <nav>
   <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="levels.html">Níveis</a></li>
-    <li><a href="usuarios.html">Criadores</a></li>
-    <li><a href="login.html" class="active">Entrar</a></li>
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" class="active" data-i18n="nav.entrar">Entrar</a></li>
   </ul>
 </nav>
 
@@ -119,7 +122,7 @@
   <div class="modal-box" style="max-width:460px;">
 
     <div class="modal-header">
-      🔑 Recuperar Conta
+      <span data-i18n="recovery.titulo">🔑 Recuperar Conta</span>
       <button class="modal-close" onclick="closeRecovery()">✕</button>
     </div>
 
@@ -135,15 +138,15 @@
 
       <!-- ETAPA 1 -->
       <div class="recovery-step active" id="step-1">
-        <div class="step-title">Qual é o seu usuário?</div>
-        <div class="step-desc">
+        <div class="step-title" data-i18n="recovery.step1_title">Qual é o seu usuário?</div>
+        <div class="step-desc" data-i18n="recovery.step1_desc">
           Informe seu nome de usuário. Você receberá um código de 6 dígitos
           para confirmar sua identidade.
         </div>
         <div class="form-group">
-          <label class="form-label">Usuário</label>
+          <label class="form-label" data-i18n="login.usuario_label">Usuário</label>
           <input class="form-input" id="rec-username" type="text"
-                 placeholder="seu_usuario" autocomplete="username"
+                 data-i18n-ph="login.usuario_ph" placeholder="seu_usuario" autocomplete="username"
                  onkeydown="if(event.key==='Enter') requestCode()">
         </div>
         <div id="rec-msg-1" class="status-msg" style="display:none;"></div>
@@ -151,8 +154,8 @@
 
       <!-- ETAPA 2 -->
       <div class="recovery-step" id="step-2">
-        <div class="step-title">Digite o código</div>
-        <div class="step-desc" id="step-2-desc">
+        <div class="step-title" data-i18n="recovery.step2_title">Digite o código</div>
+        <div class="step-desc" id="step-2-desc" data-i18n="recovery.step2_desc">
           Insira o código de 6 dígitos enviado para confirmar sua identidade.
         </div>
 
@@ -171,7 +174,7 @@
         </div>
 
         <div style="text-align:center;margin-bottom:4px;">
-          <button class="resend-link" id="resend-btn" onclick="resendCode()">
+          <button class="resend-link" id="resend-btn" onclick="resendCode()" data-i18n="recovery.nao_recebi">
             Não recebi — reenviar código
           </button>
         </div>
@@ -180,15 +183,15 @@
 
       <!-- ETAPA 3 -->
       <div class="recovery-step" id="step-3">
-        <div class="step-title">Crie uma nova senha</div>
-        <div class="step-desc">
+        <div class="step-title" data-i18n="recovery.step3_title">Crie uma nova senha</div>
+        <div class="step-desc" data-i18n="recovery.step3_desc">
           Escolha uma senha forte. Ela substituirá a senha atual da conta.
         </div>
         <div class="form-group">
-          <label class="form-label">Nova Senha</label>
+          <label class="form-label" data-i18n="login.nova_senha_label">Nova Senha</label>
           <div style="position:relative;">
             <input class="form-input" id="rec-pass1" type="password"
-                   placeholder="Mais de 7 caracteres"
+                   data-i18n-ph="login.nova_senha_ph" placeholder="Mais de 7 caracteres"
                    autocomplete="new-password"
                    oninput="checkRecPassStrength()"
                    style="padding-right:40px;">
@@ -227,8 +230,8 @@
       <div class="recovery-step" id="step-success">
         <div class="success-wrap">
           <span class="success-icon">🎉</span>
-          <div class="success-text">Senha redefinida!</div>
-          <div class="success-sub">Sua nova senha foi salva com sucesso.<br>Você já pode fazer login.</div>
+          <div class="success-text" data-i18n="recovery.success_text">Senha redefinida!</div>
+          <div class="success-sub" data-i18n="recovery.success_sub">Sua nova senha foi salva com sucesso.<br>Você já pode fazer login.</div>
         </div>
       </div>
 
@@ -236,9 +239,9 @@
 
     <div class="modal-footer" id="rec-footer">
       <button class="btn btn-outline btn-sm" id="rec-back-btn"
-              onclick="recoveryBack()" style="display:none;">← Voltar</button>
+              onclick="recoveryBack()" style="display:none;" data-i18n="recovery.btn_voltar">← Voltar</button>
       <button class="btn btn-green btn-sm" id="rec-next-btn"
-              onclick="recoveryNext()">Continuar →</button>
+              onclick="recoveryNext()" data-i18n="recovery.btn_continuar">Continuar →</button>
     </div>
 
   </div>
@@ -253,26 +256,26 @@
     <div class="login-header">❖ Pellizzola Brothers</div>
     <div class="login-body">
       <div class="tabs">
-        <button class="tab active" onclick="switchTab('login',this)">Login</button>
-        <button class="tab" onclick="switchTab('register',this)">Cadastro</button>
+        <button class="tab active" onclick="switchTab('login',this)" data-i18n="login.tab_login">Login</button>
+        <button class="tab" onclick="switchTab('register',this)" data-i18n="login.tab_cadastro">Cadastro</button>
       </div>
 
       <!-- ── LOGIN ── -->
       <div class="panel active" id="panel-login">
         <div class="form-group">
-          <label class="form-label">Usuário</label>
+          <label class="form-label" data-i18n="login.usuario_label">Usuário</label>
           <input class="form-input" id="login-user" type="text"
-                 placeholder="seu_usuario" autocomplete="username"
+                 data-i18n-ph="login.usuario_ph" placeholder="seu_usuario" autocomplete="username"
                  onkeydown="if(event.key==='Enter') doLogin()">
         </div>
         <div class="form-group">
-          <label class="form-label">Senha</label>
+          <label class="form-label" data-i18n="login.senha_label">Senha</label>
           <input class="form-input" id="login-pass" type="password"
-                 placeholder="••••••••" autocomplete="current-password"
+                 data-i18n-ph="login.senha_ph" placeholder="••••••••" autocomplete="current-password"
                  onkeydown="if(event.key==='Enter') doLogin()">
-          <button class="forgot-link" onclick="openRecovery()">Esqueceu a senha?</button>
+          <button class="forgot-link" onclick="openRecovery()" data-i18n="login.esqueceu">Esqueceu a senha?</button>
         </div>
-        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="doLogin()">Entrar</button>
+        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="doLogin()" data-i18n="login.btn_entrar">Entrar</button>
         <div id="login-msg"></div>
       </div>
 
@@ -280,18 +283,18 @@
       <div class="panel" id="panel-register">
         <div class="form-group">
           <label class="form-label">
-            Usuário
-            <span style="font-weight:400;color:var(--text-dim);font-size:10px;text-transform:none;margin-left:6px;">sem espaços</span>
+            <span data-i18n="login.usuario_label">Usuário</span>
+            <span style="font-weight:400;color:var(--text-dim);font-size:10px;text-transform:none;margin-left:6px;" data-i18n="login.sem_espacos">sem espaços</span>
           </label>
           <input class="form-input" id="reg-user" type="text"
-                 placeholder="seu_usuario" autocomplete="username">
+                 data-i18n-ph="login.usuario_ph" placeholder="seu_usuario" autocomplete="username">
         </div>
         <div class="form-group">
-          <label class="form-label">Bio <span style="font-weight:400;color:var(--text-dim);font-size:11px;text-transform:none;">(opcional)</span></label>
-          <input class="form-input" id="reg-bio" type="text" placeholder="Uma frase sobre você...">
+          <label class="form-label"><span data-i18n="login.bio_label">Bio</span> <span style="font-weight:400;color:var(--text-dim);font-size:11px;text-transform:none;" data-i18n="login.bio_opcional">(opcional)</span></label>
+          <input class="form-input" id="reg-bio" type="text" data-i18n-ph="login.bio_ph" placeholder="Uma frase sobre você...">
         </div>
         <div class="form-group">
-          <label class="form-label">Senha</label>
+          <label class="form-label" data-i18n="login.senha_label">Senha</label>
           <div style="position:relative;">
             <input class="form-input" id="reg-pass" type="password"
                    placeholder="Mais de 7 caracteres"
@@ -327,12 +330,12 @@
           </div>
           <div id="pass-match-hint" style="font-size:11px;margin-top:4px;"></div>
         </div>
-        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="doRegister()">Cadastrar</button>
+        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="doRegister()" data-i18n="login.btn_cadastrar">Cadastrar</button>
         <div id="reg-msg"></div>
       </div>
 
       <div style="margin-top:18px;text-align:center;">
-        <a href="index.html" style="font-size:13px;color:var(--text-dim);text-decoration:none;">← Voltar ao início</a>
+        <a href="index.html" style="font-size:13px;color:var(--text-dim);text-decoration:none;" data-i18n="login.voltar">← Voltar ao início</a>
       </div>
     </div>
   </div>
@@ -393,7 +396,7 @@ function goToStep(n) {
   if (backBtn) backBtn.style.display = (n > 1 && !isSuccess) ? '' : 'none';
   const nextBtn = document.getElementById('rec-next-btn');
   if (nextBtn) {
-    nextBtn.textContent = n === 3 ? '💾 Salvar senha' : 'Continuar →';
+    nextBtn.textContent = n === 3 ? t('recovery.btn_salvar') : t('recovery.btn_continuar');
     nextBtn.disabled = false;
   }
   recStep = n;
@@ -432,7 +435,7 @@ async function requestCode() {
   const nextBtn = document.getElementById('rec-next-btn');
   nextBtn.disabled = true; nextBtn.textContent = 'Enviando...';
   try {
-    const resp = await fetch(API + '/api/auth/recovery/request', {
+    const resp = await fetch(API + '/auth/recovery/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username })
@@ -467,7 +470,7 @@ async function verifyCode() {
   const nextBtn = document.getElementById('rec-next-btn');
   nextBtn.disabled = true; nextBtn.textContent = 'Verificando...';
   try {
-    const resp = await fetch(API + '/api/auth/recovery/verify', {
+    const resp = await fetch(API + '/auth/recovery/verify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: recUser, code })
@@ -495,7 +498,7 @@ async function resetPassword() {
   const nextBtn = document.getElementById('rec-next-btn');
   nextBtn.disabled = true; nextBtn.textContent = 'Salvando...';
   try {
-    const resp = await fetch(API + '/api/auth/recovery/reset', {
+    const resp = await fetch(API + '/auth/recovery/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + recToken },
       body: JSON.stringify({ password: pass })
@@ -516,7 +519,7 @@ async function resendCode() {
   const btn = document.getElementById('resend-btn');
   btn.disabled = true;
   try {
-    const resp = await fetch(API + '/api/auth/recovery/request', {
+    const resp = await fetch(API + '/auth/recovery/request', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: recUser })
@@ -540,16 +543,16 @@ function startResendCooldown() {
   const btn = document.getElementById('resend-btn');
   let secs = 60;
   btn.disabled = true;
-  btn.textContent = 'Reenviar em ' + secs + 's';
+  btn.textContent = t('recovery.reenviar_em').replace('{n}', secs);
   const iv = setInterval(function() {
     secs--;
     if (secs <= 0) {
       clearInterval(iv);
       resendCool = false;
       btn.disabled = false;
-      btn.textContent = 'Não recebi — reenviar código';
+      btn.textContent = t('recovery.nao_recebi');
     } else {
-      btn.textContent = 'Reenviar em ' + secs + 's';
+      btn.textContent = t('recovery.reenviar_em').replace('{n}', secs);
     }
   }, 1000);
 }
@@ -642,16 +645,16 @@ async function doLogin() {
   if (!username || !password) { showMsg('login-msg', 'Preencha todos os campos.', false); return; }
   if (/\s/.test(username)) { showMsg('login-msg', 'O nome de usuário não pode ter espaços.', false); return; }
   try {
-    const res  = await fetch(API + '/api/auth/login', {
+    const res  = await fetch(API + '/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password })
     });
     const data = await res.json();
     if (!res.ok) { showMsg('login-msg', data.error, false); return; }
     saveSession(data.user, data.token);
-    showMsg('login-msg', 'Login realizado! Redirecionando...', true);
+    showMsg('login-msg', t('login.ok_login'), true);
     setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
-  } catch (e) { showMsg('login-msg', 'Erro de conexão com o servidor.', false); }
+  } catch (e) { showMsg('login-msg', t('login.err_conexao'), false); }
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -752,16 +755,16 @@ async function doRegister() {
   if (password.toLowerCase().includes(username.toLowerCase())) { showMsg('reg-msg', 'A senha não pode conter o nome de usuário.', false); return; }
   if (password !== pass2) { showMsg('reg-msg', 'As senhas não coincidem.', false); return; }
   try {
-    const res  = await fetch(API + '/api/auth/register', {
+    const res  = await fetch(API + '/auth/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, bio, password })
     });
     const data = await res.json();
     if (!res.ok) { showMsg('reg-msg', data.error, false); return; }
     saveSession(data.user, data.token);
-    showMsg('reg-msg', '✅ Conta criada! Redirecionando...', true);
+    showMsg('reg-msg', t('login.ok_cadastro'), true);
     setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
-  } catch (e) { showMsg('reg-msg', 'Erro de conexão com o servidor.', false); }
+  } catch (e) { showMsg('reg-msg', t('login.err_conexao'), false); }
 }
 </script>
 </body>

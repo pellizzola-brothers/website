@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enviar Level — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
   <style>
     .upload-card {
       max-width: 560px;
@@ -173,13 +174,13 @@
 <nav>
   <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="levels.html">Levels</a></li>
-    <li><a href="usuarios.html">Criadores</a></li>
-    <li><a href="login.html" id="nav-auth">Entrar</a></li>
-        <li>
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
-        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
       </form>
     </li>
   </ul>
@@ -187,32 +188,33 @@
 
 <div class="page">
   <div class="upload-card">
-    <h1>📤 Enviar Level</h1>
+    <h1 data-i18n="upload.titulo">📤 Enviar Fase</h1>
 
     <p id="aviso-login" class="aviso-login" style="display:none;">
-      Você precisa estar <a href="login.html">logado</a> para enviar um level.
+      <span data-i18n="upload.aviso_login">Você precisa estar logado para enviar uma fase.</span>
+      <a href="login.html" data-i18n="upload.logado">logado</a>
     </p>
 
     <div id="form-upload">
       <div class="campo">
-        <label for="nome">Nome do level *</label>
-        <input type="text" id="nome" placeholder="Ex: Meu Level Incrivel" maxlength="200" oninput="contarChars('nome',200,'count-nome')">
+        <label for="nome" data-i18n="upload.nome_label">Nome da fase *</label>
+        <input type="text" id="nome" data-i18n-ph="upload.nome_ph" placeholder="Ex: Minha Fase Incrível" maxlength="200" oninput="contarChars('nome',200,'count-nome')">
         <div style="font-size:11px;color:var(--text-muted);margin-top:3px;text-align:right;"><span id="count-nome">0</span>/200</div>
       </div>
 
       <div class="campo">
-        <label for="desc">Descrição</label>
-        <textarea id="desc" placeholder="Conte um pouco sobre o level..." maxlength="1000" oninput="contarChars('desc',1000,'count-desc')"></textarea>
+        <label for="desc" data-i18n="upload.desc_label">Descrição</label>
+        <textarea id="desc" data-i18n-ph="upload.desc_ph" placeholder="Conte um pouco sobre a fase..." maxlength="1000" oninput="contarChars('desc',1000,'count-desc')"></textarea>
         <div style="font-size:11px;color:var(--text-muted);margin-top:3px;text-align:right;"><span id="count-desc">0</span>/1000</div>
       </div>
 
       <div class="campo">
-        <label>Arquivo do level *</label>
+        <label data-i18n="upload.arquivo_label">Arquivo da fase *</label>
         <div class="drop-zone" id="drop-zone">
           <input type="file" id="arquivo" accept="*/*">
           <span class="icon">📁</span>
-          <span id="drop-texto">Clique ou arraste o arquivo aqui</span>
-          <br><small style="font-size:11px;color:var(--text-dim);">Tamanho máximo: 10 MB</small>
+          <span id="drop-texto" data-i18n="upload.drop_texto">Clique ou arraste o arquivo aqui</span>
+          <br><small style="font-size:11px;color:var(--text-dim);" data-i18n="upload.drop_max">Tamanho máximo: 10 MB</small>
         </div>
       </div>
 
@@ -221,8 +223,8 @@
         <span id="pct">0%</span>
       </div>
 
-      <button class="btn btn-green" style="width:100%;margin-top:4px;" id="btn-enviar" onclick="enviar()">
-        Enviar Level
+      <button class="btn btn-green" style="width:100%;margin-top:4px;" id="btn-enviar" onclick="enviar()" data-i18n="upload.btn_enviar">
+        Enviar Fase
       </button>
     </div>
 
@@ -292,11 +294,11 @@ function enviar() {
   var desc    = document.getElementById('desc').value.trim();
   var arquivo = inputArq.files[0];
 
-  if (!nome)              { mostrarMsg('erro', 'Preencha o nome do level.'); return; }
-  if (nome.length < 3)    { mostrarMsg('erro', 'O nome deve ter pelo menos 3 caracteres.'); return; }
-  if (!arquivo)           { mostrarMsg('erro', 'Selecione um arquivo.'); return; }
+  if (!nome)              { mostrarMsg('erro', t('upload.err_nome')); return; }
+  if (nome.length < 3)    { mostrarMsg('erro', t('upload.err_nome_curto')); return; }
+  if (!arquivo)           { mostrarMsg('erro', t('upload.err_arquivo')); return; }
   if (arquivo.size > 10 * 1024 * 1024) {
-    mostrarMsg('erro', 'O arquivo é muito grande. Tamanho máximo permitido: 10 MB.');
+    mostrarMsg('erro', t('upload.err_tamanho'));
     return;
   }
 
@@ -307,7 +309,7 @@ function enviar() {
 
   var btn = document.getElementById('btn-enviar');
   btn.disabled = true;
-  btn.textContent = 'Enviando...';
+  btn.textContent = t('upload.enviando');
 
   var progressWrap = document.getElementById('progress-wrap');
   var barra = document.getElementById('barra');
@@ -326,7 +328,7 @@ function enviar() {
 
   xhr.addEventListener('load', function() {
     btn.disabled = false;
-    btn.textContent = 'Enviar Level';
+    btn.textContent = t('upload.btn_enviar');
     progressWrap.style.display = 'none';
 
     var dados;
@@ -334,21 +336,21 @@ function enviar() {
 
     if (xhr.status === 201 && dados.ok) {
       mostrarMsg('ok',
-        '✅ Level <strong>' + dados.level.name + '</strong> enviado com sucesso! Redirecionando...'
+        '✅ ' + t('entity.fase') + ' <strong>' + dados.level.name + '</strong> ' + t('upload.ok_msg')
       );
       setTimeout(function() {
         window.location.href = 'perfil_do_jogo.html?id=' + dados.level.id;
       }, 1800);
     } else {
-      mostrarMsg('erro', 'Erro: ' + (dados.error || 'Falha no servidor.'));
+      mostrarMsg('erro', t('upload.err_servidor') + ' ' + (dados.error || ''));
     }
   });
 
   xhr.addEventListener('error', function() {
     btn.disabled = false;
-    btn.textContent = 'Enviar Level';
+    btn.textContent = t('upload.btn_enviar');
     progressWrap.style.display = 'none';
-    mostrarMsg('erro', 'Erro de conexão. Verifique se o servidor está rodando.');
+    mostrarMsg('erro', t('upload.err_conexao'));
   });
 
   xhr.open('POST', API + '/upload/level');

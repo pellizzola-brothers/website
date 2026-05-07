@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Levels — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="cache.js"></script>
@@ -271,13 +274,13 @@
 <nav>
   <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="levels.html" class="active">Níveis</a></li>
-    <li><a href="usuarios.html">Criadores</a></li>
-    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" class="active" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
-        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
       </form>
     </li>
   </ul>
@@ -288,6 +291,7 @@
   <div class="search-bar-wrap" style="margin-bottom:14px;">
     <span class="search-icon">🔍</span>
     <input class="search-bar" id="searchInput" type="text"
+           data-i18n-ph="levels.pesquisar_placeholder"
            placeholder="Pesquisar por nome, descrição ou autor..."
            autocomplete="off" spellcheck="false">
   </div>
@@ -302,12 +306,13 @@
       </div>
       <div class="autor-dropdown" id="autorDropdown">
         <input class="autor-search" id="autorSearch" type="text"
+               data-i18n-ph="levels.buscar_autor"
                placeholder="🔍 Buscar autor..." autocomplete="off"
                oninput="autorFiltrarLista()" onclick="event.stopPropagation()">
         <div class="autor-chips" id="autorChips">
-          <span class="autor-chip active" id="chip-todos" onclick="autorChipTodos()">Todos</span>
-          <span class="autor-chip" id="chip-com-levels" onclick="autorChipComLevels()">Com levels</span>
-          <span class="autor-chip" id="chip-top5" onclick="autorChipTop5()">Top 5</span>
+          <span class="autor-chip active" id="chip-todos" onclick="autorChipTodos()" data-i18n="levels.chip_todos">Todos</span>
+          <span class="autor-chip" id="chip-com-levels" onclick="autorChipComLevels()" data-i18n="levels.chip_com_fases">Com fases</span>
+          <span class="autor-chip" id="chip-top5" onclick="autorChipTop5()" data-i18n="levels.chip_top5">Top 5</span>
         </div>
         <div class="autor-list" id="autorList"></div>
         <div class="autor-pagination" id="autorPagination" style="display:none;">
@@ -316,28 +321,28 @@
           <button class="autor-pg-btn" id="autorPgNext" onclick="autorPgProxima()">Próx. →</button>
         </div>
         <div class="autor-footer">
-          <button class="autor-footer-btn autor-footer-limpar" onclick="autorLimpar()">Limpar</button>
-          <button class="autor-footer-btn autor-footer-aplicar" onclick="autorApply()">Aplicar</button>
+          <button class="autor-footer-btn autor-footer-limpar" onclick="autorLimpar()" data-i18n="levels.limpar">Limpar</button>
+          <button class="autor-footer-btn autor-footer-aplicar" onclick="autorApply()" data-i18n="levels.aplicar">Aplicar</button>
         </div>
       </div>
     </div>
 
     <select id="filtroArquivo">
-      <option value="">📦 Todos</option>
-      <option value="sim">✅ Com arquivo</option>
-      <option value="nao">⚠️ Sem arquivo</option>
+      <option value="" data-i18n="levels.filtro_todos">📦 Todos</option>
+      <option value="sim" data-i18n="levels.filtro_com_arq">✅ Com arquivo</option>
+      <option value="nao" data-i18n="levels.filtro_sem_arq">⚠️ Sem arquivo</option>
     </select>
     <select id="ordenacao">
-      <option value="downloads">⬇ Mais baixados</option>
-      <option value="likes">♥ Mais curtidos</option>
-      <option value="nome">🔤 A → Z</option>
-      <option value="recentes">🕐 Mais recentes</option>
+      <option value="downloads" data-i18n="levels.ordem_downloads">⬇ Mais baixados</option>
+      <option value="likes" data-i18n="levels.ordem_likes">♥ Mais curtidos</option>
+      <option value="nome" data-i18n="levels.ordem_nome">🔤 A → Z</option>
+      <option value="recentes" data-i18n="levels.ordem_recentes">🕐 Mais recentes</option>
     </select>
   </div>
 
   <div class="list-header">
     <div id="resultado-count" class="resultado-count" style="display:none;"></div>
-    <div class="list-title" id="list-title">Todos os levels</div>
+    <div class="list-title" id="list-title" data-i18n="levels.todos">Todas as fases</div>
   </div>
 
   <div id="levels-list">
@@ -364,7 +369,7 @@
     </div>
   </div>
 
-  <div id="empty-state" class="empty-state" style="display:none;">😕 Nenhum level encontrado.</div>
+  <div id="empty-state" class="empty-state" style="display:none;" data-i18n="levels.nenhum_encontrado">😕 Nenhuma fase encontrada.</div>
   <div class="pagination" id="pagination" style="display:none;"></div>
 
 </div>
@@ -396,10 +401,10 @@ if (user) {
 /* ── UTILS ── */
 function showToast(msg, ms) {
   ms = ms || 2200;
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, ms);
+  const t_el = document.getElementById('toast');
+  t_el.textContent = msg;
+  t_el.classList.add('show');
+  setTimeout(function() { t_el.classList.remove('show'); }, ms);
 }
 
 function setProgress(pct) {
@@ -571,7 +576,7 @@ function _autorRenderLista() {
   var page  = _autorFiltrados.slice(ini, fim);
 
   if (!page.length) {
-    lista.innerHTML = '<div class="autor-empty">Nenhum autor encontrado.</div>';
+    lista.innerHTML = '<div class="autor-empty">' + t('levels.nenhum_autor') + '</div>';
     pgEl.style.display = 'none';
     return;
   }
@@ -604,7 +609,7 @@ function _autorAtualizarTrigger() {
 
   if (!sel.length) {
     label.style.display = '';
-    label.textContent   = '👤 Todos os autores';
+    label.textContent   = t('levels.todos_autores');
     tags.style.display  = 'none';
     tags.innerHTML      = '';
     return;
@@ -678,7 +683,7 @@ async function carregarNiveis() {
       {id:5,name:'Eu Acompanho as Botas Douradas',description:'Bacanices',downloads:3,likes:2,author_name:'JacaboMassola',author_id:2,file_id:null},
     ];
     setProgress(100);
-    showToast('⚠️ Exibindo dados offline');
+    showToast(t('levels.offline'));
   }
   autorInit(todosLevels);
   // Restore persisted author selection (must run after autorInit sets _autorTodos)
@@ -727,19 +732,18 @@ function aplicarFiltros() {
   var titleEl = document.getElementById('list-title');
   if (q || autoresSelecionados.length > 0 || arquivo) {
     countEl.style.display = '';
-    countEl.innerHTML = '<strong>' + levelsFiltrados.length + '</strong> nível' +
-      (levelsFiltrados.length !== 1 ? 'is' : '') + ' encontrado' +
-      (levelsFiltrados.length !== 1 ? 's' : '');
+    countEl.innerHTML = '<strong>' + levelsFiltrados.length + '</strong> ' +
+      (levelsFiltrados.length !== 1 ? t('levels.encontrados_plural') : t('levels.encontrados_singular'));
     titleEl.style.display = 'none';
     var titleParts = [];
     if (q) titleParts.push('"' + q + '"');
-    if (autoresSelecionados.length > 0) titleParts.push('por ' + autoresSelecionados.join(', '));
-    document.title = 'Levels' + (titleParts.length ? ' — ' + titleParts.join(', ') : '') + ' — Pellizzola Brothers';
+    if (autoresSelecionados.length > 0) titleParts.push(t('levels.por') + ' ' + autoresSelecionados.join(', '));
+    document.title = t('entity.fases') + (titleParts.length ? ' — ' + titleParts.join(', ') : '') + ' — Pellizzola Brothers';
   } else {
     countEl.style.display = 'none';
     titleEl.style.display = '';
-    titleEl.textContent = 'Todos os levels (' + levelsFiltrados.length + ')';
-    document.title = 'Levels — Pellizzola Brothers';
+    titleEl.textContent = t('levels.todos') + ' (' + levelsFiltrados.length + ')';
+    document.title = t('levels.titulo_pagina');
   }
 
   paginaAtual = 1;
@@ -764,9 +768,9 @@ function renderLevels(niveis) {
     list.innerHTML = '';
     var q = document.getElementById('searchInput').value.trim();
     if (q) {
-      empty.innerHTML = '😕 Nenhum nível encontrado com o nome &ldquo;' + escHtml(q) + '&rdquo;. <a href="#" onclick="limparBusca(event)" style="color:var(--accent);text-decoration:underline;">Ver todos</a>';
+      empty.innerHTML = '😕 ' + t('levels.nenhum_encontrado').replace('.','') + ' com o nome &ldquo;' + escHtml(q) + '&rdquo;. <a href="#" onclick="limparBusca(event)" style="color:var(--accent);text-decoration:underline;">Ver todos</a>';
     } else {
-      empty.innerHTML = '😕 Nenhum level encontrado.';
+      empty.innerHTML = t('levels.nenhum_encontrado');
     }
     empty.style.display = '';
     return;
@@ -792,15 +796,15 @@ function renderLevels(niveis) {
               '<span class="level-row-author">' + escHtml(l.author_name) + '</span>' +
             '</div>' +
             '<span class="badge ' + (temArq ? 'badge-ok' : 'badge-none') + '">' +
-              (temArq ? '✅ Disponível' : '⚠️ Sem arquivo') +
-            '</span>' +
+            (temArq ? t('levels.disponivel') : t('levels.sem_arquivo')) +
+          '</span>' +
           '</div>' +
           '<div class="level-row-stats" id="stats-' + l.id + '">' +
             '<span class="' + (isHot ? 'stat-hot' : '') + '">⬇ ' + l.downloads + '</span>' +
             '<span>♥ ' + l.likes + '</span>' +
             (l.comment_count ? '<span>💬 ' + parseInt(l.comment_count) + '</span>' : '') +
           '</div>' +
-          '<button class="btn-dl" onclick="handleDl(event,' + l.id + ',' + (l.file_id || 'null') + ',this,\'stats-' + l.id + '\')" title="Baixar nível">⬇</button>' +
+          '<button class="btn-dl" onclick="handleDl(event,' + l.id + ',' + (l.file_id || 'null') + ',this,\'stats-' + l.id + '\')" title="' + t('levels.baixar_title') + '">⬇</button>' +
         '</div>';
       frag.appendChild(link);
     });
@@ -830,7 +834,7 @@ function renderizarPaginacao(total) {
     return b;
   }
 
-  frag.appendChild(mkBtn('← Anterior', paginaAtual - 1, paginaAtual === 1, false));
+  frag.appendChild(mkBtn(t('levels.anterior'), paginaAtual - 1, paginaAtual === 1, false));
   if (ini > 1) {
     frag.appendChild(mkBtn('1', 1, false, false));
     if (ini > 2) { var d1 = document.createElement('span'); d1.className = 'page-info'; d1.textContent = '…'; frag.appendChild(d1); }
@@ -840,7 +844,7 @@ function renderizarPaginacao(total) {
     if (fim < total - 1) { var d2 = document.createElement('span'); d2.className = 'page-info'; d2.textContent = '…'; frag.appendChild(d2); }
     frag.appendChild(mkBtn(String(total), total, false, false));
   }
-  frag.appendChild(mkBtn('Próxima →', paginaAtual + 1, paginaAtual === total, false));
+  frag.appendChild(mkBtn(t('levels.proxima'), paginaAtual + 1, paginaAtual === total, false));
 
   cont.innerHTML = '';
   cont.appendChild(frag);
@@ -877,7 +881,7 @@ async function handleDl(e, id, fileId, btn, statsId) {
   }).catch(function() {});
 
   if (!fileId) {
-    showToast('⚠️ Este nível não tem arquivo para baixar.');
+    showToast(t('levels.dl_sem_arquivo'));
     btn.textContent = '⬇'; btn.disabled = false;
     return;
   }
@@ -885,7 +889,7 @@ async function handleDl(e, id, fileId, btn, statsId) {
   try {
     var resp = await fetch(API + '/files/' + fileId);
     if (!resp.ok) {
-      showToast('❌ Arquivo não encontrado no servidor.');
+      showToast(t('levels.dl_nao_encontrado'));
       btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false;
       return;
     }
@@ -895,14 +899,14 @@ async function handleDl(e, id, fileId, btn, statsId) {
       a.href = API + '/upload/level/' + dados.hash;
       a.download = dados.hash;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      showToast('✅ Download iniciado!');
+      showToast(t('levels.dl_iniciado'));
     } else {
-      showToast('❌ Arquivo não encontrado no servidor.');
+      showToast(t('levels.dl_nao_encontrado'));
     }
     btn.textContent = '✓'; btn.style.background = '#2d7a30';
     setTimeout(function() { btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false; }, 2500);
   } catch(err) {
-    showToast('❌ Falha na conexão. Tente novamente.');
+    showToast(t('levels.dl_falha'));
     btn.textContent = '⬇'; btn.style.background = ''; btn.disabled = false;
   }
 }

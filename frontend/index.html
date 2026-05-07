@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" id="html-root">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -231,6 +231,9 @@
       .course-grid { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
 </head>
@@ -239,13 +242,13 @@
 <nav>
   <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
   <ul class="nav-links">
-    <li><a href="index.html" class="active">Home</a></li>
-    <li><a href="levels.html">Levels</a></li>
-    <li><a href="usuarios.html">Criadores</a></li>
-    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+    <li><a href="index.html" class="active" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
-        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
       </form>
     </li>
   </ul>
@@ -273,7 +276,7 @@
         </div>
       </div>
 
-      <div class="course-world-title">Levels Recentes</div>
+      <div class="course-world-title" data-i18n="home.fases_recentes">Fases Recentes</div>
       <div class="course-grid" id="course-grid">
         <div class="course-card"><div class="course-card-thumb skeleton" style="height:72px;"></div><div class="course-card-body"><div class="skeleton" style="height:12px;width:80%;margin-bottom:5px;"></div><div class="skeleton" style="height:10px;width:55%;"></div></div></div>
         <div class="course-card"><div class="course-card-thumb skeleton" style="height:72px;"></div><div class="course-card-body"><div class="skeleton" style="height:12px;width:65%;margin-bottom:5px;"></div><div class="skeleton" style="height:10px;width:45%;"></div></div></div>
@@ -286,7 +289,7 @@
 
     <div class="side-panel">
       <div class="creator-card" id="creator-card">
-        <div class="creator-card-header">★ Criador em Destaque</div>
+        <div class="creator-card-header" data-i18n="home.criador_destaque">★ Criador em Destaque</div>
         <div class="creator-card-body">
           <div class="creator-avatar skeleton" style="width:64px;height:64px;border-radius:50%;margin:0 auto 10px;"></div>
           <div class="skeleton" style="height:14px;width:60%;margin:0 auto 6px;"></div>
@@ -304,27 +307,32 @@ const emojiFor = function(id) { return EMOJIS[(id - 1) % EMOJIS.length]; };
 
 function getGreeting(name) {
   const h = new Date().getHours();
-  const p = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const p = h < 12 ? t('home.greeting_manha') : h < 18 ? t('home.greeting_tarde') : t('home.greeting_noite');
   return p + ', ' + name + '!';
 }
 
-const user = getUser();
-if (user) {
-  document.getElementById('greeting').textContent = getGreeting(user.username.toUpperCase());
-  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
-} else {
-  document.getElementById('greeting').textContent = getGreeting('Visitante');
-}
+i18nReady.then(function() {
+  const user = getUser();
+  if (user) {
+    document.getElementById('greeting').textContent = getGreeting(user.username.toUpperCase());
+    document.getElementById('nav-auth').textContent = user.username.toUpperCase();
+    document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
+    document.getElementById('nav-auth').removeAttribute('data-i18n');
+  } else {
+    document.getElementById('greeting').textContent = getGreeting(t('home.visitante'));
+  }
+  loadHome();
+});
 
+/* loadHome agora é chamado dentro de i18nReady.then() */
 async function loadHome() {
   let levels = [], featured = null, creator = null;
   try {
     [levels, featured] = await Promise.all([
-      fetch(API + '/levels').then(function(r){ return r.json(); }),
-      fetch(API + '/levels/featured').then(function(r){ return r.json(); })
+      fetch(API + '/levels').then(function(r){ if(!r.ok) throw new Error('Falha levels'); return r.json(); }),
+      fetch(API + '/levels/featured').then(function(r){ if(!r.ok) throw new Error('Falha featured'); return r.json(); })
     ]);
-    creator = await fetch(API + '/users/' + featured.author_id).then(function(r){ return r.json(); });
+    creator = await fetch(API + '/users/' + featured.author_id).then(function(r){ if(!r.ok) throw new Error('Falha creator'); return r.json(); });
   } catch(e) {
     levels   = [
       {id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10,author_name:'xx_poste_xx'},
@@ -341,12 +349,12 @@ async function loadHome() {
     '<div class="featured-big">' +
       '<div class="featured-big-thumb">' + emojiFor(featured.id) + '</div>' +
       '<div class="featured-big-body">' +
-        '<div class="featured-big-badge">★ Em Destaque</div>' +
+        '<div class="featured-big-badge">' + t('home.destaque_badge') + '</div>' +
         '<div class="featured-big-name">' + featured.name + '</div>' +
         '<div class="featured-big-desc">' + (featured.description ? '"' + featured.description + '"' : '') + '</div>' +
         '<div class="featured-big-stats">' +
           '<div class="featured-big-stat">⬇ Downloads: <strong>' + featured.downloads + '</strong></div>' +
-          '<div class="featured-big-stat">♥ Curtidas: <strong>' + featured.likes + '</strong></div>' +
+          '<div class="featured-big-stat">♥ ' + t('perfil.curtidas').replace('Fases c','C').replace('Liked l','L') + ': <strong>' + featured.likes + '</strong></div>' +
         '</div>' +
         '<div>' +
           '<a href="perfil_do_jogo.html?id=' + featured.id + '" class="btn btn-green btn-sm">Download</a>' +
@@ -363,7 +371,7 @@ async function loadHome() {
       '</div>' +
       '<div class="course-card-body">' +
         '<div class="course-card-name">' + l.name + '</div>' +
-        '<div class="course-card-author">por ' + l.author_name + '</div>' +
+        '<div class="course-card-author">' + t('levels.por') + ' ' + l.author_name + '</div>' +
       '</div>' +
       '<div class="course-card-footer">' +
         '<span>⬇ ' + l.downloads + '</span>' +
@@ -382,27 +390,27 @@ async function loadHome() {
   }).join('');
 
   document.getElementById('creator-card').innerHTML =
-    '<div class="creator-card-header">★ Criador em Destaque</div>' +
+    '<div class="creator-card-header">' + t('home.criador_destaque') + '</div>' +
     '<div class="creator-card-body">' +
       '<div class="creator-avatar">👤</div>' +
       '<div class="creator-name">' + creator.username + '</div>' +
       '<div class="creator-bio">' + (creator.bio ? '"' + creator.bio + '"' : '') + '</div>' +
       '<div class="creator-stats-row">' +
-        '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels||[]).length + '</span><span class="creator-stat-lbl">Levels</span></div>' +
+        '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels||[]).length + '</span><span class="creator-stat-lbl">' + t('home.fases_criadas') + '</span></div>' +
         '<div class="creator-stat"><span class="creator-stat-val">' + creator.downloaded_levels + '</span><span class="creator-stat-lbl">Plays</span></div>' +
         '<div class="creator-stat"><span class="creator-stat-val">' + creator.liked_levels + '</span><span class="creator-stat-lbl">Likes</span></div>' +
       '</div>' +
-      '<a href="perfil_do_usuario.html?id=' + creator.id + '" class="btn btn-outline btn-sm" style="width:100%;text-align:center;">Ver perfil</a>' +
+      '<a href="perfil_do_usuario.html?id=' + creator.id + '" class="btn btn-outline btn-sm" style="width:100%;text-align:center;">' + t('home.ver_perfil') + '</a>' +
     '</div>' +
-    (crLevels ? '<div class="creator-levels-title">Levels criados</div>' + crLevels : '');
+    (crLevels ? '<div class="creator-levels-title">' + t('perfil.fases_criadas') + '</div>' + crLevels : '');
 }
 
-loadHome();
+/* loadHome() é chamado dentro de i18nReady.then() acima */
 
 function navSearch(e) {
   e.preventDefault();
-  var q = document.getElementById("nav-search").value.trim();
-  if (q) window.location.href = "levels.html?q=" + encodeURIComponent(q);
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
 }
 </script>
 </body>

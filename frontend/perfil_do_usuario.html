@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <style>
@@ -73,13 +74,13 @@
 <nav>
   <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
   <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="levels.html">Levels</a></li>
-    <li><a href="usuarios.html">Criadores</a></li>
-    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
-        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
       </form>
     </li>
   </ul>
@@ -88,14 +89,14 @@
 <!-- Modal: Alterar Avatar -->
 <div class="modal-overlay hidden" id="modal-avatar">
   <div class="modal-box">
-    <div class="modal-header">🖼 Alterar Avatar<button class="modal-close" onclick="closeModal('modal-avatar')">✕</button></div>
+    <div class="modal-header"><span data-i18n="modal.alterar_avatar">🖼 Alterar Avatar</span><button class="modal-close" onclick="closeModal('modal-avatar')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Escolha um emoji como avatar:</p>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;" data-i18n="modal.escolher_avatar">Escolha um emoji como avatar:</p>
       <div class="avatar-grid" id="avatar-grid"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-avatar')">Cancelar</button>
-      <button class="btn btn-green btn-sm" onclick="saveAvatar()">Salvar</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-avatar')" data-i18n="modal.cancelar">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="saveAvatar()" data-i18n="modal.salvar">Salvar</button>
     </div>
   </div>
 </div>
@@ -103,23 +104,23 @@
 <!-- Modal: Alterar Biografia -->
 <div class="modal-overlay hidden" id="modal-bio">
   <div class="modal-box">
-    <div class="modal-header">✏ Editar Perfil<button class="modal-close" onclick="closeModal('modal-bio')">✕</button></div>
+    <div class="modal-header"><span data-i18n="modal.editar_perfil">✏ Editar Perfil</span><button class="modal-close" onclick="closeModal('modal-bio')">✕</button></div>
     <div class="modal-body">
       <div class="edit-field-row">
-        <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Biografia</label>
-        <textarea id="bio-input" rows="4" maxlength="500" placeholder="Uma frase sobre você..."></textarea>
+        <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.biografia">Biografia</label>
+        <textarea id="bio-input" rows="4" maxlength="500" data-i18n-ph="modal.bio_placeholder" placeholder="Uma frase sobre você..."></textarea>
       </div>
       <div style="font-size:11px;color:var(--text-dim);text-align:right;margin-top:4px;"><span id="bio-counter">0</span>/500</div>
       <div class="change-pass-section">
-        <button class="change-pass-toggle" onclick="toggleChangePass()">🔒 Alterar senha</button>
+        <button class="change-pass-toggle" onclick="toggleChangePass()" data-i18n="modal.alterar_senha">🔒 Alterar senha</button>
         <div id="change-pass-fields" style="display:none;margin-top:12px;">
           <div class="edit-field-row">
-            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Senha Atual</label>
-            <input type="password" id="old-pass" placeholder="Sua senha atual">
+            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.senha_atual">Senha Atual</label>
+            <input type="password" id="old-pass" data-i18n-ph="modal.senha_atual_ph" placeholder="Sua senha atual">
           </div>
           <div class="edit-field-row">
-            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Nova Senha</label>
-            <input type="password" id="new-pass" placeholder="Nova senha (mais de 7 caracteres)" oninput="checkNewPassRules()">
+            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.nova_senha">Nova Senha</label>
+            <input type="password" id="new-pass" data-i18n-ph="modal.nova_senha_ph" placeholder="Nova senha (mais de 7 caracteres)" oninput="checkNewPassRules()">
           </div>
           <div id="new-pass-rules" style="font-size:11px;margin-top:4px;display:none;flex-direction:column;gap:3px;">
             <span id="np-rule-len"     style="color:var(--text-muted);">✗ Mais de 7 caracteres</span>
@@ -131,8 +132,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-bio')">Cancelar</button>
-      <button class="btn btn-green btn-sm" onclick="saveBio()">Salvar</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-bio')" data-i18n="modal.cancelar">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="saveBio()" data-i18n="modal.salvar">Salvar</button>
     </div>
   </div>
 </div>
@@ -140,14 +141,14 @@
 <!-- Modal: Apagar Level -->
 <div class="modal-overlay hidden" id="modal-delete">
   <div class="modal-box">
-    <div class="modal-header" style="color:#e07070;">🗑 Apagar Level<button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
+    <div class="modal-header" style="color:#e07070;"><span data-i18n="modal.apagar_fase">🗑 Apagar Fase</span><button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:14px;color:var(--text);margin-bottom:8px;">Tem certeza que deseja apagar o level <strong id="delete-level-name" style="color:var(--yellow);"></strong>?</p>
-      <p style="font-size:12px;color:var(--text-muted);">⚠ Esta ação não pode ser desfeita.</p>
+      <p style="font-size:14px;color:var(--text);margin-bottom:8px;"><span data-i18n="modal.apagar_confirm">Tem certeza que deseja apagar a fase</span> <strong id="delete-level-name" style="color:var(--yellow);"></strong>?</p>
+      <p style="font-size:12px;color:var(--text-muted);" data-i18n="modal.apagar_aviso">⚠ Esta ação não pode ser desfeita.</p>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-delete')">Cancelar</button>
-      <button class="btn-red" style="font-size:12px;padding:6px 14px;" id="confirm-delete-btn" onclick="confirmDelete()">🗑 Apagar</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-delete')" data-i18n="modal.cancelar">Cancelar</button>
+      <button class="btn-red" style="font-size:12px;padding:6px 14px;" id="confirm-delete-btn" onclick="confirmDelete()" data-i18n="modal.apagar_btn">🗑 Apagar</button>
     </div>
   </div>
 </div>
@@ -227,7 +228,7 @@ function saveAvatar() {
   setStoredAvatar(currentProfileId, selectedAvatar);
   document.querySelectorAll('.user-avatar').forEach(function(el) { el.textContent = selectedAvatar; });
   closeModal('modal-avatar');
-  showToast('✅ Avatar atualizado!');
+  showToast(t('perfil.toast_avatar'));
 }
 
 function openBioModal(currentBio) {
@@ -266,7 +267,7 @@ async function saveBio() {
     }
   } catch (_) { setStoredBio(currentProfileId, bio); }
   closeModal('modal-bio');
-  showToast('✅ Perfil atualizado!');
+  showToast(t('perfil.toast_perfil'));
 }
 
 function toggleChangePass() {
@@ -336,7 +337,7 @@ async function confirmDelete() {
     });
     if (!res.ok) {
       const err = await res.json().catch(function() { return {}; });
-      showToast('❌ Erro ao deletar: ' + (err.error || res.status));
+      showToast('❌ ' + (err.error || res.status));
       return;
     }
     const card = document.getElementById('level-card-' + id);
@@ -346,8 +347,8 @@ async function confirmDelete() {
       setTimeout(function() { card.remove(); }, 300);
     }
     sessionStorage.removeItem('pb_niveis_v2');
-    showToast('✅ Level apagado!');
-  } catch (_) { showToast('❌ Falha na conexão ao deletar o level.'); }
+    showToast(t('perfil.toast_del_ok'));
+  } catch (_) { showToast(t('perfil.toast_del_err')); }
 }
 
 function renderLikedSection() {
@@ -356,11 +357,11 @@ function renderLikedSection() {
   const cards = likedIds.map(function(id) {
     return '<a href="perfil_do_jogo.html?id=' + id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
       '<div class="created-card-thumb">' + emojiFor(id) + '</div>' +
-      '<div class="created-card-info"><div class="created-card-name">Level #' + id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">♥ Curtido por você</div></div>' +
-      '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked(' + id + ',this.closest(\'a\'))">✕ Remover</button></div>' +
+      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.curtido_por_vc') + '</div></div>' +
+      '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked(' + id + ',this.closest(\'a\'))">' + t('perfil.remover') + '</button></div>' +
     '</a>';
   }).join('');
-  return '<div class="created-title" style="margin-top:28px;">♥ Levels Curtidos</div><div class="created-strip">' + cards + '</div>';
+  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.fases_curtidas') + '</div><div class="created-strip">' + cards + '</div>';
 }
 
 function removeLiked(id, card) {
@@ -373,13 +374,13 @@ function renderDownloadHistory() {
   const history = JSON.parse(localStorage.getItem('pb_download_history') || '[]');
   if (!history.length) return '';
   const cards = history.slice(0, 12).map(function(item) {
-    var date = new Date(item.at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short' });
+    var date = new Date(item.at).toLocaleDateString(getLang().replace('_','-'), { day:'2-digit', month:'short' });
     return '<a href="perfil_do_jogo.html?id=' + item.id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
       '<div class="created-card-thumb">' + emojiFor(item.id) + '</div>' +
-      '<div class="created-card-info"><div class="created-card-name">Level #' + item.id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">⬇ Baixado em ' + date + '</div></div>' +
+      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + item.id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.baixado_em') + ' ' + date + '</div></div>' +
     '</a>';
   }).join('');
-  return '<div class="created-title" style="margin-top:28px;">📥 Meus Downloads Recentes</div><div class="created-strip">' + cards + '</div>';
+  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.downloads_rec') + '</div><div class="created-strip">' + cards + '</div>';
 }
 
 async function loadProfile() {
@@ -406,16 +407,16 @@ async function loadProfile() {
 
   const actionBtn = own
     ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
-        '<a href="upload.html" class="btn btn-green btn-sm">📤 Enviar Level</a>' +
-        '<button class="btn btn-outline btn-sm" id="btn-bio" onclick="openBioModal(window._currentBio)">✏ Editar Perfil</button>' +
-        '<button class="btn btn-outline btn-sm" onclick="openAvatarModal()">🖼 Avatar</button>' +
-        '<button class="btn-red" onclick="logout()">🚪 Sair</button>' +
+        '<a href="upload.html" class="btn btn-green btn-sm">' + t('perfil.enviar_fase') + '</a>' +
+        '<button class="btn btn-outline btn-sm" id="btn-bio" onclick="openBioModal(window._currentBio)">' + t('perfil.editar') + '</button>' +
+        '<button class="btn btn-outline btn-sm" onclick="openAvatarModal()">' + t('perfil.avatar') + '</button>' +
+        '<button class="btn-red" onclick="logout()">' + t('perfil.sair') + '</button>' +
       '</div>'
     : (function() {
         var fav = isFavCreator(u.id);
         return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
-          '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">Seguir</button>' +
-          '<button class="btn-fav-creator' + (fav ? ' favoritado' : '') + '" id="btn-fav-creator" onclick="onFavCreator(' + parseInt(u.id) + ')" title="' + (fav ? 'Remover dos favoritos' : 'Adicionar aos favoritos') + '">' + (fav ? '❤️ Favoritado' : '🤍 Favoritar') + '</button>' +
+          '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">' + t('perfil.seguir') + '</button>' +
+          '<button class="btn-fav-creator' + (fav ? ' favoritado' : '') + '" id="btn-fav-creator" onclick="onFavCreator(' + parseInt(u.id) + ')" title="' + (fav ? t('perfil.fav_rem') : t('perfil.fav_add')) + '">' + (fav ? t('perfil.favoritado') : t('perfil.favoritar')) + '</button>' +
         '</div>';
       })();
 
@@ -429,11 +430,11 @@ async function loadProfile() {
           '<div class="created-card-stats"><div>Downloads: ' + l.downloads + '</div><div>Curtidas: ' + l.likes + '</div></div>' +
         '</div>' +
       '</a>' +
-      (own ? '<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal(' + l.id + ',' + JSON.stringify(l.name) + ')">🗑 Apagar</button></div>' : '') +
+      (own ? '<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal(' + l.id + ',' + JSON.stringify(l.name) + ')">' + t('modal.apagar_btn') + '</button></div>' : '') +
     '</div>';
   }).join('');
 
-  const moreCard = '<a href="levels.html" class="created-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;"><div style="text-align:center;padding:16px;color:var(--text-muted);"><div style="font-size:20px;margin-bottom:6px;">→</div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Ver todos</div></div></a>';
+  const moreCard = '<a href="levels.html" class="created-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;"><div style="text-align:center;padding:16px;color:var(--text-muted);"><div style="font-size:20px;margin-bottom:6px;">→</div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">' + t('perfil.ver_todos') + '</div></div></a>';
 
   document.getElementById('main').innerHTML =
     '<div class="user-hero">' +
@@ -442,17 +443,17 @@ async function loadProfile() {
         '<div class="user-name">' + escHtml(u.username) + '</div>' +
         '<div class="user-bio">' + (bio ? '"' + escHtml(bio) + '"' : '') + '</div>' +
         '<div class="user-stats">' +
-          '<div class="user-stat">Fases jogadas: ' + u.downloaded_levels + '</div>' +
-          '<div class="user-stat">Fases curtidas: ' + u.liked_levels + '</div>' +
-          '<div class="user-stat">Levels criados: ' + levels.length + '</div>' +
-          '<div class="user-stat" style="color:var(--text-dim);font-size:11px;">Membro desde: conta #' + parseInt(u.id) + '</div>' +
+          '<div class="user-stat">' + t('perfil.fases_jogadas') + ': ' + u.downloaded_levels + '</div>' +
+          '<div class="user-stat">' + t('perfil.curtidas') + ': ' + u.liked_levels + '</div>' +
+          '<div class="user-stat">' + t('perfil.criadas') + ': ' + levels.length + '</div>' +
+          '<div class="user-stat" style="color:var(--text-dim);font-size:11px;">' + t('perfil.membro_desde') + parseInt(u.id) + '</div>' +
         '</div>' +
         actionBtn +
       '</div>' +
     '</div>' +
     (levels.length > 0
-      ? '<div class="created-title">Levels Criados</div><div class="created-strip">' + createdCards + moreCard + '</div>'
-      : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">Nenhum level criado ainda.</div>') +
+      ? '<div class="created-title">' + t('perfil.fases_criadas') + '</div><div class="created-strip">' + createdCards + moreCard + '</div>'
+      : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">' + t('perfil.nenhuma_fase') + '</div>') +
     (own ? renderLikedSection() : '') +
     (own ? renderDownloadHistory() : '');
 }
@@ -476,14 +477,14 @@ function onFavCreator(id) {
   var btn    = document.getElementById('btn-fav-creator');
   if (!btn) return;
   btn.classList.toggle('favoritado', nowFav);
-  btn.innerHTML = nowFav ? '❤️ Favoritado' : '🤍 Favoritar';
-  btn.title     = nowFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
-  showToast(nowFav ? '❤️ Criador adicionado aos favoritos!' : '💔 Removido dos favoritos.');
+  btn.innerHTML = nowFav ? t('perfil.favoritado') : t('perfil.favoritar');
+  btn.title     = nowFav ? t('perfil.fav_rem') : t('perfil.fav_add');
+  showToast(nowFav ? t('perfil.fav_add') : t('perfil.fav_rem'));
 }
 
 function toggleFollow(btn) {
-  if (btn.textContent === 'Seguir') { btn.textContent = '✓ Seguindo'; btn.classList.replace('btn-green','btn-outline'); }
-  else { btn.textContent = 'Seguir'; btn.classList.replace('btn-outline','btn-green'); }
+  if (btn.textContent === t('perfil.seguir')) { btn.textContent = t('perfil.seguindo'); btn.classList.replace('btn-green','btn-outline'); }
+  else { btn.textContent = t('perfil.seguir'); btn.classList.replace('btn-outline','btn-green'); }
 }
 
 function logout() {

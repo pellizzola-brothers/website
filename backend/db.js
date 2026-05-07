@@ -1,5 +1,7 @@
 // db.js — Pool de conexão singleton com PostgreSQL
-const { Pool } = require('pg');
+const { Pool, neonConfig } = require('@neondatabase/serverless');
+const ws = require('ws');
+neonConfig.webSocketConstructor = ws;
 require('dotenv').config();
 
 // SSL obrigatório para Neon / Railway / Supabase em produção
