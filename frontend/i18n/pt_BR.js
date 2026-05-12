@@ -5,6 +5,7 @@ window.PB_I18N['pt_BR'] = {
   "entity.fase": "Fase", "entity.fases": "Fases",
   "entity.fase_plural_count": "{n} fase", "entity.fases_plural_count": "{n} fases",
   "nav.home": "Home", "nav.fases": "Fases", "nav.criadores": "Criadores",
+  "nav.download": "Download", "nav.cafezinho": "\u2615 Caf\u00e9zinho",
   "nav.entrar": "Entrar", "nav.buscar": "\ud83d\udd0d Buscar fases...",
   "home.greeting_manha": "Bom dia", "home.greeting_tarde": "Boa tarde",
   "home.greeting_noite": "Boa noite", "home.visitante": "Visitante",

@@ -111,6 +111,8 @@
     <li><a href="index.html" data-i18n="nav.home">Home</a></li>
     <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" class="active" data-i18n="nav.entrar">Entrar</a></li>
   </ul>
 </nav>
@@ -766,6 +768,9 @@ async function doRegister() {
     setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
   } catch (e) { showMsg('reg-msg', t('login.err_conexao'), false); }
 }
+</script>
+<script>
+(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
 </script>
 </body>
 </html>

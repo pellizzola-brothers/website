@@ -5,6 +5,7 @@ window.PB_I18N['en'] = {
   "entity.fase": "Level", "entity.fases": "Levels",
   "entity.fase_plural_count": "{n} level", "entity.fases_plural_count": "{n} levels",
   "nav.home": "Home", "nav.fases": "Levels", "nav.criadores": "Creators",
+  "nav.download": "Download", "nav.cafezinho": "\u2615 Coffee",
   "nav.entrar": "Sign In", "nav.buscar": "\ud83d\udd0d Search levels...",
   "home.greeting_manha": "Good morning", "home.greeting_tarde": "Good afternoon",
   "home.greeting_noite": "Good evening", "home.visitante": "Guest",

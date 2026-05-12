@@ -177,6 +177,8 @@
     <li><a href="index.html" data-i18n="nav.home">Home</a></li>
     <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -373,6 +375,9 @@ function navSearch(e) {
   var q = document.getElementById("nav-search").value.trim();
   if (q) window.location.href = "levels.html?q=" + encodeURIComponent(q);
 }
+</script>
+<script>
+(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
 </script>
 </body>
 </html>

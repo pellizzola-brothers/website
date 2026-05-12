@@ -191,6 +191,8 @@
     <li><a href="index.html">Home</a></li>
     <li><a href="levels.html">Levels</a></li>
     <li><a href="usuarios.html" class="active">Criadores</a></li>
+    <li><a href="download.html">Download</a></li>
+    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -538,6 +540,9 @@ document.getElementById('buscaUser').addEventListener('keydown', function(e) {
 
 /* ════════ INIT ════════ */
 carregarUsuarios();
+</script>
+<script>
+(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
 </script>
 </body>
 </html>

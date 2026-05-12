@@ -49,6 +49,12 @@ frontend/          Static HTML pages + vanilla JS
   auth.js          LocalStorage session helpers (saveSession, getToken, getUser, isLoggedIn, clearSession)
   cache.js         Simple in-memory cache for API responses
   i18n.js          i18n loader; translations in i18n/en.json and i18n/pt_BR.json
+                   (also compiled into i18n/en.js and i18n/pt_BR.js for file:// compatibility)
+
+  download.html    Download page for PB Game and PB Studio — linked from the global nav
+  little_coffee.html  Cafézinho da Chapeleira community chat/lounge — linked from the global nav
+  sobre.html       About page — linked from its own nav entry only
+  creditos.html    Credits page — hidden Easter egg, accessible by clicking the nav brand 9 times
 
 levels/            Uploaded level files stored on disk (multer destination)
 pauro_database.sql Full schema + seed data + migration scripts for v5→v6 and v6→v6.1
@@ -67,3 +73,7 @@ pauro_database.sql Full schema + seed data + migration scripts for v5→v6 and v
 **Password recovery**: Generates a 6-digit code, hashes it with bcrypt, stores it with a 15-minute expiry. In non-production, the code is returned in the response for testing.
 
 **Switching to production API**: Edit `frontend/config.js` — comment/uncomment the two `const API =` lines.
+
+**Nav brand Easter egg**: Clicking "🎮 Pellizzola Brothers" 9 times navigates to `creditos.html`. The counter persists in `sessionStorage` under the key `pb_brand_clicks` and is reset after the redirect. The script is injected inline before `</body>` in every page.
+
+**i18n keys to add**: When creating a new page, add `nav.download` and `nav.cafezinho` keys to both `i18n/en.json` + `i18n/en.js` and `i18n/pt_BR.json` + `i18n/pt_BR.js`. The `.js` files are the same content wrapped in `window.PB_I18N[lang] = {...}` for `file://` compatibility — keep both in sync.
