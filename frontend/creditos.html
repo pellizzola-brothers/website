@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créditos — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    /* ── HERO BANNER ── */
+    .credits-hero {
+      text-align: center;
+      padding: 60px 24px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .credits-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 50% 0%, rgba(61,158,66,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 20% 80%, rgba(240,192,64,.08) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .credits-eyebrow {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+      position: relative;
+    }
+    .credits-title {
+      font-family: var(--font-title);
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 12px;
+      position: relative;
+      line-height: 1.1;
+    }
+    .credits-title span {
+      color: var(--yellow);
+      text-shadow: 0 0 30px rgba(240,192,64,.4);
+    }
+    .credits-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.7;
+      position: relative;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 auto 48px;
+      max-width: 600px;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    }
+    .divider-icon {
+      font-size: 18px;
+      color: var(--yellow);
+      opacity: .7;
+    }
+
+    /* ── CARDS GRID ── */
+    .credits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto 64px;
+    }
+
+    /* ── CARD ── */
+    .author-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      animation: cardIn .5s ease both;
+      cursor: default;
+    }
+    .author-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0,0,0,.5), 0 0 0 1px rgba(61,158,66,.2);
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── FOTO / AVATAR ── */
+    .author-photo-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(160deg, #0d3a0d 0%, #0a2040 55%, #200d3a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      border-bottom: 2px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .author-photo-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.4) 100%);
+    }
+    .author-role-badge {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-title);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 20px;
+      white-space: nowrap;
+      z-index: 1;
+    }
+
+    /* ── BODY ── */
+    .author-body {
+      padding: 18px 16px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .author-name {
+      font-family: var(--font-title);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .author-handle {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: .5px;
+      margin-bottom: 4px;
+    }
+    .author-quote {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.6;
+      border-left: 3px solid var(--border-light);
+      padding-left: 10px;
+      text-align: left;
+      width: 100%;
+    }
+    .author-quote::before { content: '"'; color: var(--yellow); }
+    .author-quote::after  { content: '"'; color: var(--yellow); }
+
+    /* ── SPECIAL: DESTAQUE CARD (primeiro) ── */
+    .author-card.featured {
+      border-color: var(--yellow);
+      grid-column: span 1;
+    }
+    .author-card.featured .author-photo-wrap {
+      background: linear-gradient(160deg, #2a1a0a 0%, #1a0a40 55%, #0a2a0d 100%);
+    }
+    .author-card.featured .author-role-badge {
+      background: var(--yellow);
+      color: var(--bg-nav);
+    }
+
+    /* ── CRÉDITOS ESPECIAIS ── */
+    .special-credits {
+      max-width: 700px;
+      margin: 0 auto 48px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .special-credits-header {
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 18px;
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--yellow);
+    }
+    .special-credits-body {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .special-credit-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .special-credit-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+    .special-credit-info { flex: 1; }
+    .special-credit-label {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: block;
+      margin-bottom: 2px;
+    }
+    .special-credit-value {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── RODAPÉ CRIATIVO ── */
+    .credits-footer-text {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      padding-bottom: 32px;
+      font-style: italic;
+    }
+    .credits-footer-text strong { color: var(--text-muted); }
+
+    @media (max-width: 600px) {
+      .credits-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .author-photo-wrap { font-size: 48px; }
+    }
+    @media (max-width: 380px) {
+      .credits-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text"
+               data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="credits-hero">
+    <div class="credits-eyebrow">★ The Team ★</div>
+    <h1 class="credits-title">As <span>Mentes</span> por Trás</h1>
+    <p class="credits-subtitle">
+      Conheça os cinco criadores que construíram o universo
+      Pellizzola Brothers do zero — com muita dedicação, café e bugs.
+    </p>
+  </div>
+
+  <div class="divider">
+    <span class="divider-icon">🎮</span>
+  </div>
+
+  <!-- AUTHOR CARDS -->
+  <div class="credits-grid">
+
+    <div class="author-card featured" style="animation-delay:0s">
+      <div class="author-photo-wrap">
+        🧑‍💻
+        <span class="author-role-badge">⭐ Fundador</span>
+      </div>
+      <div class="author-body">
+        <div class="author-name">Mateus Pellizzola</div>
+        <div class="author-handle">@pellizzola</div>
+        <div class="author-quote">
+          Comecei esse jogo num final de semana e nunca mais consegui parar.
+        </div>
+      </div>
+    </div>
+
+    <div class="author-card" style="animation-delay:.07s">
+      <div class="author-photo-wrap">
+        🎨
+        <span class="author-role-badge">Designer</span>
+      </div>
+      <div class="author-body">
+        <div class="author-name">Ana Clara</div>
+        <div class="author-handle">@anaclara_dev</div>
+        <div class="author-quote">
+          Pixel por pixel, cada fase é uma obra de arte esperando ser descoberta.
+        </div>
+      </div>
+    </div>
+
+    <div class="author-card" style="animation-delay:.14s">
+      <div class="author-photo-wrap">
+        ⚙️
+        <span class="author-role-badge">Backend</span>
+      </div>
+      <div class="author-body">
+        <div class="author-name">Rafael Torres</div>
+        <div class="author-handle">@rtorres</div>
+        <div class="author-quote">
+          Se o servidor não caiu é porque eu estava acordado às 3 da manhã.
+        </div>
+      </div>
+    </div>
+
+    <div class="author-card" style="animation-delay:.21s">
+      <div class="author-photo-wrap">
+        🎵
+        <span class="author-role-badge">Trilha Sonora</span>
+      </div>
+      <div class="author-body">
+        <div class="author-name">Lucas Moraes</div>
+        <div class="author-handle">@lucasbeats</div>
+        <div class="author-quote">
+          A música certa transforma uma fase boa em uma fase inesquecível.
+        </div>
+      </div>
+    </div>
+
+    <div class="author-card" style="animation-delay:.28s">
+      <div class="author-photo-wrap">
+        🕹️
+        <span class="author-role-badge">Game Design</span>
+      </div>
+      <div class="author-body">
+        <div class="author-name">Juliana Farias</div>
+        <div class="author-handle">@jufarias</div>
+        <div class="author-quote">
+          Joguei tantas fases de teste que sonho com plataformas toda noite.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /credits-grid -->
+
+  <!-- AGRADECIMENTOS ESPECIAIS -->
+  <div class="special-credits">
+    <div class="special-credits-header">🏆 Agradecimentos Especiais</div>
+    <div class="special-credits-body">
+      <div class="special-credit-item">
+        <span class="special-credit-icon">🌐</span>
+        <div class="special-credit-info">
+          <span class="special-credit-label">Hospedagem</span>
+          <span class="special-credit-value">Railway — infraestrutura de produção</span>
+        </div>
+      </div>
+      <div class="special-credit-item">
+        <span class="special-credit-icon">🗄️</span>
+        <div class="special-credit-info">
+          <span class="special-credit-label">Banco de dados</span>
+          <span class="special-credit-value">Neon — PostgreSQL serverless</span>
+        </div>
+      </div>
+      <div class="special-credit-item">
+        <span class="special-credit-icon">👥</span>
+        <div class="special-credit-info">
+          <span class="special-credit-label">Comunidade</span>
+          <span class="special-credit-value">Todos que criaram e baixaram fases</span>
+        </div>
+      </div>
+      <div class="special-credit-item">
+        <span class="special-credit-icon">☕</span>
+        <div class="special-credit-info">
+          <span class="special-credit-label">Combustível</span>
+          <span class="special-credit-value">Café, Red Bull e muito debugging</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <p class="credits-footer-text">
+    Feito com ❤️ por <strong>Pellizzola Brothers Team</strong> — v6.1 · 2025
+  </p>
+
+</div><!-- /page -->
+
+<script>
+(function() {
+  var user = getUser();
+  if (user) {
+    var el = document.getElementById('nav-auth');
+    el.textContent = user.username.toUpperCase();
+    el.href = 'perfil_do_usuario.html?id=' + user.id;
+    el.removeAttribute('data-i18n');
+  }
+})();
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+</script>
+</body>
+</html>
