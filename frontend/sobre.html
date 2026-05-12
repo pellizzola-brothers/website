@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sobre — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    /* ── HERO ── */
+    .sobre-hero {
+      position: relative;
+      text-align: center;
+      padding: 64px 24px 56px;
+      overflow: hidden;
+    }
+    .sobre-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(61,158,66,.14) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 90%, rgba(240,192,64,.07) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 80%, rgba(61,100,200,.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    /* Scanline decorativo */
+    .sobre-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(255,255,255,.012) 3px,
+        rgba(255,255,255,.012) 4px
+      );
+      pointer-events: none;
+    }
+
+    .sobre-eyebrow {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sobre-title {
+      font-family: var(--font-title);
+      font-size: clamp(32px, 6vw, 64px);
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--text);
+      line-height: 1.05;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .sobre-title .highlight {
+      color: var(--yellow);
+      text-shadow: 0 0 40px rgba(240,192,64,.45);
+    }
+
+    .sobre-tagline {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 32px;
+      line-height: 1.75;
+      position: relative;
+      z-index: 1;
+    }
+
+    .sobre-version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius);
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      position: relative;
+      z-index: 1;
+    }
+    .sobre-version-badge .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.3;} }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex; align-items: center; gap: 16px;
+      margin: 0 auto 52px;
+      max-width: 700px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    }
+    .divider-icon { font-size: 20px; color: var(--yellow); opacity: .8; }
+
+    /* ── LAYOUT PRINCIPAL ── */
+    .sobre-layout {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 28px;
+      max-width: 1100px;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    /* ── ARTIGO (coluna esquerda) ── */
+    .sobre-article {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sobre-section {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeSlideUp .5s ease both;
+    }
+
+    .sobre-section-header {
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .sobre-section-icon { font-size: 16px; }
+    .sobre-section-label {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--yellow);
+    }
+
+    .sobre-section-body {
+      padding: 22px 24px;
+    }
+
+    .sobre-section-body p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+    .sobre-section-body p:last-child { margin-bottom: 0; }
+    .sobre-section-body p strong { color: var(--text); font-weight: 600; }
+
+    /* Destaque de quote */
+    .sobre-quote {
+      border-left: 3px solid var(--accent);
+      padding: 12px 18px;
+      margin: 16px 0;
+      background: rgba(61,158,66,.06);
+      border-radius: 0 var(--radius) var(--radius) 0;
+    }
+    .sobre-quote p {
+      font-size: 15px !important;
+      color: var(--text) !important;
+      font-style: italic;
+      margin-bottom: 6px !important;
+    }
+    .sobre-quote .quote-author {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    /* Timeline */
+    .sobre-timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+    .sobre-timeline::before {
+      content: '';
+      position: absolute;
+      left: 9px; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), var(--border));
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 20px;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-dot {
+      position: absolute;
+      left: -23px;
+      top: 4px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: 2px solid var(--bg-card);
+      box-shadow: 0 0 6px var(--accent-glow);
+    }
+    .timeline-year {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 4px;
+    }
+    .timeline-text {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .timeline-text strong { color: var(--text); }
+
+    /* ── SIDEBAR (coluna direita) ── */
+    .sobre-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 66px;
+    }
+
+    .widget {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .widget-header {
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      padding: 8px 14px;
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--yellow);
+    }
+    .widget-body { padding: 14px; }
+
+    /* Ficha técnica */
+    .spec-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .spec-row:last-child { border-bottom: none; }
+    .spec-label { color: var(--text-dim); font-family: var(--font-title); letter-spacing: .5px; font-size: 10px; text-transform: uppercase; }
+    .spec-value { color: var(--text); font-weight: 600; }
+
+    /* Equipe mini */
+    .team-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .team-item:last-child { border-bottom: none; }
+    .team-avatar { font-size: 22px; flex-shrink: 0; }
+    .team-info { flex: 1; }
+    .team-name {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text);
+    }
+    .team-role { font-size: 10px; color: var(--text-dim); }
+
+    /* Botão grande */
+    .sobre-cta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    /* Ticker de fatos */
+    .sobre-facts-strip {
+      background: var(--bg-nav);
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+      padding: 10px 0;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+    .sobre-facts-inner {
+      display: flex;
+      gap: 60px;
+      animation: ticker 30s linear infinite;
+      white-space: nowrap;
+    }
+    @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .sobre-fact {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .sobre-fact .num { color: var(--yellow); }
+
+    @media (max-width: 860px) {
+      .sobre-layout { grid-template-columns: 1fr; }
+      .sobre-sidebar { position: static; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="sobre.html" class="active">Sobre</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="sobre-hero">
+  <div class="sobre-eyebrow">★ Nossa História ★</div>
+  <h1 class="sobre-title">Pellizzola <span class="highlight">Brothers</span></h1>
+  <p class="sobre-tagline">
+    Um universo de fases criadas por jogadores, para jogadores.
+    Descubra como tudo começou e para onde estamos indo.
+  </p>
+  <div class="sobre-version-badge">
+    <div class="dot"></div>
+    Versão 6.1 · Em desenvolvimento ativo
+  </div>
+</div>
+
+<!-- Ticker de fatos -->
+<div class="sobre-facts-strip">
+  <div class="sobre-facts-inner" id="ticker-inner"></div>
+</div>
+
+<div class="page" style="padding-top:0;">
+  <div class="divider"><span class="divider-icon">🎮</span></div>
+
+  <div class="sobre-layout">
+
+    <!-- ═══ ARTIGO ═══ -->
+    <div class="sobre-article">
+
+      <!-- Origem -->
+      <div class="sobre-section" style="animation-delay:.05s">
+        <div class="sobre-section-header">
+          <span class="sobre-section-icon">🌱</span>
+          <span class="sobre-section-label">A Origem</span>
+        </div>
+        <div class="sobre-section-body">
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellizzola Brothers nasceu de uma ideia simples:
+            <strong>criar um espaço onde qualquer pessoa pudesse compartilhar suas fases</strong> e encontrar criações
+            incríveis feitas por outros jogadores ao redor do mundo. O projeto começou num final de semana,
+            com um editor de código aberto e muita vontade de construir algo diferente.
+          </p>
+          <p>
+            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+          </p>
+          <div class="sobre-quote">
+            <p>Comecei esse jogo num final de semana e nunca mais consegui parar. Cada bug resolvido abria
+            espaço para dez novas ideias.</p>
+            <div class="quote-author">— Mateus Pellizzola, Fundador</div>
+          </div>
+          <p>
+            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
+          </p>
+        </div>
+      </div>
+
+      <!-- História / Timeline -->
+      <div class="sobre-section" style="animation-delay:.1s">
+        <div class="sobre-section-header">
+          <span class="sobre-section-icon">📅</span>
+          <span class="sobre-section-label">Linha do Tempo</span>
+        </div>
+        <div class="sobre-section-body">
+          <div class="sobre-timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-year">2023 · Q1</div>
+              <div class="timeline-text"><strong>O início:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. O primeiro protótipo foi construído em uma semana, com suporte básico a upload de fases no formato JSON.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-year">2023 · Q3</div>
+              <div class="timeline-text"><strong>Versão 2 — Comunidade:</strong> Sed ut perspiciatis unde omnis iste natus error sit voluptatem. Adicionamos perfis de usuário, comentários e o sistema de curtidas que persiste até hoje.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-year">2024 · Q1</div>
+              <div class="timeline-text"><strong>Versão 4 — Estabilidade:</strong> Nemo enim ipsam voluptatem quia voluptas sit aspernatur. Migração para PostgreSQL com índices GIN, autenticação JWT e rate limiting global.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-year">2024 · Q4</div>
+              <div class="timeline-text"><strong>Versão 6 — Deploy na Railway:</strong> At vero eos et accusamus et iusto odio dignissimos. Internacionalização PT-BR/EN, recuperação de senha, denúncias e o Cafézinho da Chapeleira.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot" style="background:var(--yellow);box-shadow:0 0 8px rgba(240,192,64,.5);"></div>
+              <div class="timeline-year" style="color:var(--accent);">Agora · v6.1</div>
+              <div class="timeline-text"><strong>Em desenvolvimento ativo:</strong> Lorem ipsum dolor sit amet. Painel de admin, download do aplicativo Studio e Game, novas mecânicas de ranking e muito mais.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Missão e visão -->
+      <div class="sobre-section" style="animation-delay:.15s">
+        <div class="sobre-section-header">
+          <span class="sobre-section-icon">🎯</span>
+          <span class="sobre-section-label">Missão & Visão</span>
+        </div>
+        <div class="sobre-section-body">
+          <p>
+            <strong>Nossa missão</strong> é democratizar a criação de fases, tornando ferramentas poderosas acessíveis
+            a qualquer pessoa — do iniciante ao level designer experiente. Lorem ipsum dolor sit amet,
+            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+          <p>
+            <strong>Nossa visão</strong> é construir a maior comunidade de criadores de fases do Brasil.
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+            consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse.
+          </p>
+          <p>
+            Cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+            sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde
+            omnis iste natus error sit voluptatem accusantium doloremque laudantium.
+          </p>
+        </div>
+      </div>
+
+      <!-- Tecnologia -->
+      <div class="sobre-section" style="animation-delay:.2s">
+        <div class="sobre-section-header">
+          <span class="sobre-section-icon">⚙️</span>
+          <span class="sobre-section-label">Tecnologia</span>
+        </div>
+        <div class="sobre-section-body">
+          <p>
+            Pellizzola Brothers é construído com uma stack moderna e leve: <strong>Node.js + Express</strong>
+            no backend, <strong>PostgreSQL via Neon</strong> como banco de dados serverless, e um
+            frontend em <strong>Vanilla JS</strong> — sem frameworks, sem dependências desnecessárias.
+          </p>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Autenticação via <strong>JWT Bearer Token</strong>,
+            hashing de senhas com <strong>bcrypt</strong>, upload de arquivos via <strong>Multer</strong> e
+            deploy automático na <strong>Railway</strong>. Tudo isso com rate limiting global para garantir
+            estabilidade mesmo sob alta carga.
+          </p>
+          <p>
+            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══ SIDEBAR ═══ -->
+    <div class="sobre-sidebar">
+
+      <!-- Ficha técnica -->
+      <div class="widget">
+        <div class="widget-header">📋 Ficha Técnica</div>
+        <div class="widget-body">
+          <div class="spec-row"><span class="spec-label">Versão</span><span class="spec-value">6.1</span></div>
+          <div class="spec-row"><span class="spec-label">Backend</span><span class="spec-value">Node.js + Express</span></div>
+          <div class="spec-row"><span class="spec-label">Banco</span><span class="spec-value">PostgreSQL (Neon)</span></div>
+          <div class="spec-row"><span class="spec-label">Deploy</span><span class="spec-value">Railway</span></div>
+          <div class="spec-row"><span class="spec-label">Auth</span><span class="spec-value">JWT + bcrypt</span></div>
+          <div class="spec-row"><span class="spec-label">Licença</span><span class="spec-value">MIT</span></div>
+          <div class="spec-row"><span class="spec-label">Idiomas</span><span class="spec-value">PT-BR / EN</span></div>
+        </div>
+      </div>
+
+      <!-- Equipe -->
+      <div class="widget">
+        <div class="widget-header">👥 Equipe</div>
+        <div class="widget-body">
+          <div class="team-item">
+            <div class="team-avatar">🧑‍💻</div>
+            <div class="team-info">
+              <div class="team-name">Mateus Pellizzola</div>
+              <div class="team-role">⭐ Fundador & Dev</div>
+            </div>
+          </div>
+          <div class="team-item">
+            <div class="team-avatar">🎨</div>
+            <div class="team-info">
+              <div class="team-name">Ana Clara</div>
+              <div class="team-role">Designer</div>
+            </div>
+          </div>
+          <div class="team-item">
+            <div class="team-avatar">⚙️</div>
+            <div class="team-info">
+              <div class="team-name">Rafael Torres</div>
+              <div class="team-role">Backend Dev</div>
+            </div>
+          </div>
+          <div class="team-item">
+            <div class="team-avatar">🎵</div>
+            <div class="team-info">
+              <div class="team-name">Lucas Moraes</div>
+              <div class="team-role">Trilha Sonora</div>
+            </div>
+          </div>
+          <div class="team-item">
+            <div class="team-avatar">🕹️</div>
+            <div class="team-info">
+              <div class="team-name">Juliana Farias</div>
+              <div class="team-role">Game Design</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="widget">
+        <div class="widget-header">🚀 Junte-se a nós</div>
+        <div class="widget-body sobre-cta">
+          <a href="download.html" class="btn btn-green" style="text-align:center;">⬇ Baixar o jogo</a>
+          <a href="upload.html" class="btn btn-outline" style="text-align:center;">📤 Enviar uma fase</a>
+          <a href="creditos.html" class="btn btn-outline" style="text-align:center;font-size:12px;">🏆 Ver créditos completos</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var user = getUser();
+  if (user) {
+    var el = document.getElementById('nav-auth');
+    el.textContent = user.username.toUpperCase();
+    el.href = 'perfil_do_usuario.html?id=' + user.id;
+    el.removeAttribute('data-i18n');
+  }
+
+  // Ticker de fatos
+  var facts = [
+    { num: '148+', label: 'Membros registrados' },
+    { num: '23',   label: 'Fases publicadas' },
+    { num: '2',    label: 'Idiomas suportados' },
+    { num: '10MB', label: 'Tamanho máximo de fase' },
+    { num: '6.1',  label: 'Versão atual' },
+    { num: '100%', label: 'Open Community' },
+    { num: '0',    label: 'Anúncios (zero!)' },
+    { num: '∞',    label: 'Possibilidades' },
+  ];
+  var html = '';
+  // duplica para loop contínuo
+  for (var rep = 0; rep < 2; rep++) {
+    facts.forEach(function(f) {
+      html += '<span class="sobre-fact"><span class="num">' + f.num + '</span> · ' + f.label + '</span>';
+    });
+  }
+  document.getElementById('ticker-inner').innerHTML = html;
+})();
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+</script>
+</body>
+</html>
