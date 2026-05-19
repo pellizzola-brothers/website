@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    /* ── Recovery modal steps ── */
+    .recovery-step { display: none; }
+    .recovery-step.active { display: block; }
+
+    .step-indicator {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-bottom: 20px;
+    }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      background: var(--bg-card2); border: 2px solid var(--border);
+      color: var(--text-dim); transition: all .3s;
+    }
+    .step-dot.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .step-dot.active { border-color: var(--accent); color: var(--accent); background: rgba(61,158,66,.12); }
+    .step-line { flex: 1; height: 2px; background: var(--border); max-width: 36px; transition: background .3s; }
+    .step-line.done { background: var(--accent); }
+
+    .step-title {
+      font-family: var(--font-title); font-size: 13px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .step-desc { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+
+    /* Code input */
+    .code-input-wrap { display: flex; gap: 6px; justify-content: center; margin: 12px 0 18px; }
+    .code-digit {
+      width: 44px; height: 54px;
+      background: var(--bg-input); border: 2px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: var(--font-title); font-size: 22px; font-weight: 700;
+      text-align: center; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      caret-color: var(--accent);
+    }
+    .code-digit:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    .code-digit.filled { border-color: var(--accent); }
+    .code-digit.error { border-color: #c0392b; animation: shake .35s ease; }
+
+    @keyframes shake {
+      0%,100%{ transform: translateX(0); }
+      20%{ transform: translateX(-5px); }
+      40%{ transform: translateX(5px); }
+      60%{ transform: translateX(-3px); }
+      80%{ transform: translateX(3px); }
+    }
+
+    /* Dev code hint */
+    .dev-code-hint {
+      margin: 0 0 14px;
+      padding: 10px 14px;
+      background: rgba(240,192,64,.08);
+      border: 1px solid rgba(240,192,64,.3);
+      border-radius: var(--radius);
+      font-size: 12px; color: var(--yellow);
+      text-align: center; font-family: var(--font-title); letter-spacing: 1px;
+    }
+    .dev-code-hint strong { font-size: 20px; display: block; margin-top: 4px; letter-spacing: 4px; }
+
+    .resend-link {
+      background: none; border: none; color: var(--text-dim);
+      font-size: 12px; cursor: pointer; text-decoration: underline;
+      text-underline-offset: 2px; font-family: var(--font-body);
+    }
+    .resend-link:hover { color: var(--yellow); }
+    .resend-link:disabled { opacity: .4; cursor: default; text-decoration: none; }
+
+    .success-wrap {
+      text-align: center; padding: 8px 0 4px;
+    }
+    .success-icon { font-size: 52px; display: block; margin-bottom: 10px; }
+    .success-text {
+      font-family: var(--font-title); font-size: 14px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .success-sub { font-size: 12px; color: var(--text-muted); }
+
+    .forgot-link {
+      display: block; margin-top: 8px; text-align: right;
+      font-size: 12px; color: var(--text-dim); cursor: pointer;
+      background: none; border: none; font-family: var(--font-body);
+      text-decoration: underline; text-underline-offset: 2px;
+    }
+    .forgot-link:hover { color: var(--yellow); }
+
+    #login-user, #reg-user { letter-spacing: .5px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="login.html" class="active" data-i18n="nav.entrar">Entrar</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: Recuperação de Senha — 3 etapas
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-recovery">
+  <div class="modal-box" style="max-width:460px;">
+
+    <div class="modal-header">
+      <span data-i18n="recovery.titulo">🔑 Recuperar Conta</span>
+      <button class="modal-close" onclick="closeRecovery()">✕</button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="step-indicator" id="step-indicator">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-line" id="line-1"></div>
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-line" id="line-2"></div>
+        <div class="step-dot" id="dot-3">3</div>
+      </div>
+
+      <!-- ETAPA 1 -->
+      <div class="recovery-step active" id="step-1">
+        <div class="step-title" data-i18n="recovery.step1_title">Qual é o seu usuário?</div>
+        <div class="step-desc" data-i18n="recovery.step1_desc">
+          Informe seu nome de usuário. Você receberá um código de 6 dígitos
+          para confirmar sua identidade.
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="login.usuario_label">Usuário</label>
+          <input class="form-input" id="rec-username" type="text"
+                 data-i18n-ph="login.usuario_ph" placeholder="seu_usuario" autocomplete="username"
+                 onkeydown="if(event.key==='Enter') requestCode()">
+        </div>
+        <div id="rec-msg-1" class="status-msg" style="display:none;"></div>
+      </div>
+
+      <!-- ETAPA 2 -->
+      <div class="recovery-step" id="step-2">
+        <div class="step-title" data-i18n="recovery.step2_title">Digite o código</div>
+        <div class="step-desc" id="step-2-desc" data-i18n="recovery.step2_desc">
+          Insira o código de 6 dígitos enviado para confirmar sua identidade.
+        </div>
+
+        <div class="dev-code-hint" id="dev-code-hint" style="display:none;">
+          🔧 Modo dev — código gerado:
+          <strong id="dev-code-value"></strong>
+        </div>
+
+        <div class="code-input-wrap" id="code-wrap">
+          <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input class="code-digit" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+
+        <div style="text-align:center;margin-bottom:4px;">
+          <button class="resend-link" id="resend-btn" onclick="resendCode()" data-i18n="recovery.nao_recebi">
+            Não recebi — reenviar código
+          </button>
+        </div>
+        <div id="rec-msg-2" class="status-msg" style="display:none;"></div>
+      </div>
+
+      <!-- ETAPA 3 -->
+      <div class="recovery-step" id="step-3">
+        <div class="step-title" data-i18n="recovery.step3_title">Crie uma nova senha</div>
+        <div class="step-desc" data-i18n="recovery.step3_desc">
+          Escolha uma senha forte. Ela substituirá a senha atual da conta.
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="login.nova_senha_label">Nova Senha</label>
+          <div style="position:relative;">
+            <input class="form-input" id="rec-pass1" type="password"
+                   data-i18n-ph="login.nova_senha_ph" placeholder="Mais de 7 caracteres"
+                   autocomplete="new-password"
+                   oninput="checkRecPassStrength()"
+                   style="padding-right:40px;">
+            <button type="button" onclick="togglePass('rec-pass1',this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;">👁</button>
+          </div>
+          <div id="rec-strength-bar" style="display:none;margin-top:8px;">
+            <div style="height:5px;border-radius:3px;background:var(--border);overflow:hidden;">
+              <div id="rec-strength-fill" style="height:100%;width:0%;transition:width .3s,background .3s;border-radius:3px;"></div>
+            </div>
+            <div id="rec-strength-label" style="font-size:11px;margin-top:4px;color:var(--text-muted);"></div>
+            <div style="margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:11px;">
+              <span id="rec-rule-len"     style="color:var(--text-muted);">✗ Mais de 7 caracteres</span>
+              <span id="rec-rule-upper"   style="color:var(--text-muted);">✗ Pelo menos uma letra maiúscula</span>
+              <span id="rec-rule-special" style="color:var(--text-muted);">✗ Pelo menos um caractere especial</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar Nova Senha</label>
+          <div style="position:relative;">
+            <input class="form-input" id="rec-pass2" type="password"
+                   placeholder="Repita a nova senha"
+                   autocomplete="new-password"
+                   oninput="checkRecPassConfirm()"
+                   style="padding-right:40px;">
+            <button type="button" onclick="togglePass('rec-pass2',this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;">👁</button>
+          </div>
+          <div id="rec-pass-match" style="font-size:11px;margin-top:4px;"></div>
+        </div>
+        <div id="rec-msg-3" class="status-msg" style="display:none;"></div>
+      </div>
+
+      <!-- SUCESSO -->
+      <div class="recovery-step" id="step-success">
+        <div class="success-wrap">
+          <span class="success-icon">🎉</span>
+          <div class="success-text" data-i18n="recovery.success_text">Senha redefinida!</div>
+          <div class="success-sub" data-i18n="recovery.success_sub">Sua nova senha foi salva com sucesso.<br>Você já pode fazer login.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer" id="rec-footer">
+      <button class="btn btn-outline btn-sm" id="rec-back-btn"
+              onclick="recoveryBack()" style="display:none;" data-i18n="recovery.btn_voltar">← Voltar</button>
+      <button class="btn btn-green btn-sm" id="rec-next-btn"
+              onclick="recoveryNext()" data-i18n="recovery.btn_continuar">Continuar →</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     PÁGINA DE LOGIN / CADASTRO
+══════════════════════════════════════════════════════════ -->
+<div class="login-page">
+  <div class="login-box">
+    <div class="login-header">❖ Pellizzola Brothers</div>
+    <div class="login-body">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('login',this)" data-i18n="login.tab_login">Login</button>
+        <button class="tab" onclick="switchTab('register',this)" data-i18n="login.tab_cadastro">Cadastro</button>
+      </div>
+
+      <!-- ── LOGIN ── -->
+      <div class="panel active" id="panel-login">
+        <div class="form-group">
+          <label class="form-label" data-i18n="login.usuario_label">Usuário</label>
+          <input class="form-input" id="login-user" type="text"
+                 data-i18n-ph="login.usuario_ph" placeholder="seu_usuario" autocomplete="username"
+                 onkeydown="if(event.key==='Enter') doLogin()">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="login.senha_label">Senha</label>
+          <input class="form-input" id="login-pass" type="password"
+                 data-i18n-ph="login.senha_ph" placeholder="••••••••" autocomplete="current-password"
+                 onkeydown="if(event.key==='Enter') doLogin()">
+          <button class="forgot-link" onclick="openRecovery()" data-i18n="login.esqueceu">Esqueceu a senha?</button>
+        </div>
+        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="doLogin()" data-i18n="login.btn_entrar">Entrar</button>
+        <div id="login-msg"></div>
+      </div>
+
+      <!-- ── CADASTRO ── -->
+      <div class="panel" id="panel-register">
+        <div class="form-group">
+          <label class="form-label">
+            <span data-i18n="login.usuario_label">Usuário</span>
+            <span style="font-weight:400;color:var(--text-dim);font-size:10px;text-transform:none;margin-left:6px;" data-i18n="login.sem_espacos">sem espaços</span>
+          </label>
+          <input class="form-input" id="reg-user" type="text"
+                 data-i18n-ph="login.usuario_ph" placeholder="seu_usuario" autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label"><span data-i18n="login.bio_label">Bio</span> <span style="font-weight:400;color:var(--text-dim);font-size:11px;text-transform:none;" data-i18n="login.bio_opcional">(opcional)</span></label>
+          <input class="form-input" id="reg-bio" type="text" data-i18n-ph="login.bio_ph" placeholder="Uma frase sobre você...">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="login.senha_label">Senha</label>
+          <div style="position:relative;">
+            <input class="form-input" id="reg-pass" type="password"
+                   placeholder="Mais de 7 caracteres"
+                   autocomplete="new-password"
+                   oninput="checkPasswordStrength()"
+                   style="padding-right:40px;">
+            <button type="button" onclick="togglePass('reg-pass',this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;">👁</button>
+          </div>
+          <div id="pass-strength-bar" style="display:none;margin-top:8px;">
+            <div style="height:5px;border-radius:3px;background:var(--border);overflow:hidden;">
+              <div id="pass-strength-fill" style="height:100%;width:0%;transition:width .3s,background .3s;border-radius:3px;"></div>
+            </div>
+            <div id="pass-strength-label" style="font-size:11px;margin-top:4px;color:var(--text-muted);"></div>
+            <div id="pass-rules" style="margin-top:6px;display:flex;flex-direction:column;gap:3px;font-size:11px;">
+              <span id="rule-len"     style="color:var(--text-muted);">✗ Mais de 7 caracteres</span>
+              <span id="rule-upper"   style="color:var(--text-muted);">✗ Pelo menos uma letra maiúscula</span>
+              <span id="rule-special" style="color:var(--text-muted);">✗ Pelo menos um caractere especial (!@#$%...)</span>
+              <span id="rule-nouser" style="color:var(--text-muted);">✗ Não contém o nome de usuário</span>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar Senha</label>
+          <div style="position:relative;">
+            <input class="form-input" id="reg-pass2" type="password"
+                   placeholder="Repita a senha"
+                   autocomplete="new-password"
+                   oninput="checkPassConfirm()"
+                   style="padding-right:40px;">
+            <button type="button" onclick="togglePass('reg-pass2',this)"
+                    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;">👁</button>
+          </div>
+          <div id="pass-match-hint" style="font-size:11px;margin-top:4px;"></div>
+        </div>
+        <button class="btn btn-green" style="width:100%;margin-top:4px;" onclick="doRegister()" data-i18n="login.btn_cadastrar">Cadastrar</button>
+        <div id="reg-msg"></div>
+      </div>
+
+      <div style="margin-top:18px;text-align:center;">
+        <a href="index.html" style="font-size:13px;color:var(--text-dim);text-decoration:none;" data-i18n="login.voltar">← Voltar ao início</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+'use strict';
+
+const existing = getUser();
+if (existing) window.location.href = 'perfil_do_usuario.html?id=' + existing.id;
+
+/* ══════════════════════════════════════════════════════════
+   RECOVERY STATE
+══════════════════════════════════════════════════════════ */
+let recStep    = 1;
+let recToken   = null;
+let recUser    = null;
+let resendCool = false;
+
+function openRecovery() {
+  recStep = 1; recToken = null; recUser = null; resendCool = false;
+  goToStep(1);
+  clearRecMsgs();
+  document.getElementById('rec-username').value = '';
+  document.getElementById('dev-code-hint').style.display = 'none';
+  clearCodeInputs();
+  document.getElementById('rec-pass1').value = '';
+  document.getElementById('rec-pass2').value = '';
+  document.getElementById('rec-strength-bar').style.display = 'none';
+  document.getElementById('rec-pass-match').textContent = '';
+  document.getElementById('modal-recovery').classList.remove('hidden');
+  setTimeout(() => document.getElementById('rec-username').focus(), 120);
+}
+
+function closeRecovery() {
+  document.getElementById('modal-recovery').classList.add('hidden');
+}
+
+function goToStep(n) {
+  [1, 2, 3, 'success'].forEach(function(s) {
+    const el = document.getElementById('step-' + s);
+    if (el) el.classList.toggle('active', s === n);
+  });
+  [1, 2, 3].forEach(function(i) {
+    const dot  = document.getElementById('dot-' + i);
+    const line = document.getElementById('line-' + i);
+    if (dot) {
+      dot.classList.toggle('done',   i < n && n !== 'success' || n === 'success');
+      dot.classList.toggle('active', i === n);
+    }
+    if (line) line.classList.toggle('done', (typeof n === 'number' && i < n) || n === 'success');
+  });
+  const isSuccess = n === 'success';
+  document.getElementById('step-indicator').style.display = isSuccess ? 'none' : '';
+  document.getElementById('rec-footer').style.display = isSuccess ? 'none' : '';
+  const backBtn = document.getElementById('rec-back-btn');
+  if (backBtn) backBtn.style.display = (n > 1 && !isSuccess) ? '' : 'none';
+  const nextBtn = document.getElementById('rec-next-btn');
+  if (nextBtn) {
+    nextBtn.textContent = n === 3 ? t('recovery.btn_salvar') : t('recovery.btn_continuar');
+    nextBtn.disabled = false;
+  }
+  recStep = n;
+}
+
+function clearRecMsgs() {
+  [1, 2, 3].forEach(function(i) {
+    const el = document.getElementById('rec-msg-' + i);
+    if (el) { el.style.display = 'none'; el.textContent = ''; }
+  });
+}
+
+function showRecMsg(step, text, ok) {
+  const el = document.getElementById('rec-msg-' + step);
+  if (!el) return;
+  el.className = 'status-msg ' + (ok ? 'status-ok' : 'status-err');
+  el.textContent = text;
+  el.style.display = '';
+}
+
+async function recoveryNext() {
+  clearRecMsgs();
+  if (recStep === 1) await requestCode();
+  else if (recStep === 2) await verifyCode();
+  else if (recStep === 3) await resetPassword();
+}
+
+function recoveryBack() {
+  if (recStep === 2) goToStep(1);
+  else if (recStep === 3) goToStep(2);
+}
+
+async function requestCode() {
+  const username = (document.getElementById('rec-username').value || '').trim().toLowerCase();
+  if (!username) { showRecMsg(1, 'Informe o nome de usuário.', false); return; }
+  const nextBtn = document.getElementById('rec-next-btn');
+  nextBtn.disabled = true; nextBtn.textContent = 'Enviando...';
+  try {
+    const resp = await fetch(API + '/auth/recovery/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username })
+    });
+    const data = await resp.json();
+    if (!resp.ok) { showRecMsg(1, data.error || 'Erro ao solicitar código.', false); return; }
+    recUser = username;
+    clearCodeInputs();
+    if (data.code) {
+      document.getElementById('dev-code-hint').style.display = '';
+      document.getElementById('dev-code-value').textContent = data.code;
+      document.getElementById('step-2-desc').textContent =
+        '🔧 Modo desenvolvimento: o código aparece abaixo. Em produção, seria enviado por e-mail.';
+    } else {
+      document.getElementById('dev-code-hint').style.display = 'none';
+      document.getElementById('step-2-desc').textContent =
+        'Insira o código de 6 dígitos enviado para o canal de contato da conta "' + username + '".';
+    }
+    goToStep(2);
+    setTimeout(focusFirstCodeDigit, 80);
+    startResendCooldown();
+  } catch (e) {
+    showRecMsg(1, 'Erro de conexão. Tente novamente.', false);
+  } finally {
+    nextBtn.disabled = false; nextBtn.textContent = 'Continuar →';
+  }
+}
+
+async function verifyCode() {
+  const code = getCodeValue();
+  if (code.length < 6) { showRecMsg(2, 'Digite os 6 dígitos do código.', false); shakeCode(); return; }
+  const nextBtn = document.getElementById('rec-next-btn');
+  nextBtn.disabled = true; nextBtn.textContent = 'Verificando...';
+  try {
+    const resp = await fetch(API + '/auth/recovery/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: recUser, code })
+    });
+    const data = await resp.json();
+    if (!resp.ok) { showRecMsg(2, data.error || 'Código inválido ou expirado.', false); shakeCode(); return; }
+    recToken = data.token;
+    goToStep(3);
+    setTimeout(() => document.getElementById('rec-pass1').focus(), 80);
+  } catch (e) {
+    showRecMsg(2, 'Erro de conexão. Tente novamente.', false);
+  } finally {
+    nextBtn.disabled = false;
+  }
+}
+
+async function resetPassword() {
+  const pass  = document.getElementById('rec-pass1').value;
+  const pass2 = document.getElementById('rec-pass2').value;
+  if (!pass) { showRecMsg(3, 'Informe a nova senha.', false); return; }
+  if (pass.length <= 7) { showRecMsg(3, 'A senha deve ter mais de 7 caracteres.', false); return; }
+  if (!/[A-Z]/.test(pass)) { showRecMsg(3, 'A senha deve ter pelo menos uma letra maiúscula.', false); return; }
+  if (!/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass)) { showRecMsg(3, 'A senha deve ter pelo menos um caractere especial.', false); return; }
+  if (pass !== pass2) { showRecMsg(3, 'As senhas não coincidem.', false); return; }
+  const nextBtn = document.getElementById('rec-next-btn');
+  nextBtn.disabled = true; nextBtn.textContent = 'Salvando...';
+  try {
+    const resp = await fetch(API + '/auth/recovery/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + recToken },
+      body: JSON.stringify({ password: pass })
+    });
+    const data = await resp.json();
+    if (!resp.ok) { showRecMsg(3, data.error || 'Erro ao redefinir a senha.', false); return; }
+    goToStep('success');
+    setTimeout(function() { closeRecovery(); }, 3000);
+  } catch (e) {
+    showRecMsg(3, 'Erro de conexão. Tente novamente.', false);
+  } finally {
+    nextBtn.disabled = false;
+  }
+}
+
+async function resendCode() {
+  if (resendCool || !recUser) return;
+  const btn = document.getElementById('resend-btn');
+  btn.disabled = true;
+  try {
+    const resp = await fetch(API + '/auth/recovery/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: recUser })
+    });
+    const data = await resp.json();
+    if (data.code) {
+      document.getElementById('dev-code-hint').style.display = '';
+      document.getElementById('dev-code-value').textContent = data.code;
+    }
+    showRecMsg(2, '✅ Novo código enviado!', true);
+    clearCodeInputs();
+    focusFirstCodeDigit();
+  } catch (e) {
+    showRecMsg(2, 'Erro ao reenviar. Tente novamente.', false);
+  }
+  startResendCooldown();
+}
+
+function startResendCooldown() {
+  resendCool = true;
+  const btn = document.getElementById('resend-btn');
+  let secs = 60;
+  btn.disabled = true;
+  btn.textContent = t('recovery.reenviar_em').replace('{n}', secs);
+  const iv = setInterval(function() {
+    secs--;
+    if (secs <= 0) {
+      clearInterval(iv);
+      resendCool = false;
+      btn.disabled = false;
+      btn.textContent = t('recovery.nao_recebi');
+    } else {
+      btn.textContent = t('recovery.reenviar_em').replace('{n}', secs);
+    }
+  }, 1000);
+}
+
+function clearCodeInputs() {
+  document.querySelectorAll('.code-digit').forEach(function(el) {
+    el.value = ''; el.classList.remove('filled', 'error');
+  });
+}
+function focusFirstCodeDigit() {
+  const first = document.querySelector('.code-digit');
+  if (first) first.focus();
+}
+function getCodeValue() {
+  return Array.from(document.querySelectorAll('.code-digit'))
+    .map(function(el) { return el.value; }).join('');
+}
+function shakeCode() {
+  document.querySelectorAll('.code-digit').forEach(function(el) {
+    el.classList.add('error');
+    setTimeout(function() { el.classList.remove('error'); }, 500);
+  });
+}
+
+document.querySelectorAll('.code-digit').forEach(function(inp, idx, all) {
+  inp.addEventListener('input', function() {
+    var v = this.value.replace(/\D/g, '');
+    this.value = v.slice(-1);
+    this.classList.toggle('filled', !!this.value);
+    if (this.value && idx < all.length - 1) all[idx + 1].focus();
+    if (getCodeValue().length === 6) {
+      setTimeout(function() { if (recStep === 2) verifyCode(); }, 150);
+    }
+  });
+  inp.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace' && !this.value && idx > 0) all[idx - 1].focus();
+    if (e.key === 'Enter' && getCodeValue().length === 6) verifyCode();
+  });
+  inp.addEventListener('paste', function(e) {
+    e.preventDefault();
+    var pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+    pasted.slice(0, 6).split('').forEach(function(ch, i) {
+      if (all[i]) { all[i].value = ch; all[i].classList.add('filled'); }
+    });
+    var last = Math.min(pasted.length, 5);
+    if (all[last]) all[last].focus();
+    if (pasted.length >= 6) setTimeout(function() { if (recStep === 2) verifyCode(); }, 150);
+  });
+});
+
+document.getElementById('modal-recovery').addEventListener('click', function(e) {
+  if (e.target === this) closeRecovery();
+});
+
+
+/* ══════════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════════ */
+['login-user', 'reg-user'].forEach(function(id) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', function() {
+    const pos = this.selectionStart;
+    const cleaned = this.value.replace(/\s/g, '');
+    if (this.value !== cleaned) { this.value = cleaned; this.setSelectionRange(pos - 1, pos - 1); }
+  });
+  el.addEventListener('keydown', function(e) { if (e.key === ' ') e.preventDefault(); });
+  el.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+    this.value += pasted.replace(/\s/g, '');
+  });
+});
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function showMsg(id, text, ok) {
+  const el = document.getElementById(id);
+  el.className = 'status-msg ' + (ok ? 'status-ok' : 'status-err');
+  el.textContent = text;
+}
+
+async function doLogin() {
+  const username = (document.getElementById('login-user').value || '').trim().toLowerCase();
+  const password = document.getElementById('login-pass').value;
+  if (!username || !password) { showMsg('login-msg', 'Preencha todos os campos.', false); return; }
+  if (/\s/.test(username)) { showMsg('login-msg', 'O nome de usuário não pode ter espaços.', false); return; }
+  try {
+    const res  = await fetch(API + '/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('login-msg', data.error, false); return; }
+    saveSession(data.user, data.token);
+    showMsg('login-msg', t('login.ok_login'), true);
+    setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
+  } catch (e) { showMsg('login-msg', t('login.err_conexao'), false); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CADASTRO
+══════════════════════════════════════════════════════════ */
+function togglePass(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+  else { input.type = 'password'; btn.textContent = '👁'; }
+}
+
+function checkPasswordStrength() {
+  const pass = document.getElementById('reg-pass').value;
+  const uname = document.getElementById('reg-user').value.trim().toLowerCase();
+  const bar  = document.getElementById('pass-strength-bar');
+  const fill = document.getElementById('pass-strength-fill');
+  const lbl  = document.getElementById('pass-strength-label');
+  bar.style.display = pass.length ? '' : 'none';
+  if (!pass.length) return;
+  const hasLen     = pass.length > 7;
+  const hasUpper   = /[A-Z]/.test(pass);
+  const hasSpecial = /[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass);
+  const noUser     = !uname || !pass.toLowerCase().includes(uname);
+  const rules = [
+    ['rule-len',    hasLen,     (hasLen     ? '✓' : '✗') + ' Mais de 7 caracteres'],
+    ['rule-upper',  hasUpper,   (hasUpper   ? '✓' : '✗') + ' Pelo menos uma letra maiúscula'],
+    ['rule-special',hasSpecial, (hasSpecial ? '✓' : '✗') + ' Pelo menos um caractere especial (!@#$%...)'],
+    ['rule-nouser', noUser,     (noUser     ? '✓' : '✗') + ' Não contém o nome de usuário'],
+  ];
+  rules.forEach(function(r) {
+    const el = document.getElementById(r[0]);
+    if (el) { el.style.color = r[1] ? '#5dba60' : 'var(--text-muted)'; el.textContent = r[2]; }
+  });
+  const score  = [hasLen, hasUpper, hasSpecial, noUser].filter(Boolean).length;
+  const cores  = ['#e74c3c','#e67e22','#f1c40f','#2ecc71'];
+  const labels = ['Fraca','Razoável','Boa','Forte'];
+  fill.style.width = (score * 25) + '%';
+  fill.style.background = cores[score - 1] || '#e74c3c';
+  lbl.textContent = labels[score - 1] || 'Fraca';
+  lbl.style.color = cores[score - 1] || '#e74c3c';
+}
+
+function checkRecPassStrength() {
+  const pass  = document.getElementById('rec-pass1').value;
+  const bar   = document.getElementById('rec-strength-bar');
+  const fill  = document.getElementById('rec-strength-fill');
+  const lbl   = document.getElementById('rec-strength-label');
+  bar.style.display = pass.length ? '' : 'none';
+  if (!pass.length) return;
+  const hasLen     = pass.length > 7;
+  const hasUpper   = /[A-Z]/.test(pass);
+  const hasSpecial = /[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass);
+  [['rec-rule-len', hasLen, (hasLen?'✓':'✗') + ' Mais de 7 caracteres'],
+   ['rec-rule-upper', hasUpper, (hasUpper?'✓':'✗') + ' Pelo menos uma letra maiúscula'],
+   ['rec-rule-special', hasSpecial, (hasSpecial?'✓':'✗') + ' Pelo menos um caractere especial']
+  ].forEach(function(r) {
+    const el = document.getElementById(r[0]);
+    if (el) { el.style.color = r[1] ? '#5dba60' : 'var(--text-muted)'; el.textContent = r[2]; }
+  });
+  const score  = [hasLen, hasUpper, hasSpecial].filter(Boolean).length;
+  const cores  = ['#e74c3c','#f1c40f','#2ecc71'];
+  const labels = ['Fraca','Razoável','Forte'];
+  fill.style.width = (score * 33) + '%';
+  fill.style.background = cores[score - 1] || '#e74c3c';
+  lbl.textContent = labels[score - 1] || 'Fraca';
+  lbl.style.color = cores[score - 1] || '#e74c3c';
+}
+
+function checkPassConfirm() {
+  const pass  = document.getElementById('reg-pass').value;
+  const pass2 = document.getElementById('reg-pass2').value;
+  const hint  = document.getElementById('pass-match-hint');
+  if (!pass2) { hint.textContent = ''; return; }
+  if (pass === pass2) { hint.textContent = '✓ Senhas coincidem'; hint.style.color = '#5dba60'; }
+  else { hint.textContent = '✗ Senhas não coincidem'; hint.style.color = '#e74c3c'; }
+}
+
+function checkRecPassConfirm() {
+  const pass  = document.getElementById('rec-pass1').value;
+  const pass2 = document.getElementById('rec-pass2').value;
+  const hint  = document.getElementById('rec-pass-match');
+  if (!pass2) { hint.textContent = ''; return; }
+  if (pass === pass2) { hint.textContent = '✓ Senhas coincidem'; hint.style.color = '#5dba60'; }
+  else { hint.textContent = '✗ Senhas não coincidem'; hint.style.color = '#e74c3c'; }
+}
+
+async function doRegister() {
+  const username = (document.getElementById('reg-user').value || '').trim().toLowerCase();
+  const bio      = (document.getElementById('reg-bio').value || '').trim();
+  const password = document.getElementById('reg-pass').value;
+  const pass2    = document.getElementById('reg-pass2').value;
+  if (!username || !password) { showMsg('reg-msg', 'Usuário e senha são obrigatórios.', false); return; }
+  if (/\s/.test(username))    { showMsg('reg-msg', 'Nome de usuário não pode conter espaços.', false); return; }
+  if (username.length < 3)    { showMsg('reg-msg', 'Nome de usuário muito curto (mínimo 3 caracteres).', false); return; }
+  if (password.length <= 7)   { showMsg('reg-msg', 'A senha deve ter mais de 7 caracteres.', false); return; }
+  if (!/[A-Z]/.test(password)) { showMsg('reg-msg', 'A senha deve ter pelo menos uma letra maiúscula.', false); return; }
+  if (!/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(password)) { showMsg('reg-msg', 'A senha deve ter pelo menos um caractere especial (!@#$%...).', false); return; }
+  if (password.toLowerCase().includes(username.toLowerCase())) { showMsg('reg-msg', 'A senha não pode conter o nome de usuário.', false); return; }
+  if (password !== pass2) { showMsg('reg-msg', 'As senhas não coincidem.', false); return; }
+  try {
+    const res  = await fetch(API + '/auth/register', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, bio, password })
+    });
+    const data = await res.json();
+    if (!res.ok) { showMsg('reg-msg', data.error, false); return; }
+    saveSession(data.user, data.token);
+    showMsg('reg-msg', t('login.ok_cadastro'), true);
+    setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
+  } catch (e) { showMsg('reg-msg', t('login.err_conexao'), false); }
+}
+</script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

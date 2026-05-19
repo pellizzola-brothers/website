@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Créditos — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    /* ── HERO ── */
+    .credits-hero {
+      text-align: center;
+      padding: 56px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .credits-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 0%, rgba(61,158,66,.14) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 35% at 80% 90%, rgba(240,192,64,.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .credits-institution {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(240,192,64,.08);
+      border: 1px solid rgba(240,192,64,.25);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .credits-title {
+      font-family: var(--font-title);
+      font-size: clamp(26px, 4.5vw, 48px);
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 8px;
+      position: relative;
+      line-height: 1.1;
+    }
+    .credits-title span { color: var(--accent); }
+
+    .credits-project-name {
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 6px;
+      line-height: 1.6;
+      position: relative;
+      font-style: italic;
+    }
+
+    .credits-meta-row {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      position: relative;
+    }
+    .credits-meta-item {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .credits-meta-item span { color: var(--text-muted); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 0 auto 48px;
+      max-width: 700px;
+      padding: 0 24px;
+    }
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-light), transparent);
+    }
+    .divider-label {
+      font-family: var(--font-title);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* ── SECTION TITLES ── */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 0 auto 24px;
+      max-width: 1100px;
+    }
+    .section-header-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-header-title {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      white-space: nowrap;
+    }
+
+    /* ── TEAM GRID ── */
+    .credits-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto 56px;
+    }
+
+    /* ── MEMBER CARD ── */
+    .member-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      animation: cardIn .45s ease both;
+    }
+    .member-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 28px rgba(0,0,0,.45), 0 0 0 1px rgba(61,158,66,.15);
+    }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .member-avatar-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(155deg, #0c2c0c 0%, #08183a 55%, #1a0a30 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 64px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .member-avatar-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,.5) 100%);
+    }
+    .member-role-badge {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      right: 12px;
+      text-align: center;
+      background: rgba(10,10,30,.85);
+      border: 1px solid var(--border-light);
+      color: var(--accent);
+      font-family: var(--font-title);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      z-index: 1;
+    }
+
+    .member-body {
+      padding: 16px 15px 18px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .member-name {
+      font-family: var(--font-title);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .member-tech-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .tech-tag {
+      background: rgba(61,158,66,.1);
+      border: 1px solid rgba(61,158,66,.25);
+      color: var(--accent);
+      font-family: var(--font-title);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 3px;
+    }
+    .tech-tag.yellow {
+      background: rgba(240,192,64,.08);
+      border-color: rgba(240,192,64,.2);
+      color: var(--yellow);
+    }
+    .tech-tag.blue {
+      background: rgba(60,120,200,.1);
+      border-color: rgba(60,120,200,.25);
+      color: #7aacf0;
+    }
+    .member-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      border-left: 2px solid var(--border-light);
+      padding-left: 9px;
+    }
+
+    /* ── STACK SECTION ── */
+    .stack-section {
+      max-width: 1100px;
+      margin: 0 auto 56px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .stack-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .stack-card-header {
+      background: var(--bg-nav);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .stack-card-icon { font-size: 16px; }
+    .stack-card-title {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--yellow);
+    }
+    .stack-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; }
+    .stack-item {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .stack-item-name {
+      font-family: var(--font-title);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+    .stack-item-desc {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* ── INFRA / THANKS ── */
+    .infra-section {
+      max-width: 1100px;
+      margin: 0 auto 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .infra-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .infra-card-header {
+      background: var(--bg-nav);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 14px;
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--yellow);
+    }
+    .infra-card-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .infra-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .infra-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+    .infra-info { flex: 1; }
+    .infra-label {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 1px;
+    }
+    .infra-value { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+    /* ── FOOTER ── */
+    .credits-footer {
+      text-align: center;
+      padding: 0 24px 40px;
+    }
+    .credits-footer-line {
+      width: 60px;
+      height: 2px;
+      background: var(--border);
+      margin: 0 auto 16px;
+    }
+    .credits-footer-text {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.8;
+    }
+    .credits-footer-text strong { color: var(--text-muted); font-style: normal; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      .credits-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .member-avatar-wrap { font-size: 44px; }
+      .infra-section { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 400px) {
+      .credits-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text"
+               data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="credits-hero">
+    <div class="credits-institution">
+      🏛️ Instituto Federal de Educação, Ciência e Tecnologia de São Paulo — Câmpus Campos do Jordão
+    </div>
+    <h1 class="credits-title">Equipe do <span>Projeto</span></h1>
+    <p class="credits-project-name">
+      Pellizzola Brothers: Plataforma Web Integrada para Criação, Publicação e Gestão de Conteúdo Gerado por Usuários em Jogos Digitais
+    </p>
+    <div class="credits-meta-row">
+      <div class="credits-meta-item">Disciplina <span>Projeto Integrador (PRI)</span></div>
+      <div class="credits-meta-item">Ano <span>2026</span></div>
+      <div class="credits-meta-item">Câmpus <span>Campos do Jordão</span></div>
+      <div class="credits-meta-item">Versão <span>v6.1</span></div>
+    </div>
+  </div>
+
+  <div class="divider">
+    <span class="divider-label">Integrantes da Equipe</span>
+  </div>
+
+  <!-- TEAM CARDS -->
+  <div class="credits-grid">
+
+    <div class="member-card" style="animation-delay:.00s">
+      <div class="member-avatar-wrap">
+        🕊️
+        <span class="member-role-badge">Desenvolvimento do Jogo</span>
+      </div>
+      <div class="member-body">
+        <div class="member-name">Gabriel Osti</div>
+        <div class="member-tech-tags">
+          <span class="tech-tag yellow">Analise</span>
+          <span class="tech-tag yellow">Documentação</span>
+          <span class="tech-tag yellow">Pesquisa</span>
+          <span class="tech-tag yellow">Estudo</span>
+        </div>
+        <div class="member-desc">
+Desenvolvimento da documentação técnica e estrutural do projeto Pellizzola Brothers, realizando a organização, descrição e detalhamento das funcionalidades do sistema, além de auxiliar os demais integrantes na elaboração, revisão e integração das informações referentes ao jogo, editor de levels e sistema.        </div>
+      </div>
+    </div>
+
+    <div class="member-card" style="animation-delay:.07s">
+      <div class="member-avatar-wrap">
+        🔨
+        <span class="member-role-badge">Editor de Levels</span>
+      </div>
+      <div class="member-body">
+        <div class="member-name">Igor Julio</div>
+        <div class="member-tech-tags">
+          <span class="tech-tag">Electron</span>
+          <span class="tech-tag">JavaScript</span>
+          <span class="tech-tag blue">JSON</span>
+        </div>
+        <div class="member-desc">
+          Criação do editor de levels desktop com Electron, incluindo grade 30×20, suporte a até 9 cenas, sistema de categorias, favoritos e exportação do formato .lvl.
+        </div>
+      </div>
+    </div>
+
+    <div class="member-card" style="animation-delay:.14s">
+      <div class="member-avatar-wrap">
+        😎
+        <span class="member-role-badge">Jogo C</span>
+      </div>
+      <div class="member-body">
+        <div class="member-name">Mauro Lopes de Almeida</div>
+        <div class="member-tech-tags">
+          <span class="tech-tag">C</span>
+        </div>
+        <div class="member-desc">
+          Desenvolvimento do jogo e estruturação do projeto.
+        </div>
+      </div>
+    </div>
+
+    <div class="member-card" style="animation-delay:.21s">
+      <div class="member-avatar-wrap">
+        🧑‍💻
+        <span class="member-role-badge">😑Criador Do Sistema</span>
+      </div>
+      <div class="member-body">
+        <div class="member-name">Miguel Custódio</div>
+        <div class="member-tech-tags">
+          <span class="tech-tag blue">PostgreSQL</span>
+          <span class="tech-tag blue">Neon</span>
+          <span class="tech-tag blue">SQL</span>
+          <span class="tech-tag">HTML</span>
+          <span class="tech-tag">CSS</span>
+          <span class="tech-tag">JavaScript</span>
+          <span class="tech-tag blue">Backend</span>
+        </div>
+        <div class="member-desc">
+          Modelagem e implementação do banco de dados relacional com 5 tabelas (users, levels, files, comments, download_history), chaves estrangeiras em cascata e índices de desempenho.
+        </div>
+      </div>
+    </div>
+
+    <div class="member-card" style="animation-delay:.28s">
+      <div class="member-avatar-wrap">
+        🎨
+        <span class="member-role-badge">Arte & Sprites</span>
+      </div>
+      <div class="member-body">
+        <div class="member-name">Rafael Francisco</div>
+        <div class="member-tech-tags">
+          <span class="tech-tag yellow">Aseprite</span>
+          <span class="tech-tag yellow">Pixel Art</span>
+          <span class="tech-tag yellow">NES Palette</span>
+        </div>
+        <div class="member-desc">
+          Criação de 29 elementos visuais em pixel art 32×32 px com paleta inspirada no NES: blocos, personagens jogáveis (Pellizzola e Mauro) com animações de corrida, sinalizações e plano de fundo.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /credits-grid -->
+
+  <!-- STACK SECTION -->
+  <div class="section-header">
+    <div class="section-header-line"></div>
+    <div class="section-header-title">Tecnologias por Componente</div>
+    <div class="section-header-line"></div>
+  </div>
+
+  <div class="stack-section">
+
+    <div class="stack-card">
+      <div class="stack-card-header">
+        <span class="stack-card-icon">🕹️</span>
+        <span class="stack-card-title">Jogo — Pellizzola Brothers</span>
+      </div>
+      <div class="stack-card-body">
+        <div class="stack-item">
+          <span class="stack-item-name">C</span>
+          <span class="stack-item-desc">Linguagem principal, filosofia suckless</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">raylib</span>
+          <span class="stack-item-desc">Renderização gráfica e câmera com suavização</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">jansson</span>
+          <span class="stack-item-desc">Leitura e parsing de LEVEL_DATA.json</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">FluidSynth</span>
+          <span class="stack-item-desc">Síntese MIDI em tempo real via SoundFont</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">libzip</span>
+          <span class="stack-item-desc">Leitura do formato .lvl (ZIP com JSON e MIDI)</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-card">
+      <div class="stack-card-header">
+        <span class="stack-card-icon">⚙️</span>
+        <span class="stack-card-title">Editor de Levels</span>
+      </div>
+      <div class="stack-card-body">
+        <div class="stack-item">
+          <span class="stack-item-name">Electron</span>
+          <span class="stack-item-desc">Aplicação desktop cross-platform</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">JavaScript</span>
+          <span class="stack-item-desc">Lógica da interface e do editor</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Canvas API</span>
+          <span class="stack-item-desc">Grade 30×20, pintura e pré-visualização de cenas</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">BLOCK_REGISTRY</span>
+          <span class="stack-item-desc">Registro centralizado de blocos com tags e categorias</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-card">
+      <div class="stack-card-header">
+        <span class="stack-card-icon">🌐</span>
+        <span class="stack-card-title">Plataforma Web</span>
+      </div>
+      <div class="stack-card-body">
+        <div class="stack-item">
+          <span class="stack-item-name">HTML / CSS / JS</span>
+          <span class="stack-item-desc">Frontend com i18n PT/EN integrado</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Backend Node.js</span>
+          <span class="stack-item-desc">API REST, upload .lvl, autenticação JWT</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">bcrypt</span>
+          <span class="stack-item-desc">Hash seguro de senhas</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Railway</span>
+          <span class="stack-item-desc">Infraestrutura e hospedagem em produção</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-card">
+      <div class="stack-card-header">
+        <span class="stack-card-icon">🗄️</span>
+        <span class="stack-card-title">Banco de Dados</span>
+      </div>
+      <div class="stack-card-body">
+        <div class="stack-item">
+          <span class="stack-item-name">PostgreSQL</span>
+          <span class="stack-item-desc">SGBD relacional, schema com 5 tabelas</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Neon</span>
+          <span class="stack-item-desc">PostgreSQL serverless em nuvem</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">SERIAL / FK Cascade</span>
+          <span class="stack-item-desc">Integridade referencial e exclusão em cascata</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Índices compostos</span>
+          <span class="stack-item-desc">Otimização de filtragem e ordenação por relevância</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-card">
+      <div class="stack-card-header">
+        <span class="stack-card-icon">🎨</span>
+        <span class="stack-card-title">Arte & Identidade Visual</span>
+      </div>
+      <div class="stack-card-body">
+        <div class="stack-item">
+          <span class="stack-item-name">Aseprite</span>
+          <span class="stack-item-desc">Editor principal de pixel art</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">NES Palette</span>
+          <span class="stack-item-desc">54 cores únicas do processador gráfico do NES</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Sprites 32×32 px</span>
+          <span class="stack-item-desc">29 elementos: blocos, personagens e decorações</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Spritesheet de corrida</span>
+          <span class="stack-item-desc">Animação completa dos personagens jogáveis</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack-card">
+      <div class="stack-card-header">
+        <span class="stack-card-icon">📦</span>
+        <span class="stack-card-title">Formato de Intercâmbio — .lvl</span>
+      </div>
+      <div class="stack-card-body">
+        <div class="stack-item">
+          <span class="stack-item-name">ZIP</span>
+          <span class="stack-item-desc">Contêiner único com todos os recursos do level</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">LEVEL_DATA.json</span>
+          <span class="stack-item-desc">Metadados e grade de 30×20 por cena (600 células)</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">MIDI_DATA/</span>
+          <span class="stack-item-desc">Até 10 arquivos .mid de trilha sonora</span>
+        </div>
+        <div class="stack-item">
+          <span class="stack-item-name">Multi-cena</span>
+          <span class="stack-item-desc">Até 9 cenas independentes por level</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /stack-section -->
+
+  <!-- INFRA & THANKS -->
+  <div class="section-header">
+    <div class="section-header-line"></div>
+    <div class="section-header-title">Infraestrutura & Agradecimentos</div>
+    <div class="section-header-line"></div>
+  </div>
+
+  <div class="infra-section">
+
+    <div class="infra-card">
+      <div class="infra-card-header">🏗️ Infraestrutura de Produção</div>
+      <div class="infra-card-body">
+        <div class="infra-item">
+          <span class="infra-icon">🌐</span>
+          <div class="infra-info">
+            <span class="infra-label">Hospedagem</span>
+            <span class="infra-value">Railway — deploy contínuo, sem downtime, infraestrutura escalável em produção</span>
+          </div>
+        </div>
+        <div class="infra-item">
+          <span class="infra-icon">🗄️</span>
+          <div class="infra-info">
+            <span class="infra-label">Banco de Dados</span>
+            <span class="infra-value">Neon — PostgreSQL serverless com escalabilidade automática e conexão via protocolo padrão</span>
+          </div>
+        </div>
+        <div class="infra-item">
+          <span class="infra-icon">🔒</span>
+          <div class="infra-info">
+            <span class="infra-label">Segurança</span>
+            <span class="infra-value">Credenciais protegidas por variáveis de ambiente, senhas com hash bcrypt, recuperação por e-mail</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infra-card">
+      <div class="infra-card-header">🏆 Agradecimentos</div>
+      <div class="infra-card-body">
+        <div class="infra-item">
+          <span class="infra-icon">🏛️</span>
+          <div class="infra-info">
+            <span class="infra-label">Instituição</span>
+            <span class="infra-value">IFSP — Câmpus Campos do Jordão, pelo suporte acadêmico e estrutura para o projeto</span>
+          </div>
+        </div>
+        <div class="infra-item">
+          <span class="infra-icon">📚</span>
+          <div class="infra-info">
+            <span class="infra-label">Referências</span>
+            <span class="infra-value">Comunidade suckless.org, documentação raylib, Gee (2003), Jenkins (2009) e Koster (2013)</span>
+          </div>
+        </div>
+        <div class="infra-item">
+          <span class="infra-icon">👥</span>
+          <div class="infra-info">
+            <span class="infra-label">Comunidade</span>
+            <span class="infra-value">Todos os usuários que publicaram, baixaram e testaram levels na plataforma</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /infra-section -->
+
+  <!-- FOOTER -->
+  <div class="credits-footer">
+    <div class="credits-footer-line"></div>
+    <p class="credits-footer-text">
+      Desenvolvido como <strong>Projeto Integrador (PRI)</strong> no
+      <strong>Instituto Federal de Educação, Ciência e Tecnologia de São Paulo</strong><br>
+      Câmpus Campos do Jordão · 2026 · <strong>v6.1</strong>
+    </p>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+(function() {
+  var user = getUser();
+  if (user) {
+    var el = document.getElementById('nav-auth');
+    el.textContent = user.username.toUpperCase();
+    el.href = 'perfil_do_usuario.html?id=' + user.id;
+    el.removeAttribute('data-i18n');
+  }
+})();
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+</script>
+<script>
+(function(){
+  // Bloqueia só o nav-brand em creditos.html
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) { e.preventDefault(); });
+    b.style.cursor = "default";
+    b.style.opacity = "0.35";
+  }
+
+  // Easter egg: Konami Code -> admin
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

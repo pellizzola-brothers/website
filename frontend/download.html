@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+
+    /* ── HERO ── */
+    .dl-hero {
+      text-align: center;
+      padding: 56px 24px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .dl-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 55% at 50% 0%, rgba(61,158,66,.15) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 10% 80%, rgba(240,192,64,.07) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .dl-eyebrow {
+      font-family: var(--font-title);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 14px; position: relative; z-index: 1;
+    }
+    .dl-hero-title {
+      font-family: var(--font-title);
+      font-size: clamp(28px, 5vw, 54px); font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: var(--text); line-height: 1.1;
+      margin-bottom: 16px; position: relative; z-index: 1;
+    }
+    .dl-hero-title span { color: var(--yellow); text-shadow: 0 0 36px rgba(240,192,64,.4); }
+    .dl-hero-sub {
+      font-size: 14px; color: var(--text-muted);
+      max-width: 520px; margin: 0 auto 14px; line-height: 1.7;
+      position: relative; z-index: 1;
+    }
+
+    /* ── CARDS DE DOWNLOAD ── */
+    .dl-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      max-width: 900px;
+      margin: 0 auto 64px;
+    }
+
+    .dl-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      animation: fadeSlideUp .5s ease both;
+    }
+    .dl-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(61,158,66,.15);
+    }
+    .dl-card.studio { border-color: rgba(240,192,64,.35); }
+    .dl-card.studio:hover { border-color: var(--yellow); box-shadow: 0 16px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(240,192,64,.2); }
+
+    /* Thumb do card */
+    .dl-card-thumb {
+      height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72px;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 2px solid var(--border);
+    }
+    .dl-card.game .dl-card-thumb {
+      background: linear-gradient(160deg, #0d3a0d 0%, #0a2040 55%, #200d3a 100%);
+    }
+    .dl-card.studio .dl-card-thumb {
+      background: linear-gradient(160deg, #2a1a0a 0%, #1a0a40 55%, #0a2a0d 100%);
+    }
+    .dl-card-thumb-badge {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(0,0,0,.55);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 3px 8px;
+      font-family: var(--font-title);
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .dl-card.game .dl-card-thumb-badge { color: var(--accent); border-color: rgba(61,158,66,.4); }
+    .dl-card.studio .dl-card-thumb-badge { color: var(--yellow); border-color: rgba(240,192,64,.35); }
+
+    /* Corpo */
+    .dl-card-body { padding: 22px 22px 14px; flex: 1; }
+    .dl-card-label {
+      font-family: var(--font-title);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .dl-card.game .dl-card-label { color: var(--accent); }
+    .dl-card.studio .dl-card-label { color: var(--yellow); }
+    .dl-card-name {
+      font-family: var(--font-title);
+      font-size: 22px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text); margin-bottom: 10px;
+    }
+    .dl-card-desc {
+      font-size: 13px; color: var(--text-muted);
+      line-height: 1.65; margin-bottom: 16px;
+    }
+
+    /* Features list */
+    .dl-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+    .dl-features li {
+      font-size: 12px; color: var(--text-muted);
+      display: flex; align-items: center; gap: 7px;
+    }
+    .dl-features li::before {
+      content: '✓';
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .dl-card.studio .dl-features li::before { color: var(--yellow); }
+
+    /* Footer */
+    .dl-card-footer {
+      padding: 14px 22px 18px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .dl-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: var(--font-title);
+      letter-spacing: .5px;
+    }
+
+    /* Botão de download estilizado */
+    .btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      font-family: var(--font-title);
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: background .15s, transform .1s, box-shadow .15s;
+      width: 100%;
+    }
+    .btn-download:active { transform: translateY(1px); }
+
+    .btn-download.game-dl {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 0 var(--accent-dark);
+    }
+    .btn-download.game-dl:hover { background: #4ab050; }
+
+    .btn-download.studio-dl {
+      background: var(--yellow);
+      color: var(--bg-nav);
+      box-shadow: 0 4px 0 rgba(160,120,0,.8);
+    }
+    .btn-download.studio-dl:hover { background: #f5cb55; }
+
+    .btn-download-icon { font-size: 18px; }
+
+    /* OS badges */
+    .os-badges {
+      display: flex; gap: 6px; flex-wrap: wrap;
+    }
+    .os-badge {
+      padding: 2px 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 10px; color: var(--text-dim);
+      font-family: var(--font-title); letter-spacing: .5px;
+    }
+
+    /* ── AVISO DE REQUISITOS ── */
+    .dl-requirements {
+      max-width: 900px;
+      margin: 0 auto 52px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .dl-req-header {
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      padding: 9px 18px;
+      font-family: var(--font-title);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--yellow);
+    }
+    .dl-req-body {
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .dl-req-col h4 {
+      font-family: var(--font-title);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text); margin-bottom: 8px;
+    }
+    .dl-req-col ul {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .dl-req-col ul li {
+      font-size: 12px; color: var(--text-muted);
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .dl-req-col ul li::before { content: '·'; color: var(--accent); flex-shrink: 0; }
+
+    /* ── SEÇÃO TÍTULO CARROSSEL ── */
+    .carousel-section-title {
+      font-family: var(--font-title);
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-muted);
+      max-width: 900px;
+      margin: 0 auto 14px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .carousel-section-title::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border-light), transparent);
+    }
+
+    /* ── CARROSSEL ── */
+    .carousel-wrap {
+      max-width: 900px;
+      margin: 0 auto 20px;
+      position: relative;
+      user-select: none;
+    }
+
+    .carousel-viewport {
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border);
+      background: var(--bg-card);
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform .4s cubic-bezier(.4,0,.2,1);
+    }
+
+    .carousel-slide {
+      flex-shrink: 0;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Slides simulados com gradientes (sem imagens reais) */
+    .carousel-slide-inner {
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide-0 .carousel-slide-inner { background: linear-gradient(145deg, #081a08 0%, #0a1a30 40%, #150830 100%); }
+    .slide-1 .carousel-slide-inner { background: linear-gradient(145deg, #1a0808 0%, #300a1a 40%, #0a1530 100%); }
+    .slide-2 .carousel-slide-inner { background: linear-gradient(145deg, #08101a 0%, #0a2010 40%, #301508 100%); }
+    .slide-3 .carousel-slide-inner { background: linear-gradient(145deg, #100a1a 0%, #201008 40%, #081a10 100%); }
+
+    /* Grade de pixel art decorativa dentro do slide */
+    .slide-pixel-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    .slide-emoji { font-size: 80px; z-index: 1; }
+    .slide-caption {
+      z-index: 1;
+      text-align: center;
+    }
+    .slide-caption-title {
+      font-family: var(--font-title);
+      font-size: 18px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text); margin-bottom: 6px;
+    }
+    .slide-caption-sub {
+      font-size: 13px; color: var(--text-muted);
+    }
+
+    /* Overlay escuro nas bordas */
+    .carousel-viewport::before,
+    .carousel-viewport::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 60px;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .carousel-viewport::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(20,20,58,.7), transparent);
+    }
+    .carousel-viewport::after {
+      right: 0;
+      background: linear-gradient(270deg, rgba(20,20,58,.7), transparent);
+    }
+
+    /* Botões prev/next */
+    .carousel-btn {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px;
+      background: var(--bg-card);
+      border: 2px solid var(--border-light);
+      border-radius: 50%;
+      color: var(--text);
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 10;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s, transform .15s;
+    }
+    .carousel-btn:hover {
+      border-color: var(--accent);
+      background: rgba(61,158,66,.15);
+      transform: translateY(-50%) scale(1.08);
+    }
+    .carousel-btn.prev { left: -22px; }
+    .carousel-btn.next { right: -22px; }
+
+    /* Dots */
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 14px;
+    }
+    .carousel-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--border-light);
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      border: none;
+    }
+    .carousel-dot.active {
+      background: var(--accent);
+      transform: scale(1.35);
+    }
+
+    /* ── NOTA DE RODAPÉ ── */
+    .dl-footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 32px auto 0;
+      line-height: 1.6;
+    }
+    .dl-footer-note a { color: var(--accent); }
+
+    @media (max-width: 640px) {
+      .dl-cards { grid-template-columns: 1fr; }
+      .dl-req-body { grid-template-columns: 1fr; gap: 12px; }
+      .carousel-btn.prev { left: 4px; }
+      .carousel-btn.next { right: 4px; }
+      .carousel-slide-inner { height: 240px; }
+      .slide-emoji { font-size: 52px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" class="active" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="dl-hero">
+  <div class="dl-eyebrow">⬇ Downloads Oficiais ⬇</div>
+  <h1 class="dl-hero-title">Baixe o <span>Pellizzola</span></h1>
+  <p class="dl-hero-sub">Jogue as fases da comunidade ou crie as suas próprias.
+  Escolha o app certo para você e comece agora mesmo.</p>
+</div>
+
+<div class="page" style="padding-top:0;">
+
+  <!-- ═══ CARDS DE DOWNLOAD ═══ -->
+  <div class="dl-cards">
+
+    <!-- GAME -->
+    <div class="dl-card game" style="animation-delay:.05s">
+      <div class="dl-card-thumb">
+        🎮
+        <span class="dl-card-thumb-badge">✅ Estável</span>
+      </div>
+      <div class="dl-card-body">
+        <div class="dl-card-label">Aplicativo</div>
+        <div class="dl-card-name">PB Game</div>
+        <div class="dl-card-desc">
+          O player oficial de Pellizzola Brothers. Baixe fases da comunidade,
+          jogue offline e registre seus recordes. Simples, rápido e divertido.
+        </div>
+        <ul class="dl-features">
+          <li>Jogar qualquer fase da comunidade</li>
+          <li>Modo offline completo</li>
+          <li>Registro automático de progresso</li>
+          <li>Leaderboard integrado</li>
+          <li>Atualizações automáticas</li>
+        </ul>
+      </div>
+      <div class="dl-card-footer">
+        <div class="dl-meta">
+          <span>v1.4.2</span>
+          <span>~18 MB</span>
+          <span>Gratuito</span>
+        </div>
+        <div class="os-badges">
+          <span class="os-badge">🪟 Windows</span>
+          <span class="os-badge">🍎 macOS</span>
+          <span class="os-badge">🐧 Linux</span>
+        </div>
+        <a href="#" class="btn-download game-dl" onclick="handleDownloadClick(event,'Game')">
+          <span class="btn-download-icon">⬇</span>
+          Baixar PB Game
+        </a>
+      </div>
+    </div>
+
+    <!-- STUDIO -->
+    <div class="dl-card studio" style="animation-delay:.1s">
+      <div class="dl-card-thumb">
+        🛠️
+        <span class="dl-card-thumb-badge">🔧 Beta</span>
+      </div>
+      <div class="dl-card-body">
+        <div class="dl-card-label">Editor</div>
+        <div class="dl-card-name">PB Studio</div>
+        <div class="dl-card-desc">
+          O editor oficial de fases do Pellizzola Brothers. Crie, teste e publique
+          suas criações diretamente na plataforma. Interface visual poderosa e intuitiva.
+        </div>
+        <ul class="dl-features">
+          <li>Editor visual com drag & drop</li>
+          <li>Preview em tempo real</li>
+          <li>Publicação direta na plataforma</li>
+          <li>Gerenciador de assets integrado</li>
+          <li>Histórico de versões</li>
+        </ul>
+      </div>
+      <div class="dl-card-footer">
+        <div class="dl-meta">
+          <span>v0.8.1-beta</span>
+          <span>~34 MB</span>
+          <span>Gratuito</span>
+        </div>
+        <div class="os-badges">
+          <span class="os-badge">🪟 Windows</span>
+          <span class="os-badge">🍎 macOS</span>
+        </div>
+        <a href="#" class="btn-download studio-dl" onclick="handleDownloadClick(event,'Studio')">
+          <span class="btn-download-icon">⬇</span>
+          Baixar PB Studio
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /dl-cards -->
+
+  <!-- ═══ REQUISITOS ═══ -->
+  <div class="dl-requirements">
+    <div class="dl-req-header">⚙️ Requisitos do Sistema</div>
+    <div class="dl-req-body">
+      <div class="dl-req-col">
+        <h4>🎮 PB Game</h4>
+        <ul>
+          <li>Windows 10+, macOS 11+, Ubuntu 20.04+</li>
+          <li>4 GB de RAM (mínimo)</li>
+          <li>500 MB de espaço em disco</li>
+          <li>Conexão com internet para sincronizar fases</li>
+          <li>Resolução mínima: 1024×768</li>
+        </ul>
+      </div>
+      <div class="dl-req-col">
+        <h4>🛠️ PB Studio</h4>
+        <ul>
+          <li>Windows 10+, macOS 11+</li>
+          <li>8 GB de RAM (recomendado)</li>
+          <li>1.5 GB de espaço em disco</li>
+          <li>Conexão com internet obrigatória</li>
+          <li>Conta Pellizzola Brothers ativa</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ CARROSSEL ═══ -->
+  <div class="carousel-section-title">🖼 Capturas de Tela</div>
+
+  <div class="carousel-wrap">
+    <div class="carousel-viewport" id="carousel-viewport">
+      <div class="carousel-track" id="carousel-track">
+
+        <div class="carousel-slide slide-0">
+          <div class="carousel-slide-inner">
+            <div class="slide-pixel-grid"></div>
+            <div class="slide-emoji">🌴</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">Mapa do Mundo</div>
+              <div class="slide-caption-sub">Navegue pelo mapa e escolha sua próxima fase</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-slide slide-1">
+          <div class="carousel-slide-inner">
+            <div class="slide-pixel-grid"></div>
+            <div class="slide-emoji">🎯</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">Gameplay</div>
+              <div class="slide-caption-sub">Mecânicas precisas com física planejada ao detalhe</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-slide slide-2">
+          <div class="carousel-slide-inner">
+            <div class="slide-pixel-grid"></div>
+            <div class="slide-emoji">🛠️</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">Editor — PB Studio</div>
+              <div class="slide-caption-sub">Interface visual drag & drop para criar fases incríveis</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="carousel-slide slide-3">
+          <div class="carousel-slide-inner">
+            <div class="slide-pixel-grid"></div>
+            <div class="slide-emoji">🏆</div>
+            <div class="slide-caption">
+              <div class="slide-caption-title">Leaderboard</div>
+              <div class="slide-caption-sub">Compete com jogadores de todo o Brasil</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="carousel-btn prev" onclick="carouselPrev()" aria-label="Anterior">‹</button>
+    <button class="carousel-btn next" onclick="carouselNext()" aria-label="Próximo">›</button>
+  </div>
+
+  <div class="carousel-dots" id="carousel-dots"></div>
+
+  <div class="dl-footer-note">
+    Ao baixar, você concorda com nossos <a href="#">Termos de Uso</a>.
+    Dúvidas? Acesse o <a href="little_coffee.html">Cafézinho</a> ou consulte nossos
+    <a href="creditos.html">créditos</a>.
+  </div>
+
+</div>
+
+<!-- Toast simples -->
+<div id="dl-toast" style="
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--bg-card);border:2px solid var(--accent);border-radius:6px;
+  padding:12px 24px;font-size:13px;color:var(--text);opacity:0;
+  transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;z-index:999;">
+</div>
+
+<script>
+'use strict';
+
+/* ── Auth ── */
+(function() {
+  var user = getUser();
+  if (user) {
+    var el = document.getElementById('nav-auth');
+    el.textContent = user.username.toUpperCase();
+    el.href = 'perfil_do_usuario.html?id=' + user.id;
+    el.removeAttribute('data-i18n');
+  }
+})();
+
+/* ── Download click ── */
+function handleDownloadClick(e, app) {
+  e.preventDefault();
+  var toast = document.getElementById('dl-toast');
+  toast.textContent = '⬇ Iniciando download do PB ' + app + '… (em breve disponível!)';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(function() {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3200);
+}
+
+/* ── Carrossel ── */
+var carouselIndex = 0;
+var slides = document.querySelectorAll('.carousel-slide');
+var totalSlides = slides.length;
+var autoplayTimer;
+
+function goToSlide(n) {
+  carouselIndex = (n + totalSlides) % totalSlides;
+  document.getElementById('carousel-track').style.transform =
+    'translateX(-' + (carouselIndex * 100) + '%)';
+  document.querySelectorAll('.carousel-dot').forEach(function(d, i) {
+    d.classList.toggle('active', i === carouselIndex);
+  });
+}
+
+function carouselNext() { goToSlide(carouselIndex + 1); resetAutoplay(); }
+function carouselPrev() { goToSlide(carouselIndex - 1); resetAutoplay(); }
+
+function resetAutoplay() {
+  clearInterval(autoplayTimer);
+  autoplayTimer = setInterval(function() { goToSlide(carouselIndex + 1); }, 4500);
+}
+
+/* Montar dots */
+(function() {
+  var dotsEl = document.getElementById('carousel-dots');
+  for (var i = 0; i < totalSlides; i++) {
+    var btn = document.createElement('button');
+    btn.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+    btn.setAttribute('aria-label', 'Slide ' + (i + 1));
+    (function(idx) {
+      btn.addEventListener('click', function() { goToSlide(idx); resetAutoplay(); });
+    })(i);
+    dotsEl.appendChild(btn);
+  }
+})();
+
+/* Swipe touch */
+(function() {
+  var vp = document.getElementById('carousel-viewport');
+  var startX = 0;
+  vp.addEventListener('touchstart', function(e) { startX = e.touches[0].clientX; }, { passive: true });
+  vp.addEventListener('touchend', function(e) {
+    var diff = startX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 40) diff > 0 ? carouselNext() : carouselPrev();
+  });
+  /* Keyboard */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') carouselNext();
+    if (e.key === 'ArrowLeft')  carouselPrev();
+  });
+})();
+
+resetAutoplay();
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+</script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

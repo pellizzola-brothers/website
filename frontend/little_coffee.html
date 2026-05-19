@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>☕ Cafézinho da Chapeleira — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="cache.js"></script>
+
+  <style>
+    /* ══════════════════════════════════════════
+       CAFÉZINHO — Sala de descanso gamer
+    ══════════════════════════════════════════ */
+
+    /* Fundo com "vapor" animado */
+    .cafe-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      overflow: hidden;
+    }
+    .steam-particle {
+      position: absolute; bottom: -20px;
+      width: 6px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,192,64,.18) 0%, transparent 70%);
+      animation: steamRise linear infinite;
+    }
+    @keyframes steamRise {
+      0%   { transform: translateY(0) translateX(0) scale(1); opacity: .7; }
+      50%  { transform: translateY(-45vh) translateX(30px) scale(2.5); opacity: .35; }
+      100% { transform: translateY(-90vh) translateX(-10px) scale(4); opacity: 0; }
+    }
+
+    /* Layout principal */
+    .cafe-layout {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 240px 1fr 240px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    /* ── HEADER DA SALA ── */
+    .cafe-header {
+      grid-column: 1 / -1;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cafe-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(100deg,
+        rgba(240,192,64,.06) 0%,
+        transparent 40%,
+        rgba(61,158,66,.04) 100%);
+    }
+    .cafe-cup {
+      font-size: 52px;
+      animation: cupBob 3s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes cupBob {
+      0%,100% { transform: rotate(-4deg) translateY(0); }
+      50%      { transform: rotate(4deg) translateY(-4px); }
+    }
+    .cafe-header-info { flex: 1; }
+    .cafe-title {
+      font-family: var(--font-title);
+      font-size: 26px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--yellow);
+      text-shadow: 0 0 30px rgba(240,192,64,.4);
+      margin-bottom: 4px;
+    }
+    .cafe-subtitle {
+      font-size: 13px; color: var(--text-muted);
+      font-style: italic;
+    }
+    .cafe-header-stats {
+      display: flex; gap: 24px; flex-shrink: 0;
+    }
+    .cafe-hstat {
+      text-align: center;
+    }
+    .cafe-hstat-val {
+      font-family: var(--font-title);
+      font-size: 22px; font-weight: 700;
+      color: var(--yellow);
+    }
+    .cafe-hstat-lbl {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    /* ── SIDEBAR ESQUERDA: On-line & Mood ── */
+    .side-left { display: flex; flex-direction: column; gap: 12px; }
+    .side-right { display: flex; flex-direction: column; gap: 12px; }
+
+    .widget {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .widget-header {
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      padding: 8px 14px;
+      font-family: var(--font-title);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--yellow);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .widget-body { padding: 14px; }
+
+    /* Online agora */
+    .online-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+      animation: blink 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes blink {
+      0%,100% { opacity: 1; } 50% { opacity: .4; }
+    }
+    .online-user {
+      display: flex; align-items: center; gap: 8px;
+      padding: 5px 0;
+      font-size: 13px; color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+    .online-user:last-child { border-bottom: none; }
+    .online-user-avatar { font-size: 18px; }
+    .online-user-name {
+      font-family: var(--font-title);
+      font-size: 11px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      color: var(--text); flex: 1;
+    }
+    .online-user-status { font-size: 10px; color: var(--text-dim); }
+
+    /* Mood meter */
+    .mood-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 6px; margin-bottom: 10px;
+    }
+    .mood-btn {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 3px; padding: 8px 4px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer; font-size: 18px;
+      transition: border-color .15s, background .15s;
+    }
+    .mood-btn:hover { border-color: var(--accent); background: rgba(61,158,66,.1); }
+    .mood-btn.selected { border-color: var(--yellow); background: rgba(240,192,64,.12); }
+    .mood-btn span { font-size: 9px; color: var(--text-dim); font-family: var(--font-title); }
+    .mood-total { font-size: 11px; color: var(--text-muted); text-align: center; }
+
+    /* ── RANKING DE TOPICS ── (sidebar direita) */
+    .topic-mini {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-decoration: none; color: inherit;
+      cursor: pointer;
+    }
+    .topic-mini:last-child { border-bottom: none; }
+    .topic-mini-icon { font-size: 16px; flex-shrink: 0; }
+    .topic-mini-name {
+      flex: 1; font-family: var(--font-title);
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .5px;
+      color: var(--text);
+    }
+    .topic-mini-count { font-size: 10px; color: var(--text-dim); }
+
+    /* ── PARTE CENTRAL: TABS + FEED ── */
+    .cafe-center { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Tabs */
+    .cafe-tabs {
+      display: flex; gap: 2px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 6px;
+    }
+    .cafe-tab {
+      flex: 1; padding: 8px 12px;
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      background: none; border: none;
+      border-radius: var(--radius);
+      color: var(--text-muted); cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .cafe-tab:hover { color: var(--text); background: rgba(255,255,255,.05); }
+    .cafe-tab.active { background: var(--bg-nav); color: var(--yellow); }
+
+    /* Caixa de novo post */
+    .new-post-box {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      display: flex; align-items: flex-start; gap: 12px;
+    }
+    .new-post-avatar { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+    .new-post-inner { flex: 1; }
+    .new-post-topic-select {
+      display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;
+    }
+    .topic-chip {
+      padding: 3px 10px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      font-family: var(--font-title); font-size: 10px;
+      font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .topic-chip:hover { border-color: var(--accent); color: var(--text); }
+    .topic-chip.active { border-color: var(--yellow); color: var(--yellow); }
+    .new-post-textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: var(--font-body); font-size: 14px;
+      padding: 10px 12px; resize: none; min-height: 70px;
+      outline: none; transition: border-color .2s;
+      line-height: 1.5;
+    }
+    .new-post-textarea:focus { border-color: var(--accent); }
+    .new-post-textarea::placeholder { color: var(--text-dim); }
+    .new-post-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 8px;
+    }
+    .char-count { font-size: 11px; color: var(--text-dim); }
+    .new-post-actions { display: flex; gap: 8px; align-items: center; }
+    .emoji-insert-btn {
+      background: none; border: none; font-size: 18px;
+      cursor: pointer; opacity: .6; transition: opacity .15s;
+    }
+    .emoji-insert-btn:hover { opacity: 1; }
+
+    /* Filtro rápido de tópicos */
+    .topics-filter {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .filter-chip {
+      padding: 4px 12px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      font-family: var(--font-title); font-size: 10px;
+      font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      transition: all .15s;
+    }
+    .filter-chip:hover { border-color: var(--border-light); color: var(--text); }
+    .filter-chip.active { border-color: var(--accent); color: var(--accent); background: rgba(61,158,66,.1); }
+
+    /* Feed de posts */
+    .feed { display: flex; flex-direction: column; gap: 10px; }
+
+    /* Post card */
+    .post-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      animation: fadeSlideUp .35s ease both;
+    }
+    .post-card:hover { border-color: var(--border-light); }
+    .post-top {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 14px 16px 0;
+    }
+    .post-avatar { font-size: 30px; flex-shrink: 0; }
+    .post-meta { flex: 1; }
+    .post-author-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+    .post-author {
+      font-family: var(--font-title); font-size: 12px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text); text-decoration: none;
+    }
+    .post-author:hover { color: var(--yellow); }
+    .post-badge {
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-family: var(--font-title); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .badge-topic {
+      background: rgba(61,158,66,.15);
+      color: var(--accent);
+      border: 1px solid rgba(61,158,66,.3);
+    }
+    .badge-especial {
+      background: rgba(240,192,64,.15);
+      color: var(--yellow);
+      border: 1px solid rgba(240,192,64,.3);
+    }
+    .post-time { font-size: 10px; color: var(--text-dim); }
+    .post-text {
+      padding: 8px 16px 0 58px;
+      font-size: 14px; color: var(--text); line-height: 1.6;
+    }
+    /* Nível recomendado embed */
+    .post-level-embed {
+      margin: 10px 58px 0;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit;
+      transition: border-color .15s;
+    }
+    .post-level-embed:hover { border-color: var(--accent); }
+    .post-level-embed-icon { font-size: 24px; flex-shrink: 0; }
+    .post-level-embed-info { flex: 1; }
+    .post-level-embed-name {
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--text);
+    }
+    .post-level-embed-sub { font-size: 10px; color: var(--text-muted); }
+    .post-level-embed-dl { font-size: 10px; color: var(--text-dim); }
+
+    /* Ações do post */
+    .post-actions {
+      display: flex; align-items: center; gap: 2px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--border);
+      margin-top: 12px;
+    }
+    .post-action-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 10px;
+      background: none; border: none; border-radius: var(--radius);
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      transition: color .15s, background .15s;
+    }
+    .post-action-btn:hover { color: var(--text); background: rgba(255,255,255,.06); }
+    .post-action-btn.liked { color: #e05090; }
+    .post-action-btn.liked:hover { color: #ff70b0; }
+    .post-action-btn span { font-size: 14px; }
+    .post-spacer { flex: 1; }
+    .post-action-btn.reply-btn:hover { color: var(--accent); }
+
+    /* Replies */
+    .replies-section {
+      border-top: 1px solid var(--border);
+      padding: 0 16px 12px;
+      display: none;
+    }
+    .replies-section.open { display: block; }
+    .reply-item {
+      display: flex; gap: 10px; padding: 8px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .reply-item:last-child { border-bottom: none; }
+    .reply-avatar { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .reply-body { flex: 1; }
+    .reply-author {
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      text-transform: uppercase; color: var(--text); margin-bottom: 2px;
+    }
+    .reply-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+    .reply-time { font-size: 9px; color: var(--text-dim); margin-top: 3px; }
+    .reply-input-row {
+      display: flex; gap: 8px; margin-top: 10px; align-items: center;
+    }
+    .reply-input {
+      flex: 1; background: var(--bg); border: 2px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: var(--font-body); font-size: 13px;
+      padding: 7px 10px; outline: none; transition: border-color .2s;
+    }
+    .reply-input:focus { border-color: var(--accent); }
+    .reply-input::placeholder { color: var(--text-dim); }
+
+    /* ── ABA RANKINGS ── */
+    .ranking-section { display: none; }
+    .ranking-section.active { display: block; }
+    .rank-podium {
+      display: flex; gap: 8px; justify-content: center;
+      align-items: flex-end; margin-bottom: 20px;
+    }
+    .podium-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .podium-block {
+      border-radius: var(--radius) var(--radius) 0 0;
+      width: 76px;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-end; padding-bottom: 10px;
+    }
+    .podium-1 { height: 90px; background: linear-gradient(180deg, rgba(240,192,64,.25), rgba(240,192,64,.08)); border: 2px solid rgba(240,192,64,.4); }
+    .podium-2 { height: 68px; background: linear-gradient(180deg, rgba(200,200,255,.12), rgba(200,200,255,.04)); border: 2px solid rgba(200,200,255,.25); }
+    .podium-3 { height: 52px; background: linear-gradient(180deg, rgba(200,140,60,.15), rgba(200,140,60,.04)); border: 2px solid rgba(200,140,60,.25); }
+    .podium-avatar { font-size: 24px; margin-bottom: 4px; }
+    .podium-name {
+      font-family: var(--font-title); font-size: 9px; font-weight: 700;
+      text-transform: uppercase; color: var(--text); letter-spacing: .5px;
+      text-align: center;
+    }
+    .podium-medal { font-size: 18px; }
+    .podium-score { font-size: 9px; color: var(--text-muted); }
+
+    .rank-table {
+      width: 100%; border-collapse: collapse;
+    }
+    .rank-table th {
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted); text-align: left;
+      padding: 6px 10px; border-bottom: 2px solid var(--border);
+    }
+    .rank-table td {
+      padding: 8px 10px; font-size: 13px; color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+    .rank-table tr:last-child td { border-bottom: none; }
+    .rank-pos {
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      color: var(--text-dim); width: 30px;
+    }
+    .rank-user-cell { display: flex; align-items: center; gap: 8px; }
+    .rank-badge { font-size: 10px; color: var(--text-dim); }
+
+    /* ── ABA DESAFIOS ── */
+    .challenge-section { display: none; }
+    .challenge-section.active { display: block; }
+    .challenge-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      position: relative; overflow: hidden;
+    }
+    .challenge-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--yellow));
+    }
+    .challenge-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-family: var(--font-title); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .tag-ativo { background: rgba(61,158,66,.2); color: var(--accent); border: 1px solid rgba(61,158,66,.4); }
+    .tag-encerrado { background: rgba(100,100,150,.2); color: var(--text-dim); border: 1px solid rgba(100,100,150,.3); }
+    .challenge-title {
+      font-family: var(--font-title); font-size: 16px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--text);
+      margin-bottom: 6px;
+    }
+    .challenge-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+    .challenge-meta {
+      display: flex; gap: 20px; flex-wrap: wrap;
+      font-size: 11px; color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+    .challenge-meta strong { color: var(--text); }
+    .challenge-prog-wrap {
+      height: 8px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 4px;
+      overflow: hidden; margin-bottom: 8px;
+    }
+    .challenge-prog-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--yellow));
+      border-radius: 4px;
+      transition: width 1s ease;
+    }
+    .challenge-prog-label { font-size: 10px; color: var(--text-dim); }
+
+    /* Dica do dia */
+    .tip-of-day {
+      background: linear-gradient(135deg, rgba(240,192,64,.08), rgba(61,158,66,.06));
+      border: 2px solid rgba(240,192,64,.25);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .tip-icon { font-size: 28px; flex-shrink: 0; }
+    .tip-label {
+      font-family: var(--font-title); font-size: 9px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--yellow); margin-bottom: 4px;
+    }
+    .tip-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+    /* Indicador de seção ativa */
+    .cafe-section { display: none; }
+    .cafe-section.active { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Seção vazia */
+    .empty-cafe {
+      text-align: center; padding: 48px 20px;
+      color: var(--text-muted); font-style: italic;
+      font-size: 14px;
+    }
+    .empty-cafe-icon { font-size: 40px; margin-bottom: 10px; display: block; }
+
+    /* Login call */
+    .login-needed {
+      background: var(--bg-card);
+      border: 2px dashed var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 20px; text-align: center;
+      color: var(--text-muted); font-size: 13px;
+    }
+    .login-needed a { color: var(--yellow); }
+
+    /* Toast */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--bg-card); border: 2px solid var(--accent);
+      border-radius: var(--radius-lg); padding: 12px 20px;
+      font-size: 13px; color: var(--text);
+      box-shadow: 0 8px 30px rgba(0,0,0,.5);
+      transform: translateY(80px); opacity: 0;
+      transition: transform .3s ease, opacity .3s ease;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── FEED COM SCROLL TIPO WHATSAPP ── */
+    .feed-scroll-wrap {
+      height: 620px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+    /* Scrollbar discreta, igual a apps de chat */
+    .feed-scroll-wrap::-webkit-scrollbar { width: 4px; }
+    .feed-scroll-wrap::-webkit-scrollbar-track { background: transparent; }
+    .feed-scroll-wrap::-webkit-scrollbar-thumb {
+      background: var(--border-light);
+      border-radius: 2px;
+    }
+    .feed-scroll-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+    /* Sentinel de "carregando mais" no bottom */
+    .feed-load-sentinel {
+      text-align: center;
+      padding: 10px 0;
+      font-size: 11px;
+      color: var(--text-dim);
+      font-family: var(--font-title);
+      letter-spacing: 1px;
+    }
+
+    /* ── ONLINE: MAIS X PESSOAS ── */
+    .online-more {
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: rgba(61,158,66,.08);
+      border: 1px solid rgba(61,158,66,.2);
+      border-radius: var(--radius);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+      font-family: var(--font-title);
+      letter-spacing: .5px;
+    }
+    .online-more strong { color: var(--accent); }
+
+    /* ── WIDGET CRIADORES FAVORITOS ── */
+    .fav-creator-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      color: inherit;
+    }
+    .fav-creator-item:last-child { border-bottom: none; }
+    .fav-creator-avatar { font-size: 22px; flex-shrink: 0; }
+    .fav-creator-info { flex: 1; min-width: 0; }
+    .fav-creator-name {
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .5px;
+      color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .fav-creator-sub { font-size: 10px; color: var(--text-dim); }
+    .btn-fav-mini {
+      width: 28px; height: 28px;
+      background: none; border: 2px solid var(--border);
+      border-radius: var(--radius); color: var(--text-muted);
+      font-size: 13px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .btn-fav-mini:hover { border-color: #e05070; color: #e05070; }
+    .btn-fav-mini.favoritado { border-color: #e05070; background: rgba(224,80,112,.12); color: #e05070; }
+    .fav-empty {
+      font-size: 12px; color: var(--text-dim); font-style: italic;
+      text-align: center; padding: 8px 0; line-height: 1.6;
+    }
+    .fav-empty a { color: var(--yellow); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .cafe-layout { grid-template-columns: 1fr; }
+      .side-left, .side-right { display: none; }
+      .cafe-header-stats { display: none; }
+      .feed-scroll-wrap { height: auto; max-height: 70vh; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Steam particles (decorativas) -->
+<div class="cafe-bg" id="cafe-bg"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Levels</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" class="active" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar levels..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="cafe-layout">
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <div class="cafe-header">
+      <div class="cafe-cup">☕</div>
+      <div class="cafe-header-info">
+        <div class="cafe-title">☕ Cafézinho da Chapeleira</div>
+        <div class="cafe-subtitle">Pausa gamer — discuta levels, troque dicas e faça amigos 🎮</div>
+      </div>
+      <div class="cafe-header-stats">
+        <div class="cafe-hstat">
+          <div class="cafe-hstat-val" id="stat-online">—</div>
+          <div class="cafe-hstat-lbl">Online</div>
+        </div>
+        <div class="cafe-hstat">
+          <div class="cafe-hstat-val" id="stat-posts">—</div>
+          <div class="cafe-hstat-lbl">Posts hoje</div>
+        </div>
+        <div class="cafe-hstat">
+          <div class="cafe-hstat-val" id="stat-members">—</div>
+          <div class="cafe-hstat-lbl">Membros</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SIDEBAR ESQUERDA ═══════════════ -->
+    <div class="side-left">
+
+      <!-- Quem está online -->
+      <div class="widget">
+        <div class="widget-header">
+          <div class="online-dot"></div>
+          Online agora
+        </div>
+        <div class="widget-body" id="online-list">
+          <div class="online-user">
+            <div class="online-user-avatar">🤖</div>
+            <div>
+              <div class="online-user-name">Bot do Café</div>
+              <div class="online-user-status">Sempre no plantão ☕</div>
+            </div>
+          </div>
+        </div>
+        <div id="online-more-msg" style="display:none;" class="online-more"></div>
+      </div>
+
+      <!-- Mood meter -->
+      <div class="widget">
+        <div class="widget-header">🎭 Como tá o clima?</div>
+        <div class="widget-body">
+          <div class="mood-grid" id="mood-grid">
+            <button class="mood-btn" data-mood="feliz" onclick="votarMood('feliz', this)">
+              😄 <span>Feliz</span>
+            </button>
+            <button class="mood-btn" data-mood="focado" onclick="votarMood('focado', this)">
+              🎯 <span>Focado</span>
+            </button>
+            <button class="mood-btn" data-mood="tilted" onclick="votarMood('tilted', this)">
+              😤 <span>Tilted</span>
+            </button>
+            <button class="mood-btn" data-mood="relax" onclick="votarMood('relax', this)">
+              😌 <span>Relax</span>
+            </button>
+          </div>
+          <div class="mood-total" id="mood-result">Vote para ver o resultado!</div>
+        </div>
+      </div>
+
+      <!-- Dica do dia -->
+      <div class="tip-of-day" id="tip-box">
+        <div class="tip-icon">💡</div>
+        <div>
+          <div class="tip-label">Dica do Dia</div>
+          <div class="tip-text" id="tip-text">Carregando...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ CENTRO ═══════════════ -->
+    <div class="cafe-center">
+
+      <!-- Tabs -->
+      <div class="cafe-tabs">
+        <button class="cafe-tab active" onclick="mudarAba('feed', this)">💬 Feed</button>
+        <button class="cafe-tab" onclick="mudarAba('ranking', this)">🏆 Rankings</button>
+        <button class="cafe-tab" onclick="mudarAba('desafios', this)">⚔️ Desafios</button>
+      </div>
+
+      <!-- ══ ABA: FEED ══ -->
+      <div class="cafe-section active" id="aba-feed">
+
+        <!-- Caixa de novo post (logado) -->
+        <div id="post-box-logado" style="display:none;">
+          <div class="new-post-box">
+            <div class="new-post-avatar" id="user-avatar-post">👤</div>
+            <div class="new-post-inner">
+              <div class="new-post-topic-select">
+                <button class="topic-chip active" data-topic="geral" onclick="selecionarTopico('geral', this)">☕ Geral</button>
+                <button class="topic-chip" data-topic="dica" onclick="selecionarTopico('dica', this)">💡 Dica</button>
+                <button class="topic-chip" data-topic="recomendacao" onclick="selecionarTopico('recomendacao', this)">⭐ Recomendar Level</button>
+                <button class="topic-chip" data-topic="bug" onclick="selecionarTopico('bug', this)">🐛 Bug Report</button>
+                <button class="topic-chip" data-topic="pergunta" onclick="selecionarTopico('pergunta', this)">❓ Pergunta</button>
+              </div>
+              <textarea
+                class="new-post-textarea"
+                id="post-textarea"
+                placeholder="O que você tá achando do jogo? Recomenda alguma fase? Toma um café e conta pra gente... ☕"
+                maxlength="500"
+                oninput="atualizarContador()"
+              ></textarea>
+              <!-- Campo especial para recomendar level -->
+              <div id="level-recommend-field" style="display:none;margin-top:8px;">
+                <input
+                  type="text"
+                  id="level-recommend-input"
+                  class="form-input"
+                  placeholder="🔍 ID ou nome do level que você quer recomendar..."
+                  style="font-size:13px;padding:7px 10px;"
+                >
+              </div>
+              <div class="new-post-footer">
+                <div class="char-count"><span id="char-count">0</span>/500</div>
+                <div class="new-post-actions">
+                  <button class="emoji-insert-btn" onclick="inserirEmoji('☕')" title="☕">☕</button>
+                  <button class="emoji-insert-btn" onclick="inserirEmoji('🎮')" title="🎮">🎮</button>
+                  <button class="emoji-insert-btn" onclick="inserirEmoji('🔥')" title="🔥">🔥</button>
+                  <button class="emoji-insert-btn" onclick="inserirEmoji('👾')" title="👾">👾</button>
+                  <button class="btn btn-green btn-sm" onclick="publicarPost()">Publicar ☕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call to login (visitante) -->
+        <div id="post-box-visitante" style="display:none;">
+          <div class="login-needed">
+            ☕ <a href="login.html">Faça login</a> para participar da conversa no Cafézinho!
+          </div>
+        </div>
+
+        <!-- Filtros de tópico -->
+        <div class="topics-filter" id="filtros-topico">
+          <button class="filter-chip active" data-filter="todos" onclick="filtrarPosts('todos', this)">🗂 Todos</button>
+          <button class="filter-chip" data-filter="geral" onclick="filtrarPosts('geral', this)">☕ Geral</button>
+          <button class="filter-chip" data-filter="dica" onclick="filtrarPosts('dica', this)">💡 Dicas</button>
+          <button class="filter-chip" data-filter="recomendacao" onclick="filtrarPosts('recomendacao', this)">⭐ Recomendações</button>
+          <button class="filter-chip" data-filter="bug" onclick="filtrarPosts('bug', this)">🐛 Bugs</button>
+          <button class="filter-chip" data-filter="pergunta" onclick="filtrarPosts('pergunta', this)">❓ Perguntas</button>
+        </div>
+
+        <!-- Feed -->
+        <div class="feed-scroll-wrap" id="feed-scroll-wrap">
+          <div class="feed" id="feed-container">
+            <!-- Posts injetados por JS -->
+            <div class="empty-cafe">
+              <span class="empty-cafe-icon">☕</span>
+              Carregando o café...
+            </div>
+          </div>
+          <div class="feed-load-sentinel" id="feed-sentinel" style="display:none;">
+            ☕ Você chegou ao fundo do café...
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══ ABA: RANKINGS ══ -->
+      <div class="cafe-section" id="aba-ranking">
+
+        <!-- Tabs internas -->
+        <div class="cafe-tabs" style="background:transparent;border:none;padding:0;gap:8px;">
+          <button class="filter-chip active" onclick="mudarRanking('levels', this)" id="rank-tab-levels">🎮 Top Levels</button>
+          <button class="filter-chip" onclick="mudarRanking('criadores', this)" id="rank-tab-criadores">👤 Top Criadores</button>
+          <button class="filter-chip" onclick="mudarRanking('cafe', this)" id="rank-tab-cafe">☕ Mais ativos no Café</button>
+        </div>
+
+        <!-- Pódio -->
+        <div class="widget">
+          <div class="widget-header">🏆 Pódio</div>
+          <div class="widget-body">
+            <div class="rank-podium" id="podium">
+              <div class="podium-col">
+                <div class="podium-medal">🥈</div>
+                <div class="podium-avatar">👤</div>
+                <div class="podium-block podium-2">
+                  <div class="podium-name" id="p2-name">—</div>
+                  <div class="podium-score" id="p2-score">—</div>
+                </div>
+              </div>
+              <div class="podium-col">
+                <div class="podium-medal">🥇</div>
+                <div class="podium-avatar" id="p1-avatar">👑</div>
+                <div class="podium-block podium-1">
+                  <div class="podium-name" id="p1-name">—</div>
+                  <div class="podium-score" id="p1-score">—</div>
+                </div>
+              </div>
+              <div class="podium-col">
+                <div class="podium-medal">🥉</div>
+                <div class="podium-avatar">👤</div>
+                <div class="podium-block podium-3">
+                  <div class="podium-name" id="p3-name">—</div>
+                  <div class="podium-score" id="p3-score">—</div>
+                </div>
+              </div>
+            </div>
+
+            <table class="rank-table" id="rank-table-body">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Nome</th>
+                  <th id="rank-col-label">Downloads</th>
+                </tr>
+              </thead>
+              <tbody id="rank-tbody">
+                <tr><td colspan="3" style="color:var(--text-muted);font-style:italic;text-align:center;padding:16px;">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ══ ABA: DESAFIOS ══ -->
+      <div class="cafe-section" id="aba-desafios">
+        <div id="desafios-cafe-lista">
+          <div class="empty-cafe">
+            <span class="empty-cafe-icon">⚔️</span>
+            Carregando desafios...
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ SIDEBAR DIREITA ═══════════════ -->
+    <div class="side-right">
+
+      <!-- ⭐ Criadores Favoritos -->
+      <div class="widget">
+        <div class="widget-header">⭐ Criadores Favoritos</div>
+        <div class="widget-body" id="fav-creators-list">
+          <!-- Preenchido por JS -->
+        </div>
+      </div>
+
+      <!-- Tópicos em alta -->
+      <div class="widget">
+        <div class="widget-header">🔥 Em Alta</div>
+        <div class="widget-body" id="trending-topics">
+          <div class="topic-mini" onclick="filtrarPosts('recomendacao', document.querySelector('[data-filter=recomendacao]'))">
+            <div class="topic-mini-icon">⭐</div>
+            <div class="topic-mini-name">Recomendações</div>
+            <div class="topic-mini-count">12 posts</div>
+          </div>
+          <div class="topic-mini" onclick="filtrarPosts('dica', document.querySelector('[data-filter=dica]'))">
+            <div class="topic-mini-icon">💡</div>
+            <div class="topic-mini-name">Dicas</div>
+            <div class="topic-mini-count">8 posts</div>
+          </div>
+          <div class="topic-mini" onclick="filtrarPosts('bug', document.querySelector('[data-filter=bug]'))">
+            <div class="topic-mini-icon">🐛</div>
+            <div class="topic-mini-name">Bugs</div>
+            <div class="topic-mini-count">3 posts</div>
+          </div>
+          <div class="topic-mini" onclick="filtrarPosts('geral', document.querySelector('[data-filter=geral]'))">
+            <div class="topic-mini-icon">☕</div>
+            <div class="topic-mini-name">Geral</div>
+            <div class="topic-mini-count">22 posts</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sugestão de levels para jogar -->
+      <div class="widget">
+        <div class="widget-header">🎮 Jogar Agora</div>
+        <div class="widget-body" id="sugestao-levels">
+          <div style="color:var(--text-muted);font-size:12px;font-style:italic;">Carregando...</div>
+        </div>
+      </div>
+
+      <!-- Regras do café -->
+      <div class="widget">
+        <div class="widget-header">📋 Regras do Café</div>
+        <div class="widget-body" style="font-size:12px;color:var(--text-muted);line-height:1.7;">
+          ☕ Seja gentil com todos<br>
+          🎮 Sem spoilers sem aviso<br>
+          💡 Compartilhe dicas úteis<br>
+          🐛 Bugs? Use a tag correta<br>
+          ❌ Zero spam ou flood<br>
+          ⭐ Dê crédito ao criador
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════
+   CAFÉZINHO — Lógica principal
+═══════════════════════════════════════════ */
+
+var usuario    = getUser();
+var abaAtiva   = 'feed';
+var rankAtiva  = 'levels';
+var topicoPost = 'geral';
+var filtroAtivo = 'todos';
+
+/* ── Auth UI ── */
+if (usuario) {
+  document.getElementById('nav-auth').textContent = usuario.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + usuario.id;
+  document.getElementById('post-box-logado').style.display = '';
+  document.getElementById('user-avatar-post').textContent = usuario.avatar || '👤';
+} else {
+  document.getElementById('post-box-visitante').style.display = '';
+}
+
+/* ── Steam particles ── */
+(function() {
+  var bg = document.getElementById('cafe-bg');
+  for (var i = 0; i < 12; i++) {
+    var p = document.createElement('div');
+    p.className = 'steam-particle';
+    var size = 4 + Math.random() * 12;
+    p.style.cssText =
+      'left:' + (5 + Math.random() * 90) + '%' +
+      ';width:' + size + 'px' +
+      ';height:' + size + 'px' +
+      ';animation-duration:' + (8 + Math.random() * 14) + 's' +
+      ';animation-delay:' + (Math.random() * 10) + 's';
+    bg.appendChild(p);
+  }
+})();
+
+/* ── Dicas do dia ── */
+var DICAS = [
+  'Explore as fases com menos downloads — às vezes os diamantes estão escondidos! 💎',
+  'Siga os criadores que você gosta para ver suas novas fases em primeira mão. 👁',
+  'Deixe um like nas fases que você curtiu — ajuda o criador a aparecer no destaque! ❤️',
+  'Use o Cafézinho para pedir dicas antes de tentar uma fase difícil. ☕',
+  'Fase travada? Tente outra ordem de abordagem — às vezes a saída é a esquerda. 🗺',
+  'Compartilhe o link das suas fases favoritas aqui no café com a tag #recomendação!',
+  'O criador destaque da semana leva os levels para a home. Curta e ajude quem merece! 🏆',
+  'Bug encontrado? Relate aqui com detalhes para o criador corrigir mais rápido. 🐛',
+];
+document.getElementById('tip-text').textContent = DICAS[Math.floor(Math.random() * DICAS.length)];
+
+/* ── Estatísticas do header (simuladas até ter API) ── */
+function animarNumero(el, target) {
+  var cur = 0;
+  var step = Math.ceil(target / 30);
+  var interval = setInterval(function() {
+    cur = Math.min(cur + step, target);
+    el.textContent = cur;
+    if (cur >= target) clearInterval(interval);
+  }, 40);
+}
+animarNumero(document.getElementById('stat-online'), 7);
+animarNumero(document.getElementById('stat-posts'), 23);
+animarNumero(document.getElementById('stat-members'), 148);
+
+/* ── Online agora (mock + usuário logado) — máx 5 visíveis ── */
+var mockOnlineFull = [
+  { name: 'xx_poste_xx',   avatar: '🎮', status: 'jogando Revolver' },
+  { name: 'BillyShears',   avatar: '🎸', status: 'criando nova fase' },
+  { name: 'JacaboMassola', avatar: '☕', status: 'tomando café' },
+  { name: 'DuneMaestro',   avatar: '🏜️', status: 'explorando fases' },
+  { name: 'NeonRider_77',  avatar: '⚡', status: 'no ranking' },
+  { name: 'StarGazer',     avatar: '🌟', status: 'offline pouco' },
+  { name: 'PixelWitch',    avatar: '🧙', status: 'criando levels' },
+];
+if (usuario) {
+  mockOnlineFull.unshift({ name: usuario.username, avatar: usuario.avatar || '👤', status: 'online agora' });
+}
+var MAX_ONLINE_VISIBLE = 5;
+var visiveisOnline = mockOnlineFull.slice(0, MAX_ONLINE_VISIBLE);
+var extrasOnline   = mockOnlineFull.length - MAX_ONLINE_VISIBLE;
+var onlineHTML = visiveisOnline.map(function(u) {
+  return '<div class="online-user">' +
+    '<div class="online-user-avatar">' + u.avatar + '</div>' +
+    '<div>' +
+      '<div class="online-user-name">' + escapeHTML(u.name) + '</div>' +
+      '<div class="online-user-status">' + u.status + '</div>' +
+    '</div>' +
+  '</div>';
+}).join('');
+document.getElementById('online-list').innerHTML = onlineHTML;
+if (extrasOnline > 0) {
+  var moreEl = document.getElementById('online-more-msg');
+  moreEl.style.display = '';
+  moreEl.innerHTML = 'estão online mais <strong>' + extrasOnline + '</strong> ' + (extrasOnline === 1 ? 'pessoa' : 'pessoas');
+}
+
+/* ── Mood meter ── */
+var moodVotos = { feliz: 14, focado: 8, tilted: 5, relax: 19 };
+var meuMood   = localStorage.getItem('pb_cafe_mood');
+
+function votarMood(mood, btn) {
+  if (!usuario) { showToast('☕ Faça login para votar no mood!'); return; }
+  if (meuMood && meuMood !== mood) moodVotos[meuMood]--;
+  if (!meuMood || meuMood !== mood) moodVotos[mood]++;
+  meuMood = mood;
+  localStorage.setItem('pb_cafe_mood', mood);
+  document.querySelectorAll('.mood-btn').forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  renderMoodResult();
+}
+function renderMoodResult() {
+  var total = Object.values(moodVotos).reduce(function(a,b){return a+b;},0);
+  var top   = Object.keys(moodVotos).reduce(function(a,b){return moodVotos[a]>moodVotos[b]?a:b;});
+  var emojis = { feliz:'😄', focado:'🎯', tilted:'😤', relax:'😌' };
+  var pct    = Math.round((moodVotos[top]/total)*100);
+  document.getElementById('mood-result').textContent =
+    'Clima atual: ' + emojis[top] + ' ' + top + ' (' + pct + '% dos votos)';
+  if (meuMood) {
+    var sel = document.querySelector('[data-mood="' + meuMood + '"]');
+    if (sel) sel.classList.add('selected');
+  }
+}
+renderMoodResult();
+
+/* ══════════════════════════════════
+   POSTS (armazenados localmente)
+══════════════════════════════════ */
+var STORAGE_POSTS = 'pb_cafe_posts';
+var STORAGE_LIKES = 'pb_cafe_likes';
+
+function getPosts() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_POSTS) || '[]'); } catch(_) { return []; }
+}
+function savePosts(posts) {
+  localStorage.setItem(STORAGE_POSTS, JSON.stringify(posts));
+}
+function getLikes() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_LIKES) || '{}'); } catch(_) { return {}; }
+}
+function saveLikes(l) { localStorage.setItem(STORAGE_LIKES, JSON.stringify(l)); }
+
+/* Posts iniciais de exemplo */
+function getPostsIniciais() {
+  return [
+    {
+      id: 'p001', topico: 'recomendacao', autor: 'BillyShears', avatar: '🎸',
+      autorId: 2, texto: 'Galera, o level "Revolver" do meu perfil é IRADO, vale muito testar! Dificuldade média-alta mas muito recompensador 🔥',
+      levelRec: { id: 4, name: 'Revolver', downloads: 8, likes: 6 },
+      likes: 7, ts: Date.now() - 3600000, replies: [
+        { autor: 'xx_poste_xx', avatar: '🎮', texto: 'Joguei ontem, confirmo! Fase incrível.', ts: Date.now() - 3000000 }
+      ]
+    },
+    {
+      id: 'p002', topico: 'dica', autor: 'JacaboMassola', avatar: '☕',
+      autorId: 3, texto: 'Dica pra quem tá começando: sempre leia a descrição da fase antes de tentar! Muitas têm dicas escondidas na própria descrição 💡',
+      likes: 4, ts: Date.now() - 7200000, replies: []
+    },
+    {
+      id: 'p003', topico: 'geral', autor: 'xx_poste_xx', avatar: '🎮',
+      autorId: 1, texto: '☕ Bom dia Cafézinho! Já tomei o café, já estou no flow. Hoje vou finalizar mais duas fases pra vocês 🚀',
+      likes: 11, ts: Date.now() - 10800000, replies: [
+        { autor: 'BillyShears', avatar: '🎸', texto: 'Vai nessa poste!! 🔥', ts: Date.now() - 10000000 }
+      ]
+    },
+    {
+      id: 'p004', topico: 'bug', autor: 'BillyShears', avatar: '🎸',
+      autorId: 2, texto: 'Reportando: a contagem de downloads às vezes não atualiza em tempo real na página de perfil. Já alguém mais viu isso? 🐛',
+      likes: 2, ts: Date.now() - 18000000, replies: []
+    },
+    {
+      id: 'p005', topico: 'pergunta', autor: 'JacaboMassola', avatar: '☕',
+      autorId: 3, texto: 'Alguém sabe como exportar o arquivo de fase pro formato correto? O meu tá sendo rejeitado no upload ❓',
+      likes: 1, ts: Date.now() - 25200000, replies: [
+        { autor: 'xx_poste_xx', avatar: '🎮', texto: 'Precisa ser .json ou o formato nativo do editor. Qual ferramenta você usa?', ts: Date.now() - 24000000 }
+      ]
+    },
+  ];
+}
+
+/* Inicializa posts se não houver */
+if (!localStorage.getItem(STORAGE_POSTS) || getPosts().length === 0) {
+  savePosts(getPostsIniciais());
+}
+
+/* ── Selecionar tópico do post ── */
+function selecionarTopico(tp, btn) {
+  topicoPost = tp;
+  document.querySelectorAll('.topic-chip').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('level-recommend-field').style.display =
+    tp === 'recomendacao' ? '' : 'none';
+}
+
+/* ── Atualizar contador de chars ── */
+function atualizarContador() {
+  var len = document.getElementById('post-textarea').value.length;
+  var el  = document.getElementById('char-count');
+  el.textContent = len;
+  el.style.color = len > 450 ? 'var(--accent)' : 'var(--text-dim)';
+}
+
+/* ── Inserir emoji ── */
+function inserirEmoji(emoji) {
+  var ta = document.getElementById('post-textarea');
+  ta.value += emoji;
+  atualizarContador();
+  ta.focus();
+}
+
+/* ── Publicar post ── */
+function publicarPost() {
+  if (!usuario) { showToast('Faça login primeiro!'); return; }
+  var texto = document.getElementById('post-textarea').value.trim();
+  if (!texto) { showToast('Escreva algo antes de publicar! ☕'); return; }
+  if (texto.length < 5) { showToast('Mensagem muito curta!'); return; }
+
+  var levelRec = null;
+  if (topicoPost === 'recomendacao') {
+    var lInput = document.getElementById('level-recommend-input').value.trim();
+    if (lInput) levelRec = { id: parseInt(lInput) || 0, name: lInput, downloads: 0, likes: 0 };
+  }
+
+  var posts = getPosts();
+  var novoPost = {
+    id: 'p' + Date.now(),
+    topico: topicoPost,
+    autor: usuario.username,
+    avatar: usuario.avatar || '👤',
+    autorId: usuario.id,
+    texto: texto,
+    levelRec: levelRec,
+    likes: 0,
+    ts: Date.now(),
+    replies: []
+  };
+  posts.unshift(novoPost);
+  savePosts(posts);
+
+  document.getElementById('post-textarea').value = '';
+  atualizarContador();
+  document.getElementById('level-recommend-input') && (document.getElementById('level-recommend-input').value = '');
+  renderFeed();
+  showToast('☕ Post publicado! Valeu por contribuir!');
+  /* Scroll suave para o topo do feed para o usuário ver o novo post */
+  var wrap = document.getElementById('feed-scroll-wrap');
+  if (wrap) { setTimeout(function(){ wrap.scrollTo({ top: 0, behavior: 'smooth' }); }, 50); }
+}
+
+/* ── Formatar tempo ── */
+function tempoRelativo(ts) {
+  var d = Date.now() - ts;
+  if (d < 60000)   return 'agora mesmo';
+  if (d < 3600000) return Math.floor(d/60000) + 'm atrás';
+  if (d < 86400000)return Math.floor(d/3600000) + 'h atrás';
+  return Math.floor(d/86400000) + 'd atrás';
+}
+
+/* ── Labels de tópico ── */
+var TOPICO_LABEL = {
+  geral: '☕ Geral', dica: '💡 Dica', recomendacao: '⭐ Recomendação',
+  bug: '🐛 Bug', pergunta: '❓ Pergunta'
+};
+
+/* ── Render de um post ── */
+function renderPost(post) {
+  var likes = getLikes();
+  var jaCurtiu = likes[post.id] === (usuario && usuario.id);
+  var repliesHTML = '';
+  if (post.replies && post.replies.length) {
+    repliesHTML = post.replies.map(function(r) {
+      return '<div class="reply-item">' +
+        '<div class="reply-avatar">' + (r.avatar || '👤') + '</div>' +
+        '<div class="reply-body">' +
+          '<div class="reply-author">' + r.autor + '</div>' +
+          '<div class="reply-text">' + escapeHTML(r.texto) + '</div>' +
+          '<div class="reply-time">' + tempoRelativo(r.ts) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  var levelEmbed = '';
+  if (post.levelRec) {
+    levelEmbed =
+      '<a href="perfil_do_jogo.html?id=' + post.levelRec.id + '" class="post-level-embed">' +
+        '<div class="post-level-embed-icon">🎮</div>' +
+        '<div class="post-level-embed-info">' +
+          '<div class="post-level-embed-name">' + escapeHTML(post.levelRec.name) + '</div>' +
+          '<div class="post-level-embed-sub">Level recomendado</div>' +
+          '<div class="post-level-embed-dl">⬇ ' + post.levelRec.downloads + '  ♥ ' + post.levelRec.likes + '</div>' +
+        '</div>' +
+        '<div style="font-size:18px;color:var(--accent);">→</div>' +
+      '</a>';
+  }
+
+  return '<div class="post-card card-anim" id="post-' + post.id + '" data-topico="' + post.topico + '">' +
+    '<div class="post-top">' +
+      '<div class="post-avatar">' + (post.avatar || '👤') + '</div>' +
+      '<div class="post-meta">' +
+        '<div class="post-author-row">' +
+          '<a href="perfil_do_usuario.html?id=' + post.autorId + '" class="post-author">' + escapeHTML(post.autor) + '</a>' +
+          '<span class="post-badge badge-topic">' + (TOPICO_LABEL[post.topico] || post.topico) + '</span>' +
+          '<span class="post-time">' + tempoRelativo(post.ts) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="post-text">' + escapeHTML(post.texto) + '</div>' +
+    levelEmbed +
+    '<div class="post-actions">' +
+      '<button class="post-action-btn' + (jaCurtiu ? ' liked' : '') + '" onclick="curtirPost(\'' + post.id + '\', this)">' +
+        '<span>♥</span> ' + post.likes +
+      '</button>' +
+      '<button class="post-action-btn reply-btn" onclick="toggleReplies(\'' + post.id + '\')">' +
+        '<span>💬</span> ' + (post.replies ? post.replies.length : 0) +
+      '</button>' +
+      '<div class="post-spacer"></div>' +
+      (usuario && usuario.id === post.autorId ?
+        '<button class="post-action-btn" onclick="deletarPost(\'' + post.id + '\')" style="color:var(--text-dim);font-size:9px;">🗑 apagar</button>'
+        : '') +
+    '</div>' +
+    '<div class="replies-section" id="replies-' + post.id + '">' +
+      (repliesHTML || '') +
+      (usuario ?
+        '<div class="reply-input-row">' +
+          '<div style="font-size:20px;">' + (usuario.avatar || '👤') + '</div>' +
+          '<input class="reply-input" id="reply-input-' + post.id + '" placeholder="Responder..." maxlength="300">' +
+          '<button class="btn btn-green btn-sm" onclick="enviarReply(\'' + post.id + '\')">↵</button>' +
+        '</div>'
+        : '<div style="font-size:12px;color:var(--text-dim);padding:8px 0;"><a href="login.html" style="color:var(--yellow);">Login</a> para responder.</div>'
+      ) +
+    '</div>' +
+  '</div>';
+}
+
+/* ── Render feed ── */
+function renderFeed() {
+  var posts = getPosts();
+  var filtrados = filtroAtivo === 'todos'
+    ? posts
+    : posts.filter(function(p){ return p.topico === filtroAtivo; });
+
+  var container = document.getElementById('feed-container');
+  var sentinel  = document.getElementById('feed-sentinel');
+
+  if (!filtrados.length) {
+    container.innerHTML =
+      '<div class="empty-cafe"><span class="empty-cafe-icon">☕</span>Nenhum post nessa categoria ainda. Seja o primeiro!</div>';
+    if (sentinel) sentinel.style.display = 'none';
+    return;
+  }
+  container.innerHTML = filtrados.map(renderPost).join('');
+  if (sentinel) sentinel.style.display = filtrados.length >= 3 ? '' : 'none';
+
+  /* Scroll suave ao topo do feed após novo post ou filtro */
+  var wrap = document.getElementById('feed-scroll-wrap');
+  if (wrap) wrap.scrollTop = 0;
+}
+
+/* ── Curtir post ── */
+function curtirPost(postId, btn) {
+  if (!usuario) { showToast('☕ Faça login para curtir!'); return; }
+  var posts = getPosts();
+  var likes = getLikes();
+  var idx   = posts.findIndex(function(p){ return p.id === postId; });
+  if (idx === -1) return;
+
+  if (likes[postId] === usuario.id) {
+    posts[idx].likes--;
+    delete likes[postId];
+    btn.classList.remove('liked');
+  } else {
+    posts[idx].likes++;
+    likes[postId] = usuario.id;
+    btn.classList.add('liked');
+  }
+  savePosts(posts);
+  saveLikes(likes);
+  btn.innerHTML = '<span>♥</span> ' + posts[idx].likes;
+}
+
+/* ── Toggle replies ── */
+function toggleReplies(postId) {
+  var el = document.getElementById('replies-' + postId);
+  if (el) {
+    el.classList.toggle('open');
+    if (el.classList.contains('open')) {
+      var inp = document.getElementById('reply-input-' + postId);
+      if (inp) inp.focus();
+    }
+  }
+}
+
+/* ── Enviar reply ── */
+function enviarReply(postId) {
+  if (!usuario) return;
+  var inp  = document.getElementById('reply-input-' + postId);
+  var txt  = inp ? inp.value.trim() : '';
+  if (!txt) return;
+
+  var posts = getPosts();
+  var idx   = posts.findIndex(function(p){ return p.id === postId; });
+  if (idx === -1) return;
+
+  posts[idx].replies = posts[idx].replies || [];
+  posts[idx].replies.push({
+    autor: usuario.username, avatar: usuario.avatar || '👤',
+    texto: txt, ts: Date.now()
+  });
+  savePosts(posts);
+  inp.value = '';
+  renderFeed();
+  // Reabrir replies
+  setTimeout(function(){
+    toggleReplies(postId);
+    var el = document.getElementById('replies-' + postId);
+    if (el) el.classList.add('open');
+  }, 50);
+}
+
+/* ── Deletar post ── */
+function deletarPost(postId) {
+  if (!confirm('Apagar esse post?')) return;
+  var posts = getPosts().filter(function(p){ return p.id !== postId; });
+  savePosts(posts);
+  renderFeed();
+  showToast('Post removido.');
+}
+
+/* ── Filtrar posts ── */
+function filtrarPosts(filtro, btn) {
+  filtroAtivo = filtro;
+  document.querySelectorAll('.filter-chip').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  renderFeed();
+}
+
+/* ── Trocar aba principal ── */
+function mudarAba(aba, btn) {
+  abaAtiva = aba;
+  document.querySelectorAll('.cafe-section').forEach(function(s){ s.classList.remove('active'); });
+  document.querySelectorAll('.cafe-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('aba-' + aba).classList.add('active');
+  btn.classList.add('active');
+
+  if (aba === 'ranking') carregarRanking(rankAtiva);
+}
+
+/* ── Rankings ── */
+var RANKINGS = {
+  levels: {
+    colLabel: 'Downloads',
+    items: [
+      { nome: 'Meu Level Bacana', avatar: '🌴', score: 11, sub: 'por xx_poste_xx' },
+      { nome: 'Revolver', avatar: '🎮', score: 8, sub: 'por BillyShears' },
+      { nome: 'Eu Acompanho as Botas Douradas', avatar: '⭐', score: 3, sub: 'por JacaboMassola' },
+      { nome: 'Meu Level Bacana 2', avatar: '🏆', score: 11, sub: 'por xx_poste_xx' },
+      { nome: 'A Extraordinaria Jornada de Henrique', avatar: '🎯', score: 0, sub: 'por BillyShears' },
+    ]
+  },
+  criadores: {
+    colLabel: 'Fases',
+    items: [
+      { nome: 'xx_poste_xx', avatar: '🎮', score: 2, sub: '11 plays' },
+      { nome: 'BillyShears', avatar: '🎸', score: 2, sub: '8 plays' },
+      { nome: 'JacaboMassola', avatar: '☕', score: 1, sub: '3 plays' },
+    ]
+  },
+  cafe: {
+    colLabel: 'Posts',
+    items: [
+      { nome: 'xx_poste_xx', avatar: '🎮', score: 8, sub: '42 likes recebidos' },
+      { nome: 'BillyShears', avatar: '🎸', score: 5, sub: '18 likes recebidos' },
+      { nome: 'JacaboMassola', avatar: '☕', score: 3, sub: '9 likes recebidos' },
+    ]
+  }
+};
+
+function mudarRanking(tipo, btn) {
+  rankAtiva = tipo;
+  document.querySelectorAll('#aba-ranking .filter-chip').forEach(function(b){ b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  carregarRanking(tipo);
+}
+
+function carregarRanking(tipo) {
+  var data = RANKINGS[tipo] || RANKINGS.levels;
+  document.getElementById('rank-col-label').textContent = data.colLabel;
+
+  // Pódio
+  var top = data.items.slice(0,3);
+  document.getElementById('p1-name').textContent  = top[0] ? top[0].nome.slice(0,10) : '—';
+  document.getElementById('p1-score').textContent = top[0] ? top[0].score + ' ' + data.colLabel.toLowerCase() : '—';
+  document.getElementById('p2-name').textContent  = top[1] ? top[1].nome.slice(0,10) : '—';
+  document.getElementById('p2-score').textContent = top[1] ? top[1].score + ' ' + data.colLabel.toLowerCase() : '—';
+  document.getElementById('p3-name').textContent  = top[2] ? top[2].nome.slice(0,10) : '—';
+  document.getElementById('p3-score').textContent = top[2] ? top[2].score + ' ' + data.colLabel.toLowerCase() : '—';
+
+  // Tabela
+  var tbody = data.items.map(function(item, i) {
+    return '<tr>' +
+      '<td class="rank-pos">' + (i+1) + '</td>' +
+      '<td><div class="rank-user-cell"><span style="font-size:20px">' + item.avatar + '</span> ' +
+        '<div><div>' + escapeHTML(item.nome) + '</div><div class="rank-badge">' + item.sub + '</div></div>' +
+      '</div></td>' +
+      '<td>' + item.score + '</td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('rank-tbody').innerHTML = tbody;
+}
+
+/* ── Sugestão de levels (sidebar) ── */
+(function carregarSugestoes() {
+  var LEVELS_MOCK = [
+    { id:1, name:'Meu Level Bacana', downloads:11 },
+    { id:4, name:'Revolver', downloads:8 },
+    { id:5, name:'Eu Acompanho as Botas Douradas', downloads:3 },
+  ];
+  var EMOJIS_L = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮'];
+  var html = LEVELS_MOCK.map(function(l) {
+    var emoji = EMOJIS_L[(l.id-1) % EMOJIS_L.length];
+    return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="topic-mini">' +
+      '<div class="topic-mini-icon">' + emoji + '</div>' +
+      '<div class="topic-mini-name">' + escapeHTML(l.name) + '</div>' +
+      '<div class="topic-mini-count">⬇ ' + l.downloads + '</div>' +
+    '</a>';
+  }).join('');
+  var el = document.getElementById('sugestao-levels');
+  if (el) el.innerHTML = html;
+
+  /* Tenta API */
+  try {
+    fetch(API + '/levels').then(function(r){ return r.ok ? r.json() : null; }).then(function(data) {
+      if (!data || !data.length) return;
+      var top3 = data.sort(function(a,b){ return b.downloads-a.downloads; }).slice(0,3);
+      var h2 = top3.map(function(l) {
+        return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="topic-mini">' +
+          '<div class="topic-mini-icon">' + EMOJIS_L[(l.id-1) % EMOJIS_L.length] + '</div>' +
+          '<div class="topic-mini-name">' + escapeHTML(l.name) + '</div>' +
+          '<div class="topic-mini-count">⬇ ' + l.downloads + '</div>' +
+        '</a>';
+      }).join('');
+      el.innerHTML = h2;
+    }).catch(function(){});
+  } catch(_) {}
+})();
+
+/* ── Desafios do Cafézinho (lê do localStorage criado pelo admin) ── */
+var DESAFIOS_KEY = 'pb_admin_desafios';
+var PB_PART_KEY  = 'pb_cafe_participacoes';
+
+function getDesafiosCafe() {
+  try { return JSON.parse(localStorage.getItem(DESAFIOS_KEY) || '[]'); } catch(_) { return []; }
+}
+function getParticipacoes() {
+  try { return JSON.parse(localStorage.getItem(PB_PART_KEY) || '[]'); } catch(_) { return []; }
+}
+
+function renderDesafiosCafe() {
+  var el = document.getElementById('desafios-cafe-lista');
+  if (!el) return;
+  var desafios = getDesafiosCafe();
+  var partic   = getParticipacoes();
+
+  if (!desafios.length) {
+    el.innerHTML = '<div class="empty-cafe"><span class="empty-cafe-icon">⚔️</span>Nenhum desafio ativo no momento. Volte em breve!</div>';
+    return;
+  }
+
+  el.innerHTML = desafios.map(function(d) {
+    var isAtivo   = d.status === 'ativo';
+    var jaEntrei  = partic.indexOf(d.id) !== -1;
+    var pct = d.meta ? Math.min(Math.round((d.participantes / d.meta) * 100), 100) : 0;
+    return '<div class="challenge-card" ' + (!isAtivo ? 'style="opacity:.7;"' : '') + '>' +
+      '<div class="challenge-tag ' + (isAtivo ? 'tag-ativo' : 'tag-encerrado') + '">' + (isAtivo ? '⚔️ Ativo' : '✅ Encerrado') + '</div>' +
+      '<div class="challenge-title">' + escapeHTML(d.titulo) + '</div>' +
+      '<div class="challenge-desc">' + escapeHTML(d.desc) + '</div>' +
+      '<div class="challenge-meta">' +
+        '<span>⏰ Encerra: <strong>' + escapeHTML(d.data) + '</strong></span>' +
+        (d.premio ? '<span>🏆 Prêmio: <strong>' + escapeHTML(d.premio) + '</strong></span>' : '') +
+        '<span>👥 Participantes: <strong id="desafio-part-' + d.id + '">' + d.participantes + '</strong>' + (d.meta ? ' / ' + d.meta : '') + '</span>' +
+      '</div>' +
+      (d.meta ? '<div class="challenge-prog-wrap"><div class="challenge-prog-bar" id="desafio-bar-' + d.id + '" style="width:' + pct + '%"></div></div><div class="challenge-prog-label">' + pct + '% da meta atingida</div>' : '') +
+      (isAtivo ? '<div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">' +
+        '<button class="btn ' + (jaEntrei ? 'btn-outline' : 'btn-green') + ' btn-sm" onclick="participarDesafio(' + d.id + ', this)">' +
+          (jaEntrei ? '✅ Participando!' : '🎯 Quero Participar!') + '</button>' +
+      '</div>' : '') +
+    '</div>';
+  }).join('');
+}
+
+function participarDesafio(id, btn) {
+  if (!usuario) { showToast('☕ Faça login para participar do desafio!'); return; }
+  var partic = getParticipacoes();
+  if (partic.indexOf(id) !== -1) { showToast('Você já está participando deste desafio!'); return; }
+
+  partic.push(id);
+  localStorage.setItem(PB_PART_KEY, JSON.stringify(partic));
+
+  // Incrementa contador local
+  var desafios = getDesafiosCafe();
+  var idx = desafios.findIndex(function(x){ return x.id === id; });
+  if (idx !== -1) desafios[idx].participantes++;
+  localStorage.setItem(DESAFIOS_KEY, JSON.stringify(desafios));
+
+  // Atualiza UI
+  var partEl = document.getElementById('desafio-part-' + id);
+  if (partEl) partEl.textContent = desafios[idx].participantes;
+  if (btn) { btn.textContent = '✅ Participando!'; btn.classList.remove('btn-green'); btn.classList.add('btn-outline'); }
+  showToast('🎯 Você entrou no desafio! Boa sorte ' + usuario.username + '!');
+}
+
+/* ── Escape HTML ── */
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ── Toast ── */
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+/* ── Criadores Favoritos (widget sidebar direita) ── */
+(function renderFavCriadores() {
+  var STORAGE_FAV = 'pb_fav_users';
+  function getFavs() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_FAV) || '[]'); } catch(_) { return []; }
+  }
+  function saveFavs(arr) { localStorage.setItem(STORAGE_FAV, JSON.stringify(arr)); }
+
+  /* Criadores mock — em produção viria da API */
+  var CRIADORES_MOCK = [
+    { id: 1, nome: 'xx_poste_xx',   avatar: '🎮', fases: 2 },
+    { id: 2, nome: 'BillyShears',   avatar: '🎸', fases: 2 },
+    { id: 3, nome: 'JacaboMassola', avatar: '☕', fases: 1 },
+  ];
+
+  function render() {
+    var el   = document.getElementById('fav-creators-list');
+    if (!el) return;
+    var favs = getFavs();
+
+    if (!usuario) {
+      el.innerHTML = '<div class="fav-empty">🔒 <a href="login.html">Faça login</a> para favoritar criadores e vê-los aqui rapidinho!</div>';
+      return;
+    }
+
+    var favCriadores = CRIADORES_MOCK.filter(function(c) { return favs.indexOf(c.id) !== -1; });
+    if (!favCriadores.length) {
+      el.innerHTML = '<div class="fav-empty">Você ainda não favoritou nenhum criador.<br><a href="usuarios.html">Ver criadores ♥</a></div>';
+      return;
+    }
+
+    el.innerHTML = favCriadores.map(function(c) {
+      var isFav = favs.indexOf(c.id) !== -1;
+      return '<a href="perfil_do_usuario.html?id=' + c.id + '" class="fav-creator-item">' +
+        '<div class="fav-creator-avatar">' + c.avatar + '</div>' +
+        '<div class="fav-creator-info">' +
+          '<div class="fav-creator-name">' + escapeHTML(c.nome) + '</div>' +
+          '<div class="fav-creator-sub">🎮 ' + c.fases + ' fase' + (c.fases !== 1 ? 's' : '') + '</div>' +
+        '</div>' +
+        '<button class="btn-fav-mini' + (isFav ? ' favoritado' : '') + '" ' +
+          'title="' + (isFav ? 'Desfavoritar' : 'Favoritar') + '" ' +
+          'onclick="event.preventDefault();toggleFavCriador(' + c.id + ',this)">♥</button>' +
+      '</a>';
+    }).join('');
+  }
+
+  window.toggleFavCriador = function(userId, btn) {
+    if (!usuario) { showToast('☕ Faça login para favoritar criadores!'); return; }
+    var favs = getFavs();
+    var idx  = favs.indexOf(userId);
+    if (idx === -1) {
+      favs.push(userId);
+      btn.classList.add('favoritado');
+      btn.title = 'Desfavoritar';
+      showToast('❤️ Criador favoritado!');
+    } else {
+      favs.splice(idx, 1);
+      btn.classList.remove('favoritado');
+      btn.title = 'Favoritar';
+      showToast('💔 Removido dos favoritos.');
+    }
+    saveFavs(favs);
+    setTimeout(render, 300); /* re-render após animação */
+  };
+
+  render();
+
+  /* Tenta buscar criadores reais da API */
+  try {
+    fetch(API + '/users').then(function(r){ return r.ok ? r.json() : null; }).then(function(data) {
+      if (!data || !data.length) return;
+      /* Merge com dados reais sem sobrescrever o render de favoritos */
+      data.forEach(function(u) {
+        var found = CRIADORES_MOCK.find(function(m){ return m.id === u.id; });
+        if (found) { found.nome = u.username; found.avatar = u.avatar || found.avatar; found.fases = u.faseCount || found.fases; }
+        else CRIADORES_MOCK.push({ id: u.id, nome: u.username, avatar: u.avatar || '👤', fases: u.faseCount || 0 });
+      });
+      render();
+    }).catch(function(){});
+  } catch(_) {}
+})();
+
+/* ── Nav search ── */
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+
+/* ── Init ── */
+renderFeed();
+renderDesafiosCafe();
+</script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

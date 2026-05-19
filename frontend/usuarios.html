@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criadores — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="cache.js"></script>
+  <style>
+    /* ── TABS ── */
+    .tabs-wrap {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 9px 12px;
+      background: none;
+      border: none;
+      border-radius: var(--radius);
+      color: var(--text-muted);
+      font-family: var(--font-title);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .tab-btn:hover { background: rgba(255,255,255,.06); color: var(--text); }
+    .tab-btn.active { background: var(--accent); color: #fff; }
+
+    /* ── BUSCA ── */
+    .users-search-wrap {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 14px;
+    }
+    .users-search-wrap input {
+      flex: 1; padding: 9px 14px;
+      background: var(--bg-card); border: 2px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: inherit; font-size: 14px;
+      transition: border-color .2s;
+    }
+    .users-search-wrap input:focus { outline: none; border-color: var(--accent); }
+
+    /* ── FILTROS ── */
+    .filtros-wrap {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      align-items: center; margin-bottom: 14px;
+    }
+    .filtros-wrap select {
+      padding: 8px 12px;
+      background: var(--bg-card); border: 2px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: inherit; font-size: 13px; cursor: pointer;
+      transition: border-color .2s;
+    }
+    .filtros-wrap select:focus { outline: none; border-color: var(--accent); }
+
+    /* ── CARD DO USUÁRIO ── */
+    .user-card {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      background: var(--bg-card); border: 2px solid var(--border);
+      border-radius: var(--radius-lg); text-decoration: none; color: var(--text);
+      transition: border-color .15s, background .15s, transform .1s;
+      margin-bottom: 8px;
+      position: relative;
+      will-change: transform;
+    }
+    .user-card:hover { border-color: var(--accent); background: var(--bg-card2); transform: translateX(2px); }
+
+    .user-card-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: linear-gradient(135deg, #1a3a5a 0%, #2a1a5a 100%);
+      border: 2px solid var(--border-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; flex-shrink: 0;
+    }
+    .user-card-body { flex: 1; min-width: 0; }
+    .user-card-name {
+      font-family: var(--font-title); font-size: 14px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .user-card-bio {
+      font-size: 12px; color: var(--text-muted); margin-bottom: 6px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic;
+    }
+    .user-card-stats {
+      display: flex; gap: 12px; font-size: 12px; color: var(--text-dim);
+    }
+    .user-card-stats span { display: inline-flex; align-items: center; gap: 3px; }
+
+    /* Medalhas de ranking */
+    .user-rank {
+      font-family: var(--font-title); font-size: 18px;
+      min-width: 36px; text-align: center; flex-shrink: 0;
+    }
+
+    /* Botão de favoritar */
+    .btn-fav {
+      width: 34px; height: 34px;
+      background: none; border: 2px solid var(--border);
+      border-radius: var(--radius); color: var(--text-muted);
+      font-size: 15px; cursor: pointer; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .btn-fav:hover { border-color: #e05070; color: #e05070; }
+    .btn-fav.favoritado { border-color: #e05070; background: rgba(224,80,112,.12); color: #e05070; }
+
+    /* ── GRID PARA TELAS MAIORES ── */
+    #users-list.grid-mode {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
+    #users-list.grid-mode .user-card { margin-bottom: 0; }
+
+    /* ── ESTADO VAZIO ── */
+    .empty-busca {
+      text-align: center; color: var(--text-muted);
+      padding: 48px 20px; font-size: 14px;
+    }
+    .empty-busca .empty-icon { font-size: 36px; margin-bottom: 10px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-nav); border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg); padding: 10px 20px;
+      font-size: 13px; color: var(--text);
+      opacity: 0; transition: opacity .2s, transform .2s;
+      pointer-events: none; white-space: nowrap; z-index: 999;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── BARRA DE PROGRESSO ── */
+    #progress-bar {
+      position: fixed; top: 50px; left: 0; right: 0; height: 3px;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent-glow);
+      transform-origin: left; transform: scaleX(0);
+      transition: transform .3s ease, opacity .3s;
+      z-index: 500; opacity: 0;
+    }
+    #progress-bar.active { opacity: 1; }
+
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--border) 25%, var(--border-light) 50%, var(--border) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite;
+      border-radius: var(--radius); display: block;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── CONTADOR ── */
+    .list-info {
+      font-size: 12px; color: var(--text-dim);
+      margin-bottom: 10px; font-family: var(--font-title);
+      letter-spacing: .5px; text-transform: uppercase;
+    }
+    .list-info strong { color: var(--text); }
+
+    @media (max-width: 480px) {
+      #users-list.grid-mode {
+        grid-template-columns: 1fr;
+      }
+      .user-rank { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="toast"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="levels.html">Levels</a></li>
+    <li><a href="usuarios.html" class="active">Criadores</a></li>
+    <li><a href="download.html">Download</a></li>
+    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+
+  <!-- TABS -->
+  <div class="tabs-wrap">
+    <button class="tab-btn active" id="tab-todos"     onclick="mudarAba('todos')">👥 Todos</button>
+    <button class="tab-btn"        id="tab-favoritos" onclick="mudarAba('favoritos')">❤️ Favoritos</button>
+  </div>
+
+  <!-- BUSCA -->
+  <div class="users-search-wrap">
+    <input type="text" id="buscaUser" placeholder="🔍 Buscar por nome ou bio..."
+           autocomplete="off" spellcheck="false">
+  </div>
+
+  <!-- FILTROS / ORDENAÇÃO -->
+  <div class="filtros-wrap">
+    <select id="ordenacao">
+      <option value="levels">📋 Mais levels</option>
+      <option value="downloads">⬇ Mais downloads</option>
+      <option value="likes">♥ Mais curtidos</option>
+      <option value="nome">🔤 A → Z</option>
+    </select>
+  </div>
+
+  <!-- CONTADOR -->
+  <div class="list-info" id="list-info"></div>
+
+  <!-- LISTA -->
+  <div id="users-list" class="grid-mode">
+    <!-- Skeletons de carregamento -->
+    <div class="user-card" style="pointer-events:none;">
+      <div class="skeleton" style="width:56px;height:56px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div class="skeleton" style="height:14px;width:60%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:11px;width:80%;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:11px;width:50%;"></div>
+      </div>
+    </div>
+    <div class="user-card" style="pointer-events:none;">
+      <div class="skeleton" style="width:56px;height:56px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div class="skeleton" style="height:14px;width:55%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:11px;width:75%;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:11px;width:45%;"></div>
+      </div>
+    </div>
+    <div class="user-card" style="pointer-events:none;">
+      <div class="skeleton" style="width:56px;height:56px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div class="skeleton" style="height:14px;width:70%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:11px;width:65%;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:11px;width:40%;"></div>
+      </div>
+    </div>
+    <div class="user-card" style="pointer-events:none;">
+      <div class="skeleton" style="width:56px;height:56px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div class="skeleton" style="height:14px;width:50%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:11px;width:70%;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:11px;width:35%;"></div>
+      </div>
+    </div>
+    <div class="user-card" style="pointer-events:none;">
+      <div class="skeleton" style="width:56px;height:56px;border-radius:50%;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <div class="skeleton" style="height:14px;width:65%;margin-bottom:8px;"></div>
+        <div class="skeleton" style="height:11px;width:55%;margin-bottom:6px;"></div>
+        <div class="skeleton" style="height:11px;width:42%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="empty-busca" class="empty-busca" style="display:none;">
+    <div class="empty-icon" id="empty-icon">😕</div>
+    <div id="empty-msg">Nenhum criador encontrado.</div>
+  </div>
+
+</div>
+
+<script>
+'use strict';
+
+/* ════════ CONSTANTES ════════ */
+const AVATARS   = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
+const MEDALHAS  = ['🥇','🥈','🥉'];
+const CACHE_TTL = 60 * 1000; // 1 minuto
+const DEBOUNCE  = 250;
+
+/* Retorna o avatar emoji de um usuário pelo id */
+const avatarFor = function(id) {
+  return AVATARS[((id - 1) % AVATARS.length + AVATARS.length) % AVATARS.length];
+};
+
+/* ════════ ESTADO ════════ */
+let todosUsuarios = [];
+let abaAtual      = 'todos';
+let debTimer      = null;
+
+/* ════════ SESSÃO ════════ */
+const user = getUser();
+if (user) {
+  var el = document.getElementById('nav-auth');
+  el.textContent = user.username.toUpperCase();
+  el.href = 'perfil_do_usuario.html?id=' + user.id;
+}
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+
+/* ════════ TOAST / PROGRESS ════════ */
+function showToast(msg, ms) {
+  ms = ms || 2000;
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, ms);
+}
+function setProgress(pct) {
+  var bar = document.getElementById('progress-bar');
+  if (pct >= 100) {
+    bar.style.transform = 'scaleX(1)';
+    setTimeout(function() { bar.classList.remove('active'); bar.style.transform = 'scaleX(0)'; }, 300);
+  } else { bar.classList.add('active'); bar.style.transform = 'scaleX(' + (pct / 100) + ')'; }
+}
+
+/* ════════ FAVORITOS (localStorage) ════════ */
+function getFavoritos() {
+  try { return JSON.parse(localStorage.getItem('pb_criadores_fav') || '[]'); } catch(e) { return []; }
+}
+function isFavorito(id) { return getFavoritos().indexOf(id) !== -1; }
+function toggleFavorito(id) {
+  var favs = getFavoritos();
+  var idx  = favs.indexOf(id);
+  if (idx === -1) { favs.push(id); showToast('❤️ Criador adicionado aos favoritos!'); }
+  else            { favs.splice(idx, 1); showToast('💔 Removido dos favoritos.'); }
+  localStorage.setItem('pb_criadores_fav', JSON.stringify(favs));
+}
+
+/* ════════ AVATAR armazenado localmente ════════ */
+function getAvatarLocal(id) {
+  return localStorage.getItem('pb_avatar_' + id) || avatarFor(id);
+}
+
+/* ════════ XSS ESCAPE ════════ */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+/* ════════ FETCH ════════ */
+async function carregarUsuarios() {
+  setProgress(20);
+  var cached = cacheLoad('pb_usuarios_v2', CACHE_TTL);
+  if (cached) {
+    todosUsuarios = cached; setProgress(100);
+    filtrar(); return;
+  }
+  try {
+    setProgress(45);
+    var resp = await fetch(API + '/users');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    todosUsuarios = await resp.json();
+    cacheSave('pb_usuarios_v2', todosUsuarios);
+    setProgress(100);
+  } catch(err) {
+    /* Fallback offline — NÃO salvo em cache (dados mockados) */
+    todosUsuarios = [
+      {id:1, username:'xx_poste_xx',    bio:'Viva Jesus',                     total_levels:2, downloaded_levels:11, liked_levels:9},
+      {id:2, username:'JacaboMassola',  bio:null,                             total_levels:1, downloaded_levels:0,  liked_levels:0},
+      {id:3, username:'BillyShears',    bio:'The one and only Billy Shears!', total_levels:2, downloaded_levels:0,  liked_levels:0},
+      {id:4, username:'PellizzolaFan',  bio:'Fã número 1!',                   total_levels:0, downloaded_levels:5,  liked_levels:3},
+      {id:5, username:'NintendoKing',   bio:'Mario forever',                  total_levels:1, downloaded_levels:8,  liked_levels:6},
+    ];
+    setProgress(100);
+    showToast('⚠️ Exibindo dados offline');
+  }
+  filtrar();
+}
+
+/* ════════ ABA ════════ */
+function mudarAba(aba) {
+  abaAtual = aba;
+  document.getElementById('tab-todos').classList.toggle('active', aba === 'todos');
+  document.getElementById('tab-favoritos').classList.toggle('active', aba === 'favoritos');
+  filtrar();
+}
+
+/* ════════ FILTRAR + ORDENAR ════════ */
+function onBuscaInput() {
+  clearTimeout(debTimer);
+  debTimer = setTimeout(filtrar, DEBOUNCE);
+}
+
+function filtrar() {
+  var q     = document.getElementById('buscaUser').value.toLowerCase().trim();
+  var ordem = document.getElementById('ordenacao').value;
+  var favs  = getFavoritos();
+
+  var resultado = todosUsuarios.filter(function(u) {
+    if (abaAtual === 'favoritos' && favs.indexOf(u.id) === -1) return false;
+    var buscaOk = !q ||
+      u.username.toLowerCase().indexOf(q) !== -1 ||
+      (u.bio || '').toLowerCase().indexOf(q) !== -1;
+    return buscaOk;
+  });
+
+  resultado.sort(function(a, b) {
+    if (ordem === 'levels')    return (parseInt(b.total_levels) || 0) - (parseInt(a.total_levels) || 0);
+    if (ordem === 'downloads') return (parseInt(b.downloaded_levels) || 0) - (parseInt(a.downloaded_levels) || 0);
+    if (ordem === 'likes')     return (parseInt(b.liked_levels) || 0) - (parseInt(a.liked_levels) || 0);
+    if (ordem === 'nome')      return a.username.localeCompare(b.username, 'pt-BR');
+    return 0;
+  });
+
+  var infoEl = document.getElementById('list-info');
+  if (abaAtual === 'favoritos') {
+    infoEl.innerHTML = '❤️ Seus favoritos — <strong>' + resultado.length + '</strong> criador' + (resultado.length !== 1 ? 'es' : '');
+    document.title = 'Favoritos — Criadores — Pellizzola Brothers';
+  } else if (q) {
+    infoEl.innerHTML = '<strong>' + resultado.length + '</strong> criador' + (resultado.length !== 1 ? 'es' : '') + ' encontrado' + (resultado.length !== 1 ? 's' : '');
+    document.title = 'Busca: "' + q + '" — Criadores — Pellizzola Brothers';
+  } else {
+    infoEl.innerHTML = '<strong>' + resultado.length + '</strong> criador' + (resultado.length !== 1 ? 'es' : '') + ' cadastrado' + (resultado.length !== 1 ? 's' : '');
+    document.title = 'Criadores — Pellizzola Brothers';
+  }
+
+  renderizar(resultado);
+}
+
+/* ════════ RENDERIZAR ════════ */
+function renderizar(usuarios) {
+  var lista = document.getElementById('users-list');
+  var vazio = document.getElementById('empty-busca');
+
+  if (!usuarios.length) {
+    lista.innerHTML = '';
+    vazio.style.display = '';
+    var favs = getFavoritos();
+    if (abaAtual === 'favoritos' && favs.length === 0) {
+      document.getElementById('empty-icon').textContent = '❤️';
+      document.getElementById('empty-msg').textContent = 'Você ainda não favoritou nenhum criador. Clique no ❤ em qualquer perfil!';
+    } else {
+      document.getElementById('empty-icon').textContent = '😕';
+      document.getElementById('empty-msg').textContent = 'Nenhum criador encontrado.';
+    }
+    return;
+  }
+  vazio.style.display = 'none';
+
+  requestAnimationFrame(function() {
+    var frag = document.createDocumentFragment();
+
+    usuarios.forEach(function(u, i) {
+      var rank       = i < 3 ? MEDALHAS[i] : '#' + (i + 1);
+      var totalN     = parseInt(u.total_levels) || 0;
+      var totalDl    = parseInt(u.downloaded_levels) || 0;
+      var totalLikes = parseInt(u.liked_levels) || 0;
+      var isFav      = isFavorito(u.id);
+      var avatar     = getAvatarLocal(u.id);
+
+      /* Trunca bio em 60 chars conforme requisito */
+      var bio = u.bio || '';
+      var bioExibida = bio.length > 60 ? bio.slice(0, 60) + '…' : bio;
+
+      /*
+       * Estrutura HTML do card de criador conforme requisito do prompt:
+       * <a href="perfil_do_usuario.html?id={id}" class="user-card card-anim">
+       *   <div class="user-card-avatar">{emoji}</div>
+       *   <div class="user-card-body">
+       *     <div class="user-card-name">{username}</div>
+       *     <div class="user-card-bio">{bio}</div>
+       *     <div class="user-card-stats">
+       *       <span>📋 {n} levels</span>
+       *       <span>⬇ {downloads}</span>
+       *       <span>♥ {likes}</span>
+       *     </div>
+       *   </div>
+       * </a>
+       */
+      var wrapper = document.createElement('div');
+      wrapper.style.display = 'contents';
+      wrapper.innerHTML =
+        '<a href="perfil_do_usuario.html?id=' + parseInt(u.id) + '" class="user-card card-anim" ' +
+            'style="animation-delay:' + (i * 0.04) + 's">' +
+          '<div class="user-rank">' + escHtml(rank) + '</div>' +
+          '<div class="user-card-avatar">' + escHtml(avatar) + '</div>' +
+          '<div class="user-card-body">' +
+            '<div class="user-card-name">' + escHtml(u.username.toUpperCase()) + '</div>' +
+            '<div class="user-card-bio">' +
+              (bioExibida
+                ? '&ldquo;' + escHtml(bioExibida) + '&rdquo;'
+                : '<em style="color:var(--text-dim)">Sem bio</em>') +
+            '</div>' +
+            '<div class="user-card-stats">' +
+              '<span>📋 ' + totalN + ' level' + (totalN !== 1 ? 'is' : '') + '</span>' +
+              '<span>⬇ ' + totalDl + '</span>' +
+              '<span>♥ ' + totalLikes + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<button class="btn-fav' + (isFav ? ' favoritado' : '') + '" ' +
+              'onclick="onFav(event,' + parseInt(u.id) + ')" ' +
+              'title="' + (isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos') + '">' +
+            (isFav ? '❤️' : '🤍') +
+          '</button>' +
+        '</a>';
+
+      frag.appendChild(wrapper);
+    });
+
+    lista.innerHTML = '';
+    lista.appendChild(frag);
+  });
+}
+
+/* ════════ AÇÃO FAVORITAR ════════ */
+function onFav(e, id) {
+  e.preventDefault(); e.stopPropagation();
+  toggleFavorito(id);
+  var btn  = e.currentTarget;
+  var agora = isFavorito(id);
+  btn.classList.toggle('favoritado', agora);
+  btn.textContent = agora ? '❤️' : '🤍';
+  btn.title = agora ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
+  if (abaAtual === 'favoritos' && !agora) filtrar();
+}
+
+/* ════════ EVENTOS ════════ */
+document.getElementById('buscaUser').addEventListener('input', onBuscaInput);
+document.getElementById('ordenacao').addEventListener('change', filtrar);
+document.getElementById('buscaUser').addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { e.target.value = ''; filtrar(); }
+});
+
+/* ════════ INIT ════════ */
+carregarUsuarios();
+</script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>

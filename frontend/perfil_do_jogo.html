@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil Jogo — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <style>
+    .btn-report {
+      background: none; border: 1px solid var(--border-light); color: var(--text-muted);
+      border-radius: var(--radius); padding: 7px 14px; font-family: var(--font-title);
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      transition: border-color .15s, color .15s, background .15s;
+    }
+    .btn-report:hover { border-color: #c0392b; color: #e07070; background: rgba(192,57,43,.08); }
+    .btn-share {
+      background: none; border: 1px solid var(--border-light); color: var(--text-muted);
+      border-radius: var(--radius); padding: 7px 14px; font-family: var(--font-title);
+      font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-share:hover { border-color: var(--accent); color: var(--accent); }
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .anim-in { animation: fadeSlideUp .4s ease both; }
+    @keyframes likeBounce {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.3); }
+      70%  { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .like-bounce { animation: likeBounce .35s ease; }
+    .breadcrumb {
+      font-size: 12px; color: var(--text-muted);
+      margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+    }
+    .breadcrumb a { color: var(--accent); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb-sep { color: var(--text-dim); }
+    .btn-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted); text-decoration: none;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 5px 12px; transition: color .15s, border-color .15s;
+      margin-bottom: 14px;
+    }
+    .btn-back:hover { color: var(--text); border-color: var(--accent); }
+    .comment-char-count { font-size: 11px; color: var(--text-dim); text-align: right; margin-top: 3px; }
+    .comments-section {
+      margin-top: 32px; background: var(--bg-card);
+      border: 2px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
+    }
+    .comments-header {
+      padding: 14px 20px; border-bottom: 2px solid var(--border);
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .comment-count-badge { background: var(--accent); color: #fff; border-radius: 20px; padding: 2px 8px; font-size: 11px; }
+    .comment-item { padding: 14px 20px; border-bottom: 1px solid var(--border); animation: fadeSlideUp .3s ease both; }
+    .comment-item:last-child { border-bottom: none; }
+    .comment-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .comment-author {
+      font-family: var(--font-title); font-size: 12px; font-weight: 700;
+      color: var(--yellow); text-transform: uppercase; letter-spacing: .5px; text-decoration: none;
+    }
+    .comment-author:hover { color: var(--accent); }
+    .comment-date { font-size: 11px; color: var(--text-dim); }
+    .comment-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; word-break: break-word; }
+    .comment-delete {
+      margin-left: auto; background: none; border: none; color: var(--text-dim);
+      font-size: 12px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius);
+      transition: color .15s, background .15s;
+    }
+    .comment-delete:hover { color: #e07070; background: rgba(192,57,43,.08); }
+    .comment-form {
+      padding: 14px 20px; border-top: 2px solid var(--border);
+      display: flex; gap: 10px; align-items: flex-end;
+    }
+    .comment-input {
+      flex: 1; background: var(--bg-input); border: 2px solid var(--border);
+      color: var(--text); font-family: var(--font-body); font-size: 13px;
+      padding: 9px 12px; border-radius: var(--radius); outline: none;
+      resize: none; min-height: 38px; max-height: 120px; transition: border-color .15s;
+    }
+    .comment-input:focus { border-color: var(--accent); }
+    .comment-submit {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius); padding: 9px 16px;
+      font-family: var(--font-title); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px; cursor: pointer;
+      transition: background .15s; white-space: nowrap;
+    }
+    .comment-submit:hover { background: #4ab050; }
+    .comment-submit:disabled { opacity: .5; cursor: default; }
+    .comments-empty { padding: 24px 20px; text-align: center; font-size: 13px; color: var(--text-dim); font-style: italic; }
+    .login-to-comment { padding: 14px 20px; border-top: 2px solid var(--border); font-size: 13px; color: var(--text-muted); text-align: center; }
+    .login-to-comment a { color: var(--accent); }
+    #pg-toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--bg-nav); border: 2px solid var(--border-light);
+      border-radius: var(--radius-lg); padding: 10px 20px;
+      font-size: 13px; color: var(--text);
+      opacity: 0; transition: opacity .2s, transform .2s;
+      pointer-events: none; white-space: nowrap; z-index: 999;
+    }
+    #pg-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .report-success { display: none; font-size: 12px; color: #5dba60; margin-top: 8px; background: rgba(45,122,48,0.12); border: 1px solid #2d7a30; border-radius: var(--radius); padding: 6px 12px; }
+  </style>
+</head>
+<body>
+
+<div id="pg-toast"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="levels.html">Níveis</a></li>
+    <li><a href="usuarios.html">Criadores</a></li>
+    <li><a href="download.html">Download</a></li>
+    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
+    <li><a href="login.html" id="nav-auth">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar níveis..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<!-- Modal: Denunciar -->
+<div class="modal-overlay hidden" id="modal-report">
+  <div class="modal-box">
+    <div class="modal-header" style="color:#e07070;">
+      🚩 Denunciar Level
+      <button class="modal-close" onclick="closeModal('modal-report')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Selecione o motivo da denúncia:</p>
+      <div style="display:flex;flex-direction:column;gap:8px;" id="report-reasons">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text);">
+          <input type="radio" name="report-reason" value="Conteúdo inadequado" style="accent-color:var(--accent);"> Conteúdo inadequado
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text);">
+          <input type="radio" name="report-reason" value="Arquivo malicioso"> Arquivo malicioso / vírus
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text);">
+          <input type="radio" name="report-reason" value="Spam ou enganoso"> Spam ou enganoso
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text);">
+          <input type="radio" name="report-reason" value="Level quebrado"> Level quebrado / não funciona
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text);">
+          <input type="radio" name="report-reason" value="Outro"> Outro
+        </label>
+      </div>
+      <textarea id="report-detail" placeholder="Detalhes adicionais (opcional)..." maxlength="300"
+        style="width:100%;margin-top:14px;background:var(--bg-input);border:2px solid var(--border);
+        color:var(--text);font-family:inherit;font-size:13px;padding:9px 12px;border-radius:var(--radius);
+        outline:none;resize:vertical;min-height:70px;transition:border-color .15s;"
+        onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+      <div id="report-msg" class="report-success"></div>
+    </div>
+    <div class="modal-footer" id="report-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-report')">Cancelar</button>
+      <button class="btn btn-sm" style="background:#c0392b;color:#fff;box-shadow:0 2px 0 #922b21;" onclick="submitReport()">🚩 Enviar Denúncia</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="main">
+  <div class="level-hero">
+    <div class="level-hero-thumb skeleton" style="width:270px;min-height:190px;"></div>
+    <div class="level-hero-info">
+      <div class="skeleton" style="height:22px;width:65%;margin-bottom:10px;"></div>
+      <div class="skeleton" style="height:13px;width:45%;margin-bottom:16px;"></div>
+      <div class="skeleton" style="height:13px;width:28%;margin-bottom:4px;"></div>
+      <div class="skeleton" style="height:13px;width:28%;margin-bottom:20px;"></div>
+      <div class="skeleton" style="height:34px;width:120px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const EMOJIS   = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const emojiFor = function(id) { return EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length]; };
+
+const user  = getUser();
+const token = getToken();
+
+if (user) {
+  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
+}
+
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+
+const getLevelId = function() { return parseInt(new URLSearchParams(location.search).get('id')) || 1; };
+let currentLevelId = null;
+
+function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(function(ov) {
+  ov.addEventListener('click', function(e) { if (e.target === ov) ov.classList.add('hidden'); });
+});
+
+function showToast(msg, ms) {
+  ms = ms || 2200;
+  var t = document.getElementById('pg-toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, ms);
+}
+
+function updateCommentCount() {
+  var el = document.getElementById('comment-char-count');
+  var input = document.getElementById('comment-input');
+  if (el && input) el.textContent = input.value.length;
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function submitReport() {
+  if (!user || !token) { closeModal('modal-report'); window.location.href = 'login.html'; return; }
+  var reason = document.querySelector('input[name="report-reason"]:checked');
+  if (!reason) { showToast('⚠️ Selecione um motivo para a denúncia.'); return; }
+  var detail  = document.getElementById('report-detail').value.trim();
+  var footerEl = document.getElementById('report-footer');
+  footerEl.style.display = 'none';
+  try {
+    await fetch(API + '/levels/' + currentLevelId + '/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ reason: reason.value, detail })
+    });
+  } catch (_) {}
+  document.getElementById('report-reasons').style.display = 'none';
+  document.getElementById('report-detail').style.display  = 'none';
+  var msg = document.getElementById('report-msg');
+  msg.textContent = '✅ Denúncia enviada! Obrigado por ajudar a manter a comunidade segura.';
+  msg.style.display = 'block';
+  setTimeout(function() { closeModal('modal-report'); }, 2500);
+}
+
+function openReportModal() {
+  document.getElementById('report-reasons').style.display = '';
+  document.getElementById('report-detail').style.display  = '';
+  document.getElementById('report-footer').style.display  = '';
+  var msg = document.getElementById('report-msg');
+  msg.style.display = 'none'; msg.textContent = '';
+  document.querySelectorAll('input[name="report-reason"]').forEach(function(r) { r.checked = false; });
+  document.getElementById('report-detail').value = '';
+  openModal('modal-report');
+}
+
+function shareLevel(name) {
+  var url = window.location.href;
+  if (navigator.share) {
+    navigator.share({ title: name + ' — Pellizzola Brothers', url }).catch(function() {});
+  } else {
+    navigator.clipboard.writeText(url).then(function() {
+      showToast('🔗 Link copiado!');
+    }).catch(function() { prompt('Copie o link:', url); });
+  }
+}
+
+var commentsData = [];
+
+function renderComments(comments) {
+  var list  = document.getElementById('comments-list');
+  var badge = document.getElementById('comment-count');
+  if (!list) return;
+  if (badge) badge.textContent = comments.length;
+  if (!comments.length) {
+    list.innerHTML = '<div class="comments-empty">Nenhum comentário ainda. Seja o primeiro! 👾</div>';
+    return;
+  }
+  list.innerHTML = comments.map(function(c, i) {
+    var isOwn = user && user.id === c.user_id;
+    var date  = new Date(c.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+    return '<div class="comment-item" style="animation-delay:' + (i * 0.05) + 's">' +
+      '<div class="comment-meta">' +
+        '<a class="comment-author" href="perfil_do_usuario.html?id=' + escHtml(String(c.user_id)) + '">' +
+          escHtml(c.username.toUpperCase()) +
+        '</a>' +
+        '<span class="comment-date">' + escHtml(date) + '</span>' +
+        (isOwn ? '<button class="comment-delete" onclick="deleteComment(' + parseInt(c.id) + ')" title="Deletar comentário">🗑</button>' : '') +
+      '</div>' +
+      '<div class="comment-text">' + escHtml(c.content) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+async function submitComment() {
+  if (!user || !token) return;
+  var input   = document.getElementById('comment-input');
+  var btn     = document.getElementById('comment-submit');
+  var content = input.value.trim();
+  if (!content) return;
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    var resp = await fetch(API + '/levels/' + currentLevelId + '/comment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ content })
+    });
+    var data = await resp.json();
+    if (resp.ok && data.comment) {
+      commentsData.unshift(data.comment);
+      renderComments(commentsData);
+      input.value = '';
+      updateCommentCount();
+    } else { showToast('❌ ' + (data.error || 'Erro ao comentar')); }
+  } catch (_) { showToast('❌ Erro de conexão'); }
+  btn.disabled = false; btn.textContent = 'Comentar';
+}
+
+async function deleteComment(commentId) {
+  if (!user || !token) return;
+  if (!confirm('Deletar este comentário?')) return;
+  try {
+    await fetch(API + '/levels/' + currentLevelId + '/comment/' + commentId, {
+      method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
+    });
+    commentsData = commentsData.filter(function(c) { return c.id !== commentId; });
+    renderComments(commentsData);
+  } catch (_) { showToast('❌ Erro ao deletar'); }
+}
+
+async function loadLevel() {
+  var id = getLevelId();
+  currentLevelId = id;
+  var level;
+  try {
+    var resp = await fetch(API + '/levels/' + id);
+    if (resp.status === 404) { window.location.href = '404.html'; return; }
+    if (!resp.ok) throw new Error('server');
+    level = await resp.json();
+  } catch (_) {
+    level = { id:1, name:'Meu Nivel Bacana', description:'Bacanices Bananas', downloads:11, likes:10, author_id:1, author_name:'xx_poste_xx', file_id:null, similar:[], comments:[] };
+  }
+
+  document.title = level.name + ' — Pellizzola Brothers';
+  commentsData = level.comments || [];
+
+  var alreadyLiked = false;
+  if (user) {
+    var localLiked = JSON.parse(localStorage.getItem('pb_liked_levels') || '[]');
+    alreadyLiked = localLiked.includes(level.id);
+    if (!alreadyLiked) {
+      try {
+        var likedResp = await fetch(API + '/levels/' + level.id + '/liked', { headers: { 'Authorization': 'Bearer ' + token } });
+        var likedData = await likedResp.json();
+        alreadyLiked = likedData.liked;
+        if (alreadyLiked && !localLiked.includes(level.id)) {
+          localLiked.push(level.id);
+          localStorage.setItem('pb_liked_levels', JSON.stringify(localLiked));
+        }
+      } catch (_) {}
+    }
+  }
+
+  var simCards = (level.similar || []).map(function(s, i) {
+    return '<a href="perfil_do_jogo.html?id=' + parseInt(s.id) + '" class="similar-card anim-in" style="animation-delay:' + (0.2 + i * 0.07) + 's">' +
+      '<div class="similar-thumb">' + emojiFor(s.id) + '</div>' +
+      '<div class="similar-info"><div class="similar-name">' + escHtml(s.name) + '</div><div class="similar-desc">' + (s.description ? '"' + escHtml(s.description) + '"' : '') + '</div></div>' +
+      '<div class="similar-stats"><span>⬇ ' + parseInt(s.downloads) + '</span><span>♥ ' + parseInt(s.likes) + '</span></div>' +
+    '</a>';
+  }).join('');
+  var moreCard = '<a href="levels.html" class="similar-card anim-in" style="border-style:dashed;animation-delay:.35s"><div class="similar-thumb" style="background:var(--bg);font-size:20px;">→</div><div class="similar-info"><div class="similar-name">Ver mais</div></div></a>';
+
+  var likeBtnStyle = alreadyLiked ? 'background:var(--accent);color:#fff;border-color:var(--accent);' : '';
+  var likeBtnText  = alreadyLiked ? '♥ Curtido' : '♡ Curtir';
+  var hasFile      = !!level.file_id;
+
+  var createdStr = '';
+  if (level.created_at) {
+    try { createdStr = new Date(level.created_at).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }); } catch(_) {}
+  }
+
+  document.getElementById('main').innerHTML =
+    '<div class="breadcrumb anim-in"><a href="levels.html">Níveis</a><span class="breadcrumb-sep">›</span><span>' + escHtml(level.name) + '</span></div>' +
+    '<a href="levels.html" class="btn-back anim-in" style="animation-delay:.02s">← Voltar aos Níveis</a>' +
+    '<div class="level-hero anim-in" style="animation-delay:.05s">' +
+      '<div class="level-hero-thumb">' + emojiFor(level.id) + '</div>' +
+      '<div class="level-hero-info">' +
+        '<div class="level-hero-name">' + escHtml(level.name) + '</div>' +
+        '<div class="level-hero-desc">' + (level.description ? '"' + escHtml(level.description) + '"' : '') + '</div>' +
+        '<div class="level-hero-stats">' +
+          '<div class="level-hero-stat">Downloads: <strong id="dl-count">' + parseInt(level.downloads) + '</strong></div>' +
+          '<div class="level-hero-stat">Curtidas: <strong id="like-count">' + parseInt(level.likes) + '</strong></div>' +
+          (createdStr ? '<div class="level-hero-stat">Criado em: <strong>' + escHtml(createdStr) + '</strong></div>' : '') +
+          (hasFile ? '' : '<div class="level-hero-stat" style="color:#e07070;">⚠️ Sem arquivo para download</div>') +
+        '</div>' +
+        '<div class="level-hero-actions">' +
+          '<button class="btn btn-green" id="dl-btn" onclick="handleDownload(' + parseInt(level.id) + ',' + (level.file_id ? parseInt(level.file_id) : 'null') + ')">⬇ Download</button>' +
+          '<button class="btn btn-outline" id="like-btn" style="' + likeBtnStyle + '"' + (!user ? ' disabled title="Faça login para curtir"' : '') + ' onclick="handleLike(' + parseInt(level.id) + ')">' + likeBtnText + '</button>' +
+          '<button class="btn-share" onclick="shareLevel(' + JSON.stringify(level.name) + ')">🔗 Compartilhar</button>' +
+          '<a href="perfil_do_usuario.html?id=' + parseInt(level.author_id) + '" class="btn btn-outline">👤 ' + escHtml(level.author_name) + '</a>' +
+          '<button class="btn-report" onclick="openReportModal()">🚩 Denunciar</button>' +
+        '</div>' +
+        (!user ? '<p style="font-size:12px;color:var(--text-muted);margin-top:8px;"><a href="login.html" style="color:var(--accent);">Faça login</a> para curtir e comentar.</p>' : '') +
+      '</div>' +
+    '</div>' +
+    '<div class="similar-title anim-in" style="animation-delay:.12s">Níveis Semelhantes</div>' +
+    '<div class="similar-grid">' + simCards + moreCard + '</div>' +
+    '<div class="comments-section anim-in" style="animation-delay:.18s">' +
+      '<div class="comments-header">💬 Comentários<span class="comment-count-badge" id="comment-count">' + commentsData.length + '</span></div>' +
+      '<div class="comments-list" id="comments-list"></div>' +
+      (user
+        ? '<div class="comment-form"><div style="flex:1;display:flex;flex-direction:column;gap:4px;"><textarea class="comment-input" id="comment-input" placeholder="Deixe seu comentário..." maxlength="500" rows="1" oninput="updateCommentCount()" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();submitComment();}"></textarea><div class="comment-char-count"><span id="comment-char-count">0</span>/500</div></div><button class="comment-submit" id="comment-submit" onclick="submitComment()">Comentar</button></div>'
+        : '<div class="login-to-comment"><a href="login.html">Faça login</a> para comentar neste level.</div>'
+      ) +
+    '</div>';
+
+  renderComments(commentsData);
+}
+
+async function handleDownload(levelId, fileId) {
+  var btn = document.getElementById('dl-btn');
+  btn.textContent = '⏳ Baixando...'; btn.disabled = true;
+  try {
+    var body = {};
+    if (user) body.user_id = user.id;
+    await fetch(API + '/levels/' + levelId + '/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  } catch (_) {}
+  var el = document.getElementById('dl-count');
+  if (el) el.textContent = parseInt(el.textContent || '0') + 1;
+  if (user) {
+    var history = JSON.parse(localStorage.getItem('pb_download_history') || '[]');
+    if (!history.find(function(x) { return x.id === levelId; })) {
+      history.unshift({ id: levelId, at: Date.now() });
+      if (history.length > 100) history.pop();
+      localStorage.setItem('pb_download_history', JSON.stringify(history));
+    }
+  }
+  if (!fileId) { showToast('⚠️ Este nível não tem arquivo para baixar.'); btn.textContent = '⬇ Download'; btn.disabled = false; return; }
+  try {
+    var resp  = await fetch(API + '/files/' + fileId);
+    if (!resp.ok) { showToast('❌ Arquivo não encontrado no servidor.'); btn.textContent = '❌ Erro'; btn.style.background = '#c0392b'; setTimeout(function() { btn.textContent = '⬇ Download'; btn.style.background = ''; btn.disabled = false; }, 3000); return; }
+    var dados = await resp.json();
+    if (!dados || dados.error) { showToast('❌ Arquivo não encontrado no servidor.'); btn.textContent = '❌ Erro'; btn.style.background = '#c0392b'; setTimeout(function() { btn.textContent = '⬇ Download'; btn.style.background = ''; btn.disabled = false; }, 3000); return; }
+    var a = document.createElement('a');
+    a.href = API + '/upload/level/' + dados.hash;
+    a.download = dados.hash;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast('✅ Download iniciado!');
+    btn.textContent = '✓ Baixado!'; btn.style.background = '#2d7a30';
+    setTimeout(function() { btn.textContent = '⬇ Download'; btn.style.background = ''; btn.disabled = false; }, 2500);
+  } catch (_) { showToast('❌ Falha na conexão. Verifique sua internet e tente novamente.'); btn.textContent = '⬇ Download'; btn.style.background = ''; btn.disabled = false; }
+}
+
+async function handleLike(id) {
+  if (!user || !token) return;
+  var btn     = document.getElementById('like-btn');
+  var countEl = document.getElementById('like-count');
+  var localLiked = JSON.parse(localStorage.getItem('pb_liked_levels') || '[]');
+  var alreadyLiked = localLiked.includes(id);
+  btn.disabled = true;
+  if (alreadyLiked) {
+    var updated = localLiked.filter(function(x) { return x !== id; });
+    localStorage.setItem('pb_liked_levels', JSON.stringify(updated));
+    btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
+    btn.textContent = '♡ Curtir';
+    if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent || '0') - 1);
+    try { await fetch(API + '/levels/' + id + '/unlike', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ user_id: user.id }) }); } catch (_) {}
+    btn.disabled = false;
+    return;
+  }
+  try {
+    var resp = await fetch(API + '/levels/' + id + '/like', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ user_id: user.id }) });
+    var data = await resp.json();
+    if (resp.status === 409 || data.already_liked || data.ok) {
+      localLiked.push(id);
+      localStorage.setItem('pb_liked_levels', JSON.stringify(localLiked));
+      btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
+      btn.textContent = '♥ Curtido';
+      btn.classList.remove('like-bounce'); void btn.offsetWidth; btn.classList.add('like-bounce');
+      if (countEl && data.likes) countEl.textContent = data.likes;
+      else if (countEl && data.ok) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+    }
+  } catch (_) {
+    localLiked.push(id);
+    localStorage.setItem('pb_liked_levels', JSON.stringify(localLiked));
+    btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
+    btn.textContent = '♥ Curtido';
+    btn.classList.remove('like-bounce'); void btn.offsetWidth; btn.classList.add('like-bounce');
+    if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+  }
+  btn.disabled = false;
+}
+
+loadLevel();
+</script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>
