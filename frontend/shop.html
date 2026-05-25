@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛒 Loja — Pellizzola Brothers</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="cache.js"></script>
+
+  <style>
+    /* ══════════════════════════════════════════
+       LOJA — Shop de cosméticos com XP
+    ══════════════════════════════════════════ */
+
+    /* Partículas de fundo */
+    .shop-bg {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+    }
+    .shop-particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(240,192,64,.10) 0%, transparent 70%);
+      animation: shopFloat linear infinite;
+    }
+    @keyframes shopFloat {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: .4; }
+      100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+    }
+
+    /* Layout */
+    .shop-layout {
+      position: relative; z-index: 1;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* ── HEADER ── */
+    .shop-header {
+      grid-column: 1 / -1;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 28px;
+      display: flex; align-items: center; gap: 20px;
+      position: relative; overflow: hidden;
+    }
+    .shop-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(100deg, rgba(240,192,64,.06) 0%, transparent 50%, rgba(61,158,66,.04) 100%);
+    }
+    .shop-header-icon {
+      font-size: 52px;
+      animation: shopIconBob 3s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes shopIconBob {
+      0%,100% { transform: rotate(-3deg) scale(1); }
+      50%      { transform: rotate(3deg) scale(1.08); }
+    }
+    .shop-header-info { flex: 1; }
+    .shop-header-title {
+      font-family: var(--font-title);
+      font-size: 26px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--yellow);
+      text-shadow: 0 0 30px rgba(240,192,64,.4);
+      margin-bottom: 4px;
+    }
+    .shop-header-sub { font-size: 13px; color: var(--text-muted); font-style: italic; }
+
+    /* Saldo XP no header */
+    .xp-balance-box {
+      background: var(--bg-nav);
+      border: 2px solid rgba(240,192,64,.4);
+      border-radius: var(--radius-lg);
+      padding: 12px 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .xp-balance-val {
+      font-family: var(--font-title);
+      font-size: 28px; font-weight: 700;
+      color: var(--yellow);
+      display: flex; align-items: center; gap: 6px;
+      justify-content: center;
+    }
+    .xp-balance-lbl {
+      font-size: 10px; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px;
+    }
+    .xp-icon { font-size: 22px; }
+
+    /* ── SIDEBAR: filtros ── */
+    .shop-sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+    .sidebar-widget {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+    .sidebar-widget-header {
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      padding: 8px 14px;
+      font-family: var(--font-title);
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--yellow);
+    }
+    .sidebar-widget-body { padding: 10px; }
+
+    .filter-btn {
+      width: 100%; display: flex; align-items: center; gap: 10px;
+      padding: 9px 10px;
+      background: none; border: none;
+      border-radius: var(--radius);
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      color: var(--text-muted); cursor: pointer;
+      transition: background .15s, color .15s;
+      text-align: left;
+    }
+    .filter-btn:hover { background: rgba(255,255,255,.06); color: var(--text); }
+    .filter-btn.active { background: rgba(61,158,66,.12); color: var(--accent); }
+    .filter-btn-icon { font-size: 16px; flex-shrink: 0; }
+    .filter-btn-count {
+      margin-left: auto;
+      font-size: 10px; color: var(--text-dim);
+      background: var(--bg-nav);
+      border-radius: 10px; padding: 1px 7px;
+    }
+
+    /* Raridade filtro */
+    .rarity-filter { display: flex; flex-direction: column; gap: 4px; }
+    .rarity-check {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: var(--radius);
+      cursor: pointer; font-size: 12px; color: var(--text-muted);
+      transition: background .15s;
+    }
+    .rarity-check:hover { background: rgba(255,255,255,.04); }
+    .rarity-check input { accent-color: var(--accent); width: 14px; height: 14px; }
+    .rarity-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* Ordenação */
+    .sort-select {
+      width: 100%;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      color: var(--text); font-family: var(--font-body); font-size: 13px;
+      padding: 7px 10px; border-radius: var(--radius); outline: none;
+    }
+    .sort-select:focus { border-color: var(--accent); }
+
+    /* Dica XP como ganhar */
+    .xp-tip {
+      background: linear-gradient(135deg, rgba(240,192,64,.08), rgba(61,158,66,.06));
+      border: 2px solid rgba(240,192,64,.2);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      font-size: 12px; color: var(--text-muted); line-height: 1.7;
+    }
+    .xp-tip-title {
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--yellow); margin-bottom: 6px;
+    }
+    .xp-tip-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+
+    /* ── ÁREA PRINCIPAL ── */
+    .shop-main { display: flex; flex-direction: column; gap: 14px; }
+
+    /* Barra de busca */
+    .shop-search-bar {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 9px 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .shop-search-input {
+      flex: 1; background: none; border: none; outline: none;
+      color: var(--text); font-family: var(--font-body); font-size: 14px;
+    }
+    .shop-search-input::placeholder { color: var(--text-dim); font-style: italic; }
+    .shop-search-icon { font-size: 16px; color: var(--text-dim); }
+    .shop-result-count { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+
+    /* Grade de itens */
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 10px;
+    }
+
+    /* Card do item */
+    .item-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: border-color .2s, transform .15s;
+      animation: fadeSlideUp .3s ease both;
+      cursor: pointer;
+      position: relative;
+    }
+    .item-card:hover { border-color: var(--border-light); transform: translateY(-2px); }
+    .item-card.owned { border-color: rgba(61,158,66,.5); }
+    .item-card.equipped { border-color: var(--yellow); }
+
+    /* Badge de raridade no canto */
+    .rarity-badge {
+      position: absolute; top: 8px; left: 8px;
+      font-family: var(--font-title); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 3px;
+      z-index: 2;
+    }
+    .rarity-common    { background: rgba(80,80,136,.7);   color: #a0a0dd; border: 1px solid rgba(100,100,160,.5); }
+    .rarity-uncommon  { background: rgba(61,158,66,.2);   color: #5ecc66; border: 1px solid rgba(61,158,66,.4); }
+    .rarity-rare      { background: rgba(127,119,221,.2); color: #afa9ec; border: 1px solid rgba(127,119,221,.4); }
+    .rarity-legendary { background: rgba(240,192,64,.2);  color: var(--yellow); border: 1px solid rgba(240,192,64,.4); }
+
+    /* Badge owned/equipped */
+    .status-badge {
+      position: absolute; top: 8px; right: 8px;
+      font-family: var(--font-title); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 3px; z-index: 2;
+    }
+    .status-owned    { background: rgba(61,158,66,.2);  color: #5ecc66; border: 1px solid rgba(61,158,66,.4); }
+    .status-equipped { background: rgba(240,192,64,.2); color: var(--yellow); border: 1px solid rgba(240,192,64,.4); }
+
+    /* Preview do item */
+    .item-preview {
+      height: 120px;
+      background: var(--bg-nav);
+      border-bottom: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Previews específicos */
+    .preview-avatar-wrap {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; height: 100%;
+    }
+    .preview-avatar-circle {
+      width: 62px; height: 62px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-title); font-size: 20px; font-weight: 700;
+    }
+    .preview-bg-strip {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .preview-title-text {
+      font-family: var(--font-title); font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      padding: 6px 14px; border-radius: 3px; border: 2px solid;
+    }
+    .preview-badge-pill {
+      font-family: var(--font-title); font-size: 11px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .5px;
+      padding: 5px 14px; border-radius: 20px;
+    }
+    .preview-card-theme {
+      width: calc(100% - 24px); height: calc(100% - 24px);
+      border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      border: 3px solid;
+    }
+
+    /* Frame animado */
+    @keyframes spinRing {
+      to { transform: rotate(360deg); }
+    }
+    .preview-frame-wrap {
+      position: relative; width: 70px; height: 70px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .preview-frame-ring {
+      position: absolute; inset: -5px;
+      border-radius: 50%;
+      border: 3px solid transparent;
+    }
+    .frame-anim .preview-frame-ring {
+      border-top-color: var(--yellow);
+      border-right-color: var(--accent);
+      animation: spinRing 2s linear infinite;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .frame-anim .preview-frame-ring {
+        animation: none;
+        border-color: var(--yellow);
+      }
+    }
+
+    /* Card legend animado */
+    @keyframes cardLegendGlow {
+      0%,100% { border-color: var(--yellow); box-shadow: 0 0 8px rgba(240,192,64,.3); }
+      50%      { border-color: var(--accent); box-shadow: 0 0 14px rgba(61,158,66,.4); }
+    }
+    .card-anim-legend { animation: cardLegendGlow 2s ease-in-out infinite; }
+
+    /* Info do item */
+    .item-info { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .item-name {
+      font-family: var(--font-title); font-size: 12px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase; color: var(--text);
+    }
+    .item-desc { font-size: 11px; color: var(--text-muted); font-style: italic; line-height: 1.4; flex: 1; }
+
+    /* Footer do card */
+    .item-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .item-price {
+      display: flex; align-items: center; gap: 5px;
+      font-family: var(--font-title); font-size: 14px; font-weight: 700;
+      color: var(--yellow);
+    }
+    .item-price-icon { font-size: 13px; }
+    .can-afford { color: var(--yellow); }
+    .cannot-afford { color: var(--text-dim); }
+
+    .btn-buy {
+      padding: 5px 14px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 2px 0 var(--accent-dark);
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .btn-buy:hover { background: #4ab050; }
+    .btn-buy:active { box-shadow: none; transform: translateY(1px); }
+    .btn-buy:disabled {
+      background: var(--bg-nav); color: var(--text-dim);
+      box-shadow: none; cursor: not-allowed;
+    }
+    .btn-equip {
+      padding: 5px 14px;
+      background: rgba(240,192,64,.15); color: var(--yellow);
+      border: 2px solid rgba(240,192,64,.4); border-radius: var(--radius);
+      font-family: var(--font-title); font-size: 10px; font-weight: 700;
+      letter-spacing: .5px; text-transform: uppercase;
+      cursor: pointer; transition: background .15s;
+      white-space: nowrap;
+    }
+    .btn-equip:hover { background: rgba(240,192,64,.25); }
+    .btn-equip.equipped-btn {
+      background: rgba(61,158,66,.15); color: var(--accent);
+      border-color: rgba(61,158,66,.4);
+    }
+    .btn-equip.equipped-btn:hover { background: rgba(61,158,66,.25); }
+
+    /* Estado vazio */
+    .shop-empty {
+      grid-column: 1 / -1;
+      text-align: center; padding: 60px 20px;
+      color: var(--text-muted); font-style: italic;
+    }
+    .shop-empty-icon { font-size: 48px; display: block; margin-bottom: 12px; }
+
+    /* Modal de compra */
+    .buy-modal-preview {
+      display: flex; align-items: center; justify-content: center;
+      height: 140px;
+      background: var(--bg-nav);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+      font-size: 13px;
+    }
+    .buy-modal-details { font-size: 13px; color: var(--text-muted); line-height: 1.8; margin-bottom: 14px; }
+    .buy-modal-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 6px 0; border-bottom: 1px solid var(--border);
+    }
+    .buy-modal-row:last-child { border-bottom: none; }
+    .buy-modal-row-label { color: var(--text-muted); font-size: 12px; }
+    .buy-modal-row-val   { color: var(--text); font-size: 13px; font-weight: 500; }
+    .buy-confirm-xp {
+      background: rgba(240,192,64,.08);
+      border: 2px solid rgba(240,192,64,.25);
+      border-radius: var(--radius-lg);
+      padding: 10px 14px; margin-top: 12px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px;
+    }
+    .buy-confirm-xp-icon { font-size: 22px; }
+    .buy-confirm-xp-text { flex: 1; line-height: 1.5; }
+    .buy-confirm-xp strong { color: var(--yellow); }
+    .buy-insufficient {
+      background: rgba(210,50,50,.1);
+      border: 2px solid rgba(210,50,50,.3);
+      border-radius: var(--radius-lg);
+      padding: 10px 14px; margin-top: 12px;
+      font-size: 13px; color: #ff7070; line-height: 1.5;
+    }
+
+    /* Toast */
+    #shop-toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9999;
+      background: var(--bg-card); border: 2px solid var(--accent);
+      border-radius: var(--radius-lg); padding: 12px 20px;
+      font-size: 13px; color: var(--text);
+      box-shadow: 0 8px 30px rgba(0,0,0,.5);
+      transform: translateY(80px); opacity: 0;
+      transition: transform .3s ease, opacity .3s ease;
+      pointer-events: none; max-width: 320px;
+    }
+    #shop-toast.show { transform: translateY(0); opacity: 1; }
+
+    @media (max-width: 900px) {
+      .shop-layout { grid-template-columns: 1fr; }
+      .shop-header { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="shop-bg" id="shop-bg"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Levels</a></li>
+    <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="shop.html" class="active">🛒 Loja</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar levels..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
+
+<div class="page">
+  <div class="shop-layout">
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <div class="shop-header">
+      <div class="shop-header-icon">🛒</div>
+      <div class="shop-header-info">
+        <div class="shop-header-title">🛒 Loja de Cosméticos</div>
+        <div class="shop-header-sub">Gaste seus XP para personalizar seu perfil e fases — ganhe curtindo suas fases e completando desafios!</div>
+      </div>
+      <div class="xp-balance-box">
+        <div class="xp-balance-val">
+          <span class="xp-icon">⚡</span>
+          <span id="xp-balance-val">—</span>
+        </div>
+        <div class="xp-balance-lbl">Seu Saldo de XP</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <div class="shop-sidebar">
+
+      <!-- Filtro por tipo -->
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-header">🎨 Categorias</div>
+        <div class="sidebar-widget-body" id="category-filters">
+          <button class="filter-btn active" data-filter="all" onclick="filtrarCategoria('all', this)">
+            <span class="filter-btn-icon">🗂</span> Todos
+            <span class="filter-btn-count" id="count-all">0</span>
+          </button>
+          <button class="filter-btn" data-filter="color" onclick="filtrarCategoria('color', this)">
+            <span class="filter-btn-icon">🎨</span> Cor do Avatar
+            <span class="filter-btn-count" id="count-color">0</span>
+          </button>
+          <button class="filter-btn" data-filter="bg" onclick="filtrarCategoria('bg', this)">
+            <span class="filter-btn-icon">🖼</span> Fundo do Perfil
+            <span class="filter-btn-count" id="count-bg">0</span>
+          </button>
+          <button class="filter-btn" data-filter="frame" onclick="filtrarCategoria('frame', this)">
+            <span class="filter-btn-icon">💠</span> Moldura
+            <span class="filter-btn-count" id="count-frame">0</span>
+          </button>
+          <button class="filter-btn" data-filter="badge" onclick="filtrarCategoria('badge', this)">
+            <span class="filter-btn-icon">🏅</span> Badge
+            <span class="filter-btn-count" id="count-badge">0</span>
+          </button>
+          <button class="filter-btn" data-filter="title" onclick="filtrarCategoria('title', this)">
+            <span class="filter-btn-icon">📛</span> Título
+            <span class="filter-btn-count" id="count-title">0</span>
+          </button>
+          <button class="filter-btn" data-filter="card_theme" onclick="filtrarCategoria('card_theme', this)">
+            <span class="filter-btn-icon">🃏</span> Tema de Card
+            <span class="filter-btn-count" id="count-card_theme">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtro raridade -->
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-header">✨ Raridade</div>
+        <div class="sidebar-widget-body">
+          <div class="rarity-filter">
+            <label class="rarity-check">
+              <input type="checkbox" checked value="common" onchange="atualizarFiltroRaridade()">
+              <span class="rarity-dot" style="background:#a0a0dd;"></span>
+              Comum
+            </label>
+            <label class="rarity-check">
+              <input type="checkbox" checked value="uncommon" onchange="atualizarFiltroRaridade()">
+              <span class="rarity-dot" style="background:#5ecc66;"></span>
+              Incomum
+            </label>
+            <label class="rarity-check">
+              <input type="checkbox" checked value="rare" onchange="atualizarFiltroRaridade()">
+              <span class="rarity-dot" style="background:#afa9ec;"></span>
+              Raro
+            </label>
+            <label class="rarity-check">
+              <input type="checkbox" checked value="legendary" onchange="atualizarFiltroRaridade()">
+              <span class="rarity-dot" style="background:#f0c040;"></span>
+              Lendário
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ordenação -->
+      <div class="sidebar-widget">
+        <div class="sidebar-widget-header">↕ Ordenar</div>
+        <div class="sidebar-widget-body">
+          <select class="sort-select" id="sort-select" onchange="renderGrade()">
+            <option value="price_asc">Preço: menor primeiro</option>
+            <option value="price_desc">Preço: maior primeiro</option>
+            <option value="rarity">Raridade</option>
+            <option value="name">Nome (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dica XP -->
+      <div class="xp-tip">
+        <div class="xp-tip-title">⚡ Como ganhar XP</div>
+        <div class="xp-tip-row">⭐ Curtida recebida na sua fase</div>
+        <div style="font-size:11px;color:var(--text-dim);padding-left:20px;margin-bottom:4px;">+10 XP por curtida</div>
+        <div class="xp-tip-row">⚔️ Desafio concluído</div>
+        <div style="font-size:11px;color:var(--text-dim);padding-left:20px;">+50 a +150 XP</div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ ÁREA PRINCIPAL ═══════════════ -->
+    <div class="shop-main">
+
+      <!-- Barra de busca -->
+      <div class="shop-search-bar">
+        <span class="shop-search-icon">🔍</span>
+        <input
+          type="text"
+          class="shop-search-input"
+          id="shop-search"
+          placeholder="Buscar itens na loja..."
+          oninput="renderGrade()"
+        >
+        <span class="shop-result-count" id="result-count"></span>
+      </div>
+
+      <!-- Grade de itens -->
+      <div class="shop-grid" id="shop-grid">
+        <div class="shop-empty">
+          <span class="shop-empty-icon">🛒</span>
+          Carregando itens...
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de compra -->
+<div class="modal-overlay hidden" id="buy-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span id="buy-modal-title">Confirmar Compra</span>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="buy-modal-preview" id="buy-modal-preview"></div>
+      <div class="buy-modal-details" id="buy-modal-details"></div>
+      <div id="buy-modal-xp-info"></div>
+    </div>
+    <div class="modal-footer" id="buy-modal-footer"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="shop-toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   LOJA — Lógica principal
+══════════════════════════════════════════ */
+
+var usuario = getUser();
+var categoriaAtiva = 'all';
+var raridadesFiltro = ['common', 'uncommon', 'rare', 'legendary'];
+var itemSelecionado = null;
+
+/* ── Auth UI ── */
+if (usuario) {
+  document.getElementById('nav-auth').textContent = usuario.username.toUpperCase();
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + usuario.id;
+}
+
+/* ── Partículas de fundo ── */
+(function() {
+  var bg = document.getElementById('shop-bg');
+  for (var i = 0; i < 8; i++) {
+    var p = document.createElement('div');
+    p.className = 'shop-particle';
+    var size = 10 + Math.random() * 30;
+    p.style.cssText =
+      'left:' + (Math.random() * 100) + '%' +
+      ';width:' + size + 'px' +
+      ';height:' + size + 'px' +
+      ';animation-duration:' + (12 + Math.random() * 16) + 's' +
+      ';animation-delay:' + (Math.random() * 14) + 's';
+    bg.appendChild(p);
+  }
+})();
+
+/* ══════════════════════════════════════════
+   DADOS
+══════════════════════════════════════════ */
+
+/* Inventário e XP do usuário (localStorage até ter API) */
+var STORAGE_XP        = 'pb_user_xp';
+var STORAGE_INVENTORY = 'pb_user_inventory';
+var STORAGE_EQUIPPED  = 'pb_user_equipped';
+
+function getXP() {
+  if (usuario) {
+    /* Tenta pegar do objeto do usuário primeiro */
+    if (usuario.xp !== undefined) return parseInt(usuario.xp) || 0;
+  }
+  return parseInt(localStorage.getItem(STORAGE_XP) || '250');
+}
+function setXP(val) {
+  localStorage.setItem(STORAGE_XP, val);
+  /* Atualiza objeto do usuário em sessão */
+  if (usuario) { usuario.xp = val; localStorage.setItem('pb_user', JSON.stringify(usuario)); }
+  document.getElementById('xp-balance-val').textContent = val;
+}
+function getInventory() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_INVENTORY) || '[]'); } catch(_) { return []; }
+}
+function saveInventory(inv) { localStorage.setItem(STORAGE_INVENTORY, JSON.stringify(inv)); }
+function getEquipped() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_EQUIPPED) || '{}'); } catch(_) { return {}; }
+}
+function saveEquipped(eq) { localStorage.setItem(STORAGE_EQUIPPED, JSON.stringify(eq)); }
+
+/* Itens da loja — lidos do XML via fetch, com fallback embutido */
+var SHOP_ITEMS = [];
+
+var FALLBACK_ITEMS = [
+  /* Cor do avatar */
+  { id:'color_blue',    name:'Azul Oceano',      type:'color',      price_xp:50,   value:'#378ADD', rarity:'common',    description:'Um azul tranquilo, como o mar em dia de calma.',      is_active:true, animated:false },
+  { id:'color_green',   name:'Verde Esmeralda',  type:'color',      price_xp:50,   value:'#1D9E75', rarity:'common',    description:'Verde vibrante de quem está sempre na ativa.',         is_active:true, animated:false },
+  { id:'color_purple',  name:'Roxo Galáxia',     type:'color',      price_xp:100,  value:'#7F77DD', rarity:'uncommon',  description:'Para quem tem estilo fora deste mundo.',               is_active:true, animated:false },
+  { id:'color_orange',  name:'Laranja Fogo',     type:'color',      price_xp:100,  value:'#D85A30', rarity:'uncommon',  description:'Quente como as fases mais desafiadoras.',              is_active:true, animated:false },
+  { id:'color_gold',    name:'Dourado Lenda',    type:'color',      price_xp:200,  value:'#EF9F27', rarity:'rare',      description:'Reservado para os verdadeiros campeões.',              is_active:true, animated:false },
+  /* Fundo */
+  { id:'bg_mint',       name:'Fundo Menta',      type:'bg',         price_xp:100,  value:'#E1F5EE', rarity:'common',    description:'Fresco e tranquilo.',                                  is_active:true, animated:false },
+  { id:'bg_lavender',   name:'Fundo Lavanda',    type:'bg',         price_xp:100,  value:'#EEEDFE', rarity:'common',    description:'Suave como uma brisa.',                                is_active:true, animated:false },
+  { id:'bg_sunset',     name:'Fundo Pôr do Sol', type:'bg',         price_xp:250,  value:'#FAEEDA', rarity:'uncommon',  description:'Tons quentes que lembram o fim de um dia épico.',      is_active:true, animated:false },
+  { id:'bg_night',      name:'Fundo Noite',      type:'bg',         price_xp:500,  value:'#2C2C2A', rarity:'rare',      description:'Escuro, misterioso e cheio de brilho.',                is_active:true, animated:false },
+  /* Moldura */
+  { id:'frame_silver',  name:'Moldura Prata',    type:'frame',      price_xp:150,  value:'frame_silver',  rarity:'common',    description:'Uma borda limpa e elegante em prata.',           is_active:true, animated:false, frame_color:'#B4B2A9' },
+  { id:'frame_gold',    name:'Moldura Dourada',  type:'frame',      price_xp:400,  value:'frame_gold',    rarity:'uncommon',  description:'Brilha como ouro, reservada para os dedicados.', is_active:true, animated:false, frame_color:'#EF9F27' },
+  { id:'frame_emerald', name:'Moldura Esmeralda',type:'frame',      price_xp:400,  value:'frame_emerald', rarity:'uncommon',  description:'Verde intenso para quem domina as fases.',       is_active:true, animated:false, frame_color:'#1D9E75' },
+  { id:'frame_purple',  name:'Moldura Roxa Neon',type:'frame',      price_xp:500,  value:'frame_purple',  rarity:'rare',      description:'Roxo vibrante que chama atenção.',               is_active:true, animated:false, frame_color:'#7F77DD' },
+  { id:'frame_spin',    name:'Moldura Giratória',type:'frame',      price_xp:800,  value:'frame_spin',    rarity:'rare',      description:'Animação contínua. Impossível não notar.',       is_active:true, animated:true,  frame_color:'#7F77DD', frame_color2:'#1D9E75' },
+  { id:'frame_rainbow', name:'Moldura Arco-Íris',type:'frame',      price_xp:1500, value:'frame_rainbow', rarity:'legendary', description:'As cores do arco-íris giram ao redor do avatar. Lendário.', is_active:true, animated:true, frame_color:'#EF9F27', frame_color2:'#7F77DD' },
+  /* Badge */
+  { id:'badge_creator', name:'Criador',          type:'badge',      price_xp:200,  value:'badge_creator',  rarity:'common',    description:'Para quem já publicou sua primeira fase.',        is_active:true, animated:false, badge_color:'#633806', badge_bg:'#FAEEDA' },
+  { id:'badge_veteran', name:'Veterano',         type:'badge',      price_xp:300,  value:'badge_veteran',  rarity:'uncommon',  description:'Está aqui há muito tempo.',                       is_active:true, animated:false, badge_color:'#085041', badge_bg:'#E1F5EE' },
+  { id:'badge_top',     name:'Top Fase',         type:'badge',      price_xp:400,  value:'badge_top',      rarity:'uncommon',  description:'Suas fases são curtidas pela comunidade.',        is_active:true, animated:false, badge_color:'#0C447C', badge_bg:'#E6F1FB' },
+  { id:'badge_champ',   name:'Campeão',          type:'badge',      price_xp:600,  value:'badge_champ',    rarity:'rare',      description:'Conquistou o topo do placar.',                    is_active:true, animated:false, badge_color:'#3C3489', badge_bg:'#EEEDFE' },
+  { id:'badge_legend',  name:'Lenda',            type:'badge',      price_xp:1200, value:'badge_legend',   rarity:'legendary', description:'Poucos chegam aqui. Você é uma lenda.',           is_active:true, animated:false, badge_color:'#633806', badge_bg:'rgba(240,192,64,.2)' },
+  /* Título */
+  { id:'title_explorer',name:'Explorador',       type:'title',      price_xp:300,  value:'Explorador',       rarity:'common',    description:'Para quem curte explorar novas fases.',           is_active:true, animated:false, title_color:'#1D9E75' },
+  { id:'title_arch',    name:'Arquiteto de Fases',type:'title',     price_xp:500,  value:'Arquiteto de Fases',rarity:'uncommon', description:'Constrói mundos onde outros jogam.',              is_active:true, animated:false, title_color:'#7F77DD' },
+  { id:'title_master',  name:'Mestre das Fases', type:'title',      price_xp:800,  value:'Mestre das Fases', rarity:'rare',      description:'Domínio total sobre criação e desafios.',         is_active:true, animated:false, title_color:'#EF9F27' },
+  { id:'title_legend',  name:'Lendário',         type:'title',      price_xp:1000, value:'Lendário',         rarity:'legendary', description:'Um título que fala por si só.',                   is_active:true, animated:false, title_color:'#f0c040' },
+  { id:'title_unique',  name:'O Inigualável',    type:'title',      price_xp:2000, value:'O Inigualável',    rarity:'legendary', description:'Item mais raro da loja.',                         is_active:true, animated:false, title_color:'#f0c040' },
+  /* Tema de card */
+  { id:'card_gold',     name:'Card Dourado',     type:'card_theme', price_xp:400,  value:'card_gold',    rarity:'uncommon',  description:'Suas fases aparecem com borda dourada.',            is_active:true, animated:false, card_color:'#EF9F27', card_bg:'#FAEEDA', card_text:'#633806' },
+  { id:'card_purple',   name:'Card Roxo',        type:'card_theme', price_xp:400,  value:'card_purple',  rarity:'uncommon',  description:'Borda roxa para suas fases se destacarem.',         is_active:true, animated:false, card_color:'#534AB7', card_bg:'#EEEDFE', card_text:'#3C3489' },
+  { id:'card_emerald',  name:'Card Esmeralda',   type:'card_theme', price_xp:400,  value:'card_emerald', rarity:'uncommon',  description:'Verde intenso para suas fases na listagem.',        is_active:true, animated:false, card_color:'#0F6E56', card_bg:'#E1F5EE', card_text:'#085041' },
+  { id:'card_legend',   name:'Card Lenda',       type:'card_theme', price_xp:1000, value:'card_legend',  rarity:'legendary', description:'Borda animada e brilhante. Nunca passará despercebida.', is_active:true, animated:true, card_color:'#EF9F27', card_bg:'rgba(240,192,64,.07)', card_text:'var(--yellow)' },
+];
+
+/* ── Carrega XML (se disponível) ── */
+function carregarXML() {
+  SHOP_ITEMS = FALLBACK_ITEMS;
+  inicializar();
+
+  fetch('shop_items.xml')
+    .then(function(r) { return r.ok ? r.text() : null; })
+    .then(function(txt) {
+      if (!txt) return;
+      try {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(txt, 'application/xml');
+        var nodes = doc.querySelectorAll('item');
+        if (!nodes.length) return;
+        var parsed = [];
+        nodes.forEach(function(node) {
+          var get = function(tag) { var el = node.querySelector(tag); return el ? el.textContent.trim() : ''; };
+          if (get('is_active') !== 'true') return;
+          parsed.push({
+            id:          get('value').replace(/[^a-z0-9_]/gi,'_').toLowerCase() || ('item_' + Math.random()),
+            name:        get('name'),
+            type:        get('type'),
+            price_xp:    parseInt(get('price_xp')) || 0,
+            value:       get('value'),
+            rarity:      get('rarity') || 'common',
+            description: get('description'),
+            is_active:   true,
+            animated:    get('animated') === 'true',
+          });
+        });
+        if (parsed.length) { SHOP_ITEMS = parsed; inicializar(); }
+      } catch(_) {}
+    })
+    .catch(function() {});
+}
+
+/* ── Inicializar ── */
+function inicializar() {
+  atualizarSaldo();
+  atualizarContadores();
+  renderGrade();
+}
+
+/* ── Saldo XP ── */
+function atualizarSaldo() {
+  var xp = getXP();
+  document.getElementById('xp-balance-val').textContent = xp;
+
+  /* Tenta buscar da API */
+  if (usuario) {
+    fetch(API + '/users/' + usuario.id)
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (data && data.xp !== undefined) {
+          setXP(data.xp);
+        }
+      })
+      .catch(function() {});
+  }
+}
+
+/* ── Contadores por categoria ── */
+function atualizarContadores() {
+  var tipos = ['color','bg','frame','badge','title','card_theme'];
+  var total = SHOP_ITEMS.filter(function(i){ return i.is_active; }).length;
+  document.getElementById('count-all').textContent = total;
+  tipos.forEach(function(t) {
+    var el = document.getElementById('count-' + t);
+    if (el) el.textContent = SHOP_ITEMS.filter(function(i){ return i.type === t && i.is_active; }).length;
+  });
+}
+
+/* ── Filtros ── */
+function filtrarCategoria(cat, btn) {
+  categoriaAtiva = cat;
+  document.querySelectorAll('.filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  renderGrade();
+}
+
+function atualizarFiltroRaridade() {
+  raridadesFiltro = [];
+  document.querySelectorAll('.rarity-filter input[type=checkbox]').forEach(function(cb) {
+    if (cb.checked) raridadesFiltro.push(cb.value);
+  });
+  renderGrade();
+}
+
+/* ── Ordenação ── */
+var RARITY_ORDER = { common:0, uncommon:1, rare:2, legendary:3 };
+function ordenarItens(itens) {
+  var sort = document.getElementById('sort-select').value;
+  return itens.slice().sort(function(a, b) {
+    if (sort === 'price_asc')  return a.price_xp - b.price_xp;
+    if (sort === 'price_desc') return b.price_xp - a.price_xp;
+    if (sort === 'rarity')     return RARITY_ORDER[b.rarity] - RARITY_ORDER[a.rarity];
+    if (sort === 'name')       return a.name.localeCompare(b.name);
+    return 0;
+  });
+}
+
+/* ── Preview de item ── */
+function buildPreview(item, container) {
+  var inv      = getInventory();
+  var equipped = getEquipped();
+  var isOwned    = inv.indexOf(item.id) !== -1;
+  var isEquipped = equipped[item.type] === item.id;
+
+  if (item.type === 'color') {
+    container.innerHTML =
+      '<div class="preview-avatar-wrap">' +
+        '<div class="preview-avatar-circle" style="background:' + item.value + ';color:#fff;">PB</div>' +
+      '</div>';
+
+  } else if (item.type === 'bg') {
+    container.innerHTML =
+      '<div class="preview-bg-strip" style="background:' + item.value + ';color:' + (item.value === '#2C2C2A' ? '#aaa' : '#333') + ';">Fundo do Perfil</div>';
+
+  } else if (item.type === 'frame') {
+    var animClass = item.animated ? 'frame-anim' : '';
+    container.innerHTML =
+      '<div class="preview-frame-wrap ' + animClass + '">' +
+        '<div class="preview-frame-ring"' + (!item.animated ? ' style="border:3px solid ' + (item.frame_color || '#888') + '"' : '') + '></div>' +
+        '<div class="preview-avatar-circle" style="background:var(--bg-card2);color:var(--text);width:58px;height:58px;">PB</div>' +
+      '</div>';
+
+  } else if (item.type === 'badge') {
+    container.innerHTML =
+      '<span class="preview-badge-pill" style="background:' + (item.badge_bg || 'rgba(240,192,64,.2)') + ';color:' + (item.badge_color || '#f0c040') + ';">' +
+        item.name +
+      '</span>';
+
+  } else if (item.type === 'title') {
+    container.innerHTML =
+      '<span class="preview-title-text" style="color:' + (item.title_color || 'var(--yellow)') + ';border-color:' + (item.title_color || 'var(--yellow)') + ';">' +
+        item.value +
+      '</span>';
+
+  } else if (item.type === 'card_theme') {
+    var extraClass = item.animated ? 'card-anim-legend' : '';
+    container.innerHTML =
+      '<div class="preview-card-theme ' + extraClass + '" style="background:' + (item.card_bg || 'transparent') + ';border-color:' + (item.card_color || 'var(--yellow)') + ';color:' + (item.card_text || 'var(--yellow)') + ';">' +
+        'Sua Fase' +
+      '</div>';
+
+  } else {
+    container.innerHTML = '<span style="font-size:32px;">🎨</span>';
+  }
+}
+
+/* ── Render de um card ── */
+function renderCard(item) {
+  var inv      = getInventory();
+  var equipped = getEquipped();
+  var isOwned    = inv.indexOf(item.id) !== -1;
+  var isEquipped = equipped[item.type] === item.id;
+  var xp         = getXP();
+  var podeComprar = xp >= item.price_xp;
+
+  var rarityLabel = { common:'Comum', uncommon:'Incomum', rare:'Raro', legendary:'Lendário' };
+
+  var statusBadge = '';
+  if (isEquipped) statusBadge = '<div class="status-badge status-equipped">✓ Equipado</div>';
+  else if (isOwned) statusBadge = '<div class="status-badge status-owned">✓ Possui</div>';
+
+  var btnHtml = '';
+  if (!usuario) {
+    btnHtml = '<button class="btn-buy" onclick="showToast(\'Faça login para comprar!\')">Comprar</button>';
+  } else if (isEquipped) {
+    btnHtml = '<button class="btn-equip equipped-btn" onclick="desequipar(\'' + item.id + '\')">Desequipar</button>';
+  } else if (isOwned) {
+    btnHtml = '<button class="btn-equip" onclick="equipar(\'' + item.id + '\')">Equipar</button>';
+  } else {
+    btnHtml = '<button class="btn-buy" ' + (!podeComprar ? 'disabled title="XP insuficiente"' : '') + ' onclick="abrirModal(\'' + item.id + '\')">' +
+      (!podeComprar ? '🔒 Comprar' : 'Comprar') +
+    '</button>';
+  }
+
+  var priceClass = podeComprar || isOwned ? 'can-afford' : 'cannot-afford';
+
+  var cardClass = 'item-card' + (isOwned ? ' owned' : '') + (isEquipped ? ' equipped' : '');
+
+  var card = document.createElement('div');
+  card.className = cardClass;
+  card.id = 'card-' + item.id;
+  card.innerHTML =
+    '<div class="rarity-badge rarity-' + item.rarity + '">' + rarityLabel[item.rarity] + '</div>' +
+    statusBadge +
+    '<div class="item-preview" id="preview-' + item.id + '"></div>' +
+    '<div class="item-info">' +
+      '<div class="item-name">' + escapeHTML(item.name) + '</div>' +
+      '<div class="item-desc">' + escapeHTML(item.description) + '</div>' +
+    '</div>' +
+    '<div class="item-footer">' +
+      '<div class="item-price ' + priceClass + '">' +
+        '<span class="item-price-icon">⚡</span>' +
+        item.price_xp +
+      '</div>' +
+      btnHtml +
+    '</div>';
+
+  return card;
+}
+
+/* ── Render da grade ── */
+function renderGrade() {
+  var busca = (document.getElementById('shop-search').value || '').toLowerCase().trim();
+  var grid  = document.getElementById('shop-grid');
+
+  var filtrados = SHOP_ITEMS.filter(function(item) {
+    if (!item.is_active) return false;
+    if (categoriaAtiva !== 'all' && item.type !== categoriaAtiva) return false;
+    if (raridadesFiltro.indexOf(item.rarity) === -1) return false;
+    if (busca && item.name.toLowerCase().indexOf(busca) === -1 &&
+                 item.description.toLowerCase().indexOf(busca) === -1) return false;
+    return true;
+  });
+
+  filtrados = ordenarItens(filtrados);
+
+  document.getElementById('result-count').textContent =
+    filtrados.length + (filtrados.length === 1 ? ' item' : ' itens');
+
+  grid.innerHTML = '';
+
+  if (!filtrados.length) {
+    grid.innerHTML =
+      '<div class="shop-empty">' +
+        '<span class="shop-empty-icon">🔍</span>' +
+        'Nenhum item encontrado com esses filtros.' +
+      '</div>';
+    return;
+  }
+
+  filtrados.forEach(function(item, i) {
+    var card = renderCard(item);
+    card.style.animationDelay = (i * 0.04) + 's';
+    grid.appendChild(card);
+    /* Injeta preview */
+    var previewEl = document.getElementById('preview-' + item.id);
+    if (previewEl) buildPreview(item, previewEl);
+  });
+}
+
+/* ══════════════════════════════════════════
+   COMPRA / EQUIPAR
+══════════════════════════════════════════ */
+
+function abrirModal(itemId) {
+  if (!usuario) { showToast('Faça login para comprar!'); return; }
+  var item = SHOP_ITEMS.find(function(i){ return i.id === itemId; });
+  if (!item) return;
+  itemSelecionado = item;
+
+  var xp = getXP();
+  var podeComprar = xp >= item.price_xp;
+  var saldoApos   = xp - item.price_xp;
+
+  document.getElementById('buy-modal-title').textContent = 'Confirmar Compra — ' + item.name;
+
+  /* Preview no modal */
+  var previewEl = document.getElementById('buy-modal-preview');
+  previewEl.innerHTML = '';
+  buildPreview(item, previewEl);
+
+  /* Detalhes */
+  var rarityLabel = { common:'Comum', uncommon:'Incomum', rare:'Raro', legendary:'Lendário' };
+  document.getElementById('buy-modal-details').innerHTML =
+    '<div class="buy-modal-row"><span class="buy-modal-row-label">Item</span><span class="buy-modal-row-val">' + escapeHTML(item.name) + '</span></div>' +
+    '<div class="buy-modal-row"><span class="buy-modal-row-label">Tipo</span><span class="buy-modal-row-val">' + tipoLabel(item.type) + '</span></div>' +
+    '<div class="buy-modal-row"><span class="buy-modal-row-label">Raridade</span><span class="buy-modal-row-val">' + rarityLabel[item.rarity] + '</span></div>' +
+    '<div class="buy-modal-row"><span class="buy-modal-row-label">Preço</span><span class="buy-modal-row-val" style="color:var(--yellow);">⚡ ' + item.price_xp + ' XP</span></div>';
+
+  /* Info XP */
+  var xpInfoEl = document.getElementById('buy-modal-xp-info');
+  if (podeComprar) {
+    xpInfoEl.innerHTML =
+      '<div class="buy-confirm-xp">' +
+        '<div class="buy-confirm-xp-icon">⚡</div>' +
+        '<div class="buy-confirm-xp-text">' +
+          'Seu saldo: <strong>' + xp + ' XP</strong> — após a compra: <strong>' + saldoApos + ' XP</strong>' +
+        '</div>' +
+      '</div>';
+  } else {
+    xpInfoEl.innerHTML =
+      '<div class="buy-insufficient">' +
+        '⚠️ Você precisa de mais <strong>' + (item.price_xp - xp) + ' XP</strong> para comprar este item.<br>' +
+        'Receba curtidas nas suas fases (+10 XP cada) ou complete desafios!' +
+      '</div>';
+  }
+
+  /* Botões do footer */
+  document.getElementById('buy-modal-footer').innerHTML =
+    '<button class="btn btn-outline btn-sm" onclick="fecharModal()">Cancelar</button>' +
+    (podeComprar
+      ? '<button class="btn btn-green btn-sm" onclick="confirmarCompra()">⚡ Confirmar Compra</button>'
+      : '<button class="btn btn-sm" style="opacity:.5;cursor:not-allowed;" disabled>XP Insuficiente</button>'
+    );
+
+  document.getElementById('buy-modal').classList.remove('hidden');
+}
+
+function fecharModal() {
+  document.getElementById('buy-modal').classList.add('hidden');
+  itemSelecionado = null;
+}
+
+function confirmarCompra() {
+  if (!itemSelecionado || !usuario) return;
+  var item = itemSelecionado;
+  var xp   = getXP();
+
+  if (xp < item.price_xp) { showToast('XP insuficiente!'); return; }
+
+  /* Desconta XP */
+  setXP(xp - item.price_xp);
+
+  /* Adiciona ao inventário */
+  var inv = getInventory();
+  if (inv.indexOf(item.id) === -1) inv.push(item.id);
+  saveInventory(inv);
+
+  /* Equipa automaticamente */
+  var eq = getEquipped();
+  eq[item.type] = item.id;
+  saveEquipped(eq);
+
+  fecharModal();
+  renderGrade();
+  showToast('🎉 ' + item.name + ' comprado e equipado!');
+
+  /* Tenta salvar na API */
+  salvarCompraAPI(item);
+}
+
+function salvarCompraAPI(item) {
+  if (!usuario) return;
+  fetch(API + '/shop/buy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+    body: JSON.stringify({ item_id: item.id })
+  })
+  .then(function(r) { return r.ok ? r.json() : null; })
+  .then(function(data) {
+    if (data && data.xp !== undefined) setXP(data.xp);
+  })
+  .catch(function() { /* fallback local já funcionou */ });
+}
+
+function equipar(itemId) {
+  var item = SHOP_ITEMS.find(function(i){ return i.id === itemId; });
+  if (!item) return;
+  var eq = getEquipped();
+  eq[item.type] = item.id;
+  saveEquipped(eq);
+  renderGrade();
+  showToast('✅ ' + item.name + ' equipado!');
+
+  /* API */
+  if (usuario) {
+    fetch(API + '/shop/equip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body: JSON.stringify({ item_id: item.id })
+    }).catch(function(){});
+  }
+}
+
+function desequipar(itemId) {
+  var item = SHOP_ITEMS.find(function(i){ return i.id === itemId; });
+  if (!item) return;
+  var eq = getEquipped();
+  if (eq[item.type] === item.id) delete eq[item.type];
+  saveEquipped(eq);
+  renderGrade();
+  showToast('↩️ ' + item.name + ' desequipado.');
+}
+
+/* ── Helpers ── */
+function tipoLabel(type) {
+  var labels = { color:'Cor do Avatar', bg:'Fundo do Perfil', frame:'Moldura', badge:'Badge', title:'Título', card_theme:'Tema de Card' };
+  return labels[type] || type;
+}
+
+function escapeHTML(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  var t = document.getElementById('shop-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+}
+
+/* ── Fechar modal clicando fora ── */
+document.getElementById('buy-modal').addEventListener('click', function(e) {
+  if (e.target === this) fecharModal();
+});
+
+/* ── Nav search ── */
+function navSearch(e) {
+  e.preventDefault();
+  var q = document.getElementById('nav-search').value.trim();
+  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
+}
+
+/* ── Init ── */
+carregarXML();
+</script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
+</body>
+</html>
