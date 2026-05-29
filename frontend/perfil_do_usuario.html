@@ -10,61 +10,155 @@
   <script src="auth.js"></script>
   <style>
     .btn-red {
-      background: #c0392b; color: #fff; border: none;
-      box-shadow: 0 3px 0 #922b21; padding: 6px 14px;
-      font-family: var(--font-title); font-size: 12px; font-weight: 700;
-      letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
-      border-radius: var(--radius); display: inline-flex; align-items: center; gap: 6px;
-      text-decoration: none;
+      background:#c0392b;color:#fff;border:none;box-shadow:0 3px 0 #922b21;padding:6px 14px;
+      font-family:var(--font-title);font-size:12px;font-weight:700;letter-spacing:1px;
+      text-transform:uppercase;cursor:pointer;border-radius:var(--radius);
+      display:inline-flex;align-items:center;gap:6px;text-decoration:none;
     }
-    .btn-red:hover { background: #e74c3c; }
-    .btn-red:active { box-shadow: none; }
+    .btn-red:hover{background:#e74c3c;}
     .btn-delete-level {
-      background: none; border: 1px solid #c0392b; color: #c0392b;
-      border-radius: var(--radius); padding: 4px 10px; font-size: 10px;
-      font-family: var(--font-title); font-weight: 700; text-transform: uppercase;
-      cursor: pointer; letter-spacing: .5px; transition: background .15s, color .15s;
+      background:none;border:1px solid #c0392b;color:#c0392b;border-radius:var(--radius);
+      padding:4px 10px;font-size:10px;font-family:var(--font-title);font-weight:700;
+      text-transform:uppercase;cursor:pointer;letter-spacing:.5px;transition:background .15s,color .15s;
     }
-    .btn-delete-level:hover { background: #c0392b; color: #fff; }
-    .created-card-foot {
-      padding: 5px 8px; border-top: 1px solid var(--border);
-      display: flex; gap: 6px; justify-content: flex-end;
-      background: rgba(0,0,0,0.15);
+    .btn-delete-level:hover{background:#c0392b;color:#fff;}
+    .created-card-foot{padding:5px 8px;border-top:1px solid var(--border);display:flex;gap:6px;justify-content:flex-end;background:rgba(0,0,0,0.15);}
+    .edit-field-row{margin-bottom:10px;}
+    .edit-field-row textarea,.edit-field-row input{
+      width:100%;background:var(--bg-input);border:2px solid var(--border);
+      color:var(--text);font-family:var(--font-body);font-size:14px;
+      padding:9px 12px;border-radius:var(--radius);outline:none;resize:vertical;transition:border-color .2s;
     }
-    .edit-field-row { margin-bottom: 10px; }
-    .edit-field-row textarea, .edit-field-row input {
-      width: 100%; background: var(--bg-input); border: 2px solid var(--border);
-      color: var(--text); font-family: var(--font-body); font-size: 14px;
-      padding: 9px 12px; border-radius: var(--radius); outline: none; resize: vertical;
-      transition: border-color .2s;
+    .edit-field-row textarea:focus,.edit-field-row input:focus{border-color:var(--accent);}
+    .change-pass-section{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+    .change-pass-toggle{background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;font-family:var(--font-body);text-decoration:underline;text-underline-offset:2px;padding:0;}
+    .change-pass-toggle:hover{color:var(--yellow);}
+    .btn-fav-creator{
+      display:inline-flex;align-items:center;gap:6px;padding:6px 14px;
+      background:none;border:2px solid var(--border);border-radius:var(--radius);
+      color:var(--text-muted);font-family:var(--font-title);font-size:12px;font-weight:700;
+      letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:border-color .15s,color .15s,background .15s;
     }
-    .edit-field-row textarea:focus, .edit-field-row input:focus { border-color: var(--accent); }
-    .change-pass-section { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-    .change-pass-toggle {
-      background: none; border: none; color: var(--text-dim);
-      font-size: 12px; cursor: pointer; font-family: var(--font-body);
-      text-decoration: underline; text-underline-offset: 2px; padding: 0;
+    .btn-fav-creator:hover{border-color:#e05070;color:#e05070;}
+    .btn-fav-creator.favoritado{border-color:#e05070;background:rgba(224,80,112,.12);color:#e05070;}
+
+    /* ── Cosmetics ── */
+    .user-avatar{
+      width:155px;height:155px;
+      background:linear-gradient(135deg,#1a3a5a 0%,#2a1a5a 100%);
+      border:3px solid var(--border-light);border-radius:var(--radius-lg);
+      display:flex;align-items:center;justify-content:center;font-size:62px;
+      position:relative;overflow:visible;flex-shrink:0;
     }
-    .change-pass-toggle:hover { color: var(--yellow); }
-    .btn-fav-creator {
-      display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
-      background: none; border: 2px solid var(--border); border-radius: var(--radius);
-      color: var(--text-muted); font-family: var(--font-title); font-size: 12px;
-      font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer;
-      transition: border-color .15s, color .15s, background .15s;
+    .avatar-frame-ring{
+      position:absolute;inset:-6px;border-radius:calc(var(--radius-lg) + 4px);
+      border:4px solid transparent;pointer-events:none;z-index:3;
     }
-    .btn-fav-creator:hover { border-color: #e05070; color: #e05070; }
-    .btn-fav-creator.favoritado { border-color: #e05070; background: rgba(224,80,112,.12); color: #e05070; }
-    #toast-profile {
-      position: fixed; bottom: 24px; left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--bg-nav); border: 2px solid var(--border-light);
-      border-radius: var(--radius-lg); padding: 10px 20px;
-      font-size: 13px; color: var(--text);
-      opacity: 0; transition: opacity .2s, transform .2s;
-      pointer-events: none; white-space: nowrap; z-index: 999;
+    .avatar-frame-ring.frame-active{border-color:var(--frame-color,#888);}
+    @keyframes spinFrame{to{transform:rotate(360deg);}}
+    .avatar-frame-ring.frame-spin{border-top-color:var(--yellow);border-right-color:var(--accent);animation:spinFrame 2s linear infinite;}
+    .profile-badge{
+      display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;
+      font-family:var(--font-title);font-size:10px;font-weight:700;
+      letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px;
     }
-    #toast-profile.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .profile-title{font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+
+    /* ── Cosmetics modal ── */
+    .cosm-tabs{display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap;}
+    .cosm-tab{
+      padding:5px 12px;background:var(--bg-nav);border:2px solid var(--border);
+      border-radius:var(--radius);font-family:var(--font-title);font-size:10px;font-weight:700;
+      letter-spacing:.5px;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:all .15s;
+    }
+    .cosm-tab:hover{border-color:var(--accent);color:var(--text);}
+    .cosm-tab.active{background:rgba(61,158,66,.15);border-color:var(--accent);color:var(--accent);}
+    .cosm-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:320px;overflow-y:auto;padding-right:4px;}
+    .cosm-grid::-webkit-scrollbar{width:4px;}
+    .cosm-grid::-webkit-scrollbar-track{background:var(--bg);}
+    .cosm-grid::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:2px;}
+    /* emoji avatars */
+    .cosm-opt-emoji{
+      aspect-ratio:1;background:var(--bg-card2);border:2px solid var(--border);
+      border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+      font-size:24px;cursor:pointer;transition:border-color .15s,background .15s;
+    }
+    .cosm-opt-emoji:hover{border-color:var(--accent);}
+    .cosm-opt-emoji.selected{border-color:var(--accent);background:rgba(61,158,66,.15);}
+    /* color swatches */
+    .cosm-opt-color{
+      aspect-ratio:1;border-radius:50%;border:3px solid var(--border);
+      cursor:pointer;transition:border-color .15s,transform .15s;
+    }
+    .cosm-opt-color:hover{border-color:var(--accent);transform:scale(1.1);}
+    .cosm-opt-color.selected{border-color:var(--yellow);transform:scale(1.15);box-shadow:0 0 8px rgba(240,192,64,.4);}
+    /* bg swatches */
+    .cosm-opt-bg{
+      aspect-ratio:1;border-radius:var(--radius);border:3px solid var(--border);
+      cursor:pointer;transition:border-color .15s;display:flex;align-items:center;justify-content:center;
+      font-size:9px;font-family:var(--font-title);font-weight:700;text-transform:uppercase;
+    }
+    .cosm-opt-bg:hover{border-color:var(--accent);}
+    .cosm-opt-bg.selected{border-color:var(--yellow);box-shadow:0 0 8px rgba(240,192,64,.4);}
+    /* frame options */
+    .cosm-opt-frame{
+      aspect-ratio:1;background:var(--bg-card2);border:2px solid var(--border);
+      border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:border-color .15s,background .15s;position:relative;
+    }
+    .cosm-opt-frame:hover{border-color:var(--accent);}
+    .cosm-opt-frame.selected{border-color:var(--yellow);background:rgba(240,192,64,.1);}
+    .cosm-opt-frame .frame-mini{
+      width:36px;height:36px;border-radius:50%;border:3px solid;
+      display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-dim);
+    }
+    /* badge / title options */
+    .cosm-opt-badge{
+      grid-column:span 2;padding:6px 8px;
+      background:var(--bg-card2);border:2px solid var(--border);border-radius:var(--radius);
+      cursor:pointer;transition:border-color .15s,background .15s;
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-title);font-size:10px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.5px;border-radius:20px;
+    }
+    .cosm-opt-badge:hover{border-color:var(--accent);}
+    .cosm-opt-badge.selected{border-color:var(--yellow);box-shadow:0 0 8px rgba(240,192,64,.3);}
+    .cosm-opt-title{
+      grid-column:span 3;padding:6px 8px;
+      background:var(--bg-card2);border:2px solid var(--border);border-radius:var(--radius);
+      cursor:pointer;transition:border-color .15s;
+      font-family:var(--font-title);font-size:10px;font-weight:700;
+      text-transform:uppercase;letter-spacing:.5px;text-align:center;
+    }
+    .cosm-opt-title:hover{border-color:var(--accent);}
+    .cosm-opt-title.selected{border-color:var(--yellow);}
+    /* lock overlay for unowned */
+    .cosm-locked{position:relative;opacity:.45;pointer-events:none;}
+    .cosm-lock-badge{
+      position:absolute;top:2px;right:2px;font-size:9px;
+      background:rgba(0,0,0,.7);border-radius:3px;padding:1px 3px;z-index:5;
+    }
+    .cosm-section-title{
+      grid-column:1/-1;font-family:var(--font-title);font-size:9px;font-weight:700;
+      letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);
+      padding:4px 0 2px;border-bottom:1px solid var(--border);margin-bottom:2px;
+    }
+    .cosm-none-opt{
+      aspect-ratio:1;background:var(--bg-card2);border:2px dashed var(--border);
+      border-radius:var(--radius);display:flex;align-items:center;justify-content:center;
+      font-size:9px;color:var(--text-dim);cursor:pointer;transition:border-color .15s;
+      font-family:var(--font-title);text-transform:uppercase;text-align:center;padding:2px;
+    }
+    .cosm-none-opt:hover{border-color:var(--accent);}
+    .cosm-none-opt.selected{border-color:#e07070;background:rgba(210,50,50,.08);}
+
+    #toast-profile{
+      position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+      background:var(--bg-nav);border:2px solid var(--border-light);border-radius:var(--radius-lg);
+      padding:10px 20px;font-size:13px;color:var(--text);
+      opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;white-space:nowrap;z-index:9999;
+    }
+    #toast-profile.show{opacity:1;transform:translateX(-50%) translateY(0);}
   </style>
 </head>
 <body>
@@ -75,54 +169,71 @@
   <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
   <ul class="nav-links">
     <li><a href="index.html" data-i18n="nav.home">Home</a></li>
-    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Levels</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
     <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="shop.html">🛒 Loja</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
-        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar fases..." autocomplete="off">
       </form>
     </li>
   </ul>
 </nav>
 
-<!-- Modal: Alterar Avatar -->
-<div class="modal-overlay hidden" id="modal-avatar">
-  <div class="modal-box">
-    <div class="modal-header"><span data-i18n="modal.alterar_avatar">🖼 Alterar Avatar</span><button class="modal-close" onclick="closeModal('modal-avatar')">✕</button></div>
+<!-- ═══════════════════════════════════════════
+     MODAL DE COSMÉTICOS (substitui modal-avatar)
+     Abas: Avatar | Cor | Fundo | Moldura | Badge | Título
+═══════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-cosm">
+  <div class="modal-box" style="max-width:520px;">
+    <div class="modal-header">
+      <span>🎨 Personalizar Perfil</span>
+      <button class="modal-close" onclick="closeModal('modal-cosm')">✕</button>
+    </div>
     <div class="modal-body">
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;" data-i18n="modal.escolher_avatar">Escolha um emoji como avatar:</p>
-      <div class="avatar-grid" id="avatar-grid"></div>
+      <div class="cosm-tabs" id="cosm-tabs">
+        <button class="cosm-tab active" data-tab="avatar"     onclick="switchCosmTab('avatar',this)">😄 Avatar</button>
+        <button class="cosm-tab"        data-tab="color"      onclick="switchCosmTab('color',this)">🎨 Cor</button>
+        <button class="cosm-tab"        data-tab="bg"         onclick="switchCosmTab('bg',this)">🖼 Fundo</button>
+        <button class="cosm-tab"        data-tab="frame"      onclick="switchCosmTab('frame',this)">💠 Moldura</button>
+        <button class="cosm-tab"        data-tab="badge"      onclick="switchCosmTab('badge',this)">🏅 Badge</button>
+        <button class="cosm-tab"        data-tab="title"      onclick="switchCosmTab('title',this)">📛 Título</button>
+      </div>
+      <div class="cosm-grid" id="cosm-grid"></div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:10px;font-style:italic;">
+        🔒 Itens bloqueados precisam ser comprados na <a href="shop.html" style="color:var(--yellow);">Loja</a> com XP.
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-avatar')" data-i18n="modal.cancelar">Cancelar</button>
-      <button class="btn btn-green btn-sm" onclick="saveAvatar()" data-i18n="modal.salvar">Salvar</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-cosm')">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="saveCosmetics()">✅ Aplicar</button>
     </div>
   </div>
 </div>
 
-<!-- Modal: Alterar Biografia -->
+<!-- Modal: Editar Bio -->
 <div class="modal-overlay hidden" id="modal-bio">
   <div class="modal-box">
-    <div class="modal-header"><span data-i18n="modal.editar_perfil">✏ Editar Perfil</span><button class="modal-close" onclick="closeModal('modal-bio')">✕</button></div>
+    <div class="modal-header"><span>✏ Editar Perfil</span><button class="modal-close" onclick="closeModal('modal-bio')">✕</button></div>
     <div class="modal-body">
       <div class="edit-field-row">
-        <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.biografia">Biografia</label>
-        <textarea id="bio-input" rows="4" maxlength="500" data-i18n-ph="modal.bio_placeholder" placeholder="Uma frase sobre você..."></textarea>
+        <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Biografia</label>
+        <textarea id="bio-input" rows="4" maxlength="500" placeholder="Uma frase sobre você..."></textarea>
       </div>
       <div style="font-size:11px;color:var(--text-dim);text-align:right;margin-top:4px;"><span id="bio-counter">0</span>/500</div>
       <div class="change-pass-section">
-        <button class="change-pass-toggle" onclick="toggleChangePass()" data-i18n="modal.alterar_senha">🔒 Alterar senha</button>
+        <button class="change-pass-toggle" onclick="toggleChangePass()">🔒 Alterar senha</button>
         <div id="change-pass-fields" style="display:none;margin-top:12px;">
           <div class="edit-field-row">
-            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.senha_atual">Senha Atual</label>
-            <input type="password" id="old-pass" data-i18n-ph="modal.senha_atual_ph" placeholder="Sua senha atual">
+            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Senha Atual</label>
+            <input type="password" id="old-pass" placeholder="Sua senha atual">
           </div>
           <div class="edit-field-row">
-            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;" data-i18n="modal.nova_senha">Nova Senha</label>
-            <input type="password" id="new-pass" data-i18n-ph="modal.nova_senha_ph" placeholder="Nova senha (mais de 7 caracteres)" oninput="checkNewPassRules()">
+            <label style="display:block;font-family:var(--font-title);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Nova Senha</label>
+            <input type="password" id="new-pass" placeholder="Nova senha (mais de 7 caracteres)" oninput="checkNewPassRules()">
           </div>
           <div id="new-pass-rules" style="font-size:11px;margin-top:4px;display:none;flex-direction:column;gap:3px;">
             <span id="np-rule-len"     style="color:var(--text-muted);">✗ Mais de 7 caracteres</span>
@@ -134,8 +245,8 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-bio')" data-i18n="modal.cancelar">Cancelar</button>
-      <button class="btn btn-green btn-sm" onclick="saveBio()" data-i18n="modal.salvar">Salvar</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-bio')">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="saveBio()">Salvar</button>
     </div>
   </div>
 </div>
@@ -143,14 +254,14 @@
 <!-- Modal: Apagar Level -->
 <div class="modal-overlay hidden" id="modal-delete">
   <div class="modal-box">
-    <div class="modal-header" style="color:#e07070;"><span data-i18n="modal.apagar_fase">🗑 Apagar Fase</span><button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
+    <div class="modal-header" style="color:#e07070;"><span>🗑 Apagar Fase</span><button class="modal-close" onclick="closeModal('modal-delete')">✕</button></div>
     <div class="modal-body">
-      <p style="font-size:14px;color:var(--text);margin-bottom:8px;"><span data-i18n="modal.apagar_confirm">Tem certeza que deseja apagar a fase</span> <strong id="delete-level-name" style="color:var(--yellow);"></strong>?</p>
-      <p style="font-size:12px;color:var(--text-muted);" data-i18n="modal.apagar_aviso">⚠ Esta ação não pode ser desfeita.</p>
+      <p style="font-size:14px;color:var(--text);margin-bottom:8px;">Tem certeza que deseja apagar a fase <strong id="delete-level-name" style="color:var(--yellow);"></strong>?</p>
+      <p style="font-size:12px;color:var(--text-muted);">⚠ Esta ação não pode ser desfeita.</p>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-delete')" data-i18n="modal.cancelar">Cancelar</button>
-      <button class="btn-red" style="font-size:12px;padding:6px 14px;" id="confirm-delete-btn" onclick="confirmDelete()" data-i18n="modal.apagar_btn">🗑 Apagar</button>
+      <button class="btn btn-outline btn-sm" onclick="closeModal('modal-delete')">Cancelar</button>
+      <button class="btn-red" style="font-size:12px;padding:6px 14px;" id="confirm-delete-btn" onclick="confirmDelete()">🗑 Apagar</button>
     </div>
   </div>
 </div>
@@ -162,7 +273,6 @@
       <div class="skeleton" style="height:26px;width:45%;margin-bottom:10px;"></div>
       <div class="skeleton" style="height:13px;width:32%;margin-bottom:14px;"></div>
       <div class="skeleton" style="height:13px;width:26%;margin-bottom:4px;"></div>
-      <div class="skeleton" style="height:13px;width:26%;margin-bottom:20px;"></div>
       <div class="skeleton" style="height:34px;width:110px;"></div>
     </div>
   </div>
@@ -171,362 +281,523 @@
 <script>
 'use strict';
 
-const EMOJIS  = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
-const AVATARS = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
-const emojiFor = id => EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length];
+/* ═══════════════════════════════════════════════════════
+   COSMETICS DATA — espelha exatamente a loja
+   Qualquer item com price_xp:0 é grátis (sempre possuído).
+   Os demais precisam estar em pb_user_inventory para usar.
+═══════════════════════════════════════════════════════ */
+
+const AVATARS_LIST = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
+
+const COSM_CATALOG = {
+  avatar: AVATARS_LIST.map(function(e,i){ return {id:'avatar_'+i, value:e, label:e, price_xp:0, rarity:'free'}; }),
+  color: [
+    {id:'color_blue',   value:'#378ADD', label:'Azul',    price_xp:50,   rarity:'common'},
+    {id:'color_green',  value:'#1D9E75', label:'Verde',   price_xp:50,   rarity:'common'},
+    {id:'color_purple', value:'#7F77DD', label:'Roxo',    price_xp:100,  rarity:'uncommon'},
+    {id:'color_orange', value:'#D85A30', label:'Laranja', price_xp:100,  rarity:'uncommon'},
+    {id:'color_gold',   value:'#EF9F27', label:'Dourado', price_xp:200,  rarity:'rare'},
+  ],
+  bg: [
+    {id:'bg_mint',     value:'#E1F5EE', label:'Menta',      price_xp:100, rarity:'common',   textColor:'#2a5a3a'},
+    {id:'bg_lavender', value:'#EEEDFE', label:'Lavanda',    price_xp:100, rarity:'common',   textColor:'#3a2a5a'},
+    {id:'bg_sunset',   value:'#FAEEDA', label:'Pôr do Sol', price_xp:250, rarity:'uncommon', textColor:'#5a3a2a'},
+    {id:'bg_night',    value:'#2C2C2A', label:'Noite',      price_xp:500, rarity:'rare',     textColor:'#aaaaaa'},
+  ],
+  frame: [
+    {id:'frame_silver',  color:'#B4B2A9', label:'Prata',     price_xp:150,  rarity:'common',    animated:false},
+    {id:'frame_gold',    color:'#EF9F27', label:'Dourada',   price_xp:400,  rarity:'uncommon',  animated:false},
+    {id:'frame_emerald', color:'#1D9E75', label:'Esmeralda', price_xp:400,  rarity:'uncommon',  animated:false},
+    {id:'frame_purple',  color:'#7F77DD', label:'Roxa Neon', price_xp:500,  rarity:'rare',      animated:false},
+    {id:'frame_spin',    color:null,      label:'Giratória', price_xp:800,  rarity:'rare',      animated:true},
+    {id:'frame_rainbow', color:null,      label:'Arco-Íris', price_xp:1500, rarity:'legendary', animated:true},
+  ],
+  badge: [
+    {id:'badge_creator', label:'Criador',  price_xp:200,  color:'#633806', bg:'#FAEEDA',              rarity:'common'},
+    {id:'badge_veteran', label:'Veterano', price_xp:300,  color:'#085041', bg:'#E1F5EE',              rarity:'uncommon'},
+    {id:'badge_top',     label:'Top Fase', price_xp:400,  color:'#0C447C', bg:'#E6F1FB',              rarity:'uncommon'},
+    {id:'badge_champ',   label:'Campeão',  price_xp:600,  color:'#3C3489', bg:'#EEEDFE',              rarity:'rare'},
+    {id:'badge_legend',  label:'Lenda',    price_xp:1200, color:'#633806', bg:'rgba(240,192,64,.2)',   rarity:'legendary'},
+  ],
+  title: [
+    {id:'title_explorer', label:'Explorador',         price_xp:300,  color:'#1D9E75', rarity:'common'},
+    {id:'title_arch',     label:'Arquiteto de Fases', price_xp:500,  color:'#7F77DD', rarity:'uncommon'},
+    {id:'title_master',   label:'Mestre das Fases',   price_xp:800,  color:'#EF9F27', rarity:'rare'},
+    {id:'title_legend',   label:'Lendário',           price_xp:1000, color:'#f0c040', rarity:'legendary'},
+    {id:'title_unique',   label:'O Inigualável',      price_xp:2000, color:'#f0c040', rarity:'legendary'},
+  ]
+};
+
+const EMOJIS   = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
+const emojiFor = id => EMOJIS[((id-1)%EMOJIS.length+EMOJIS.length)%EMOJIS.length];
 
 const loggedUser = getUser();
 const authToken  = getToken();
 
-if (loggedUser) {
+if(loggedUser){
   document.getElementById('nav-auth').textContent = loggedUser.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + loggedUser.id;
+  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id='+loggedUser.id;
 }
 
-const getUserId = () => parseInt(new URLSearchParams(location.search).get('id')) || 1;
-const isOwn     = id => loggedUser && loggedUser.id === id;
+const getUserId = () => parseInt(new URLSearchParams(location.search).get('id'))||1;
+const isOwn     = id => loggedUser && loggedUser.id===id;
 
-function getStoredAvatar(userId) { return localStorage.getItem('pb_avatar_' + userId) || '👤'; }
-function setStoredAvatar(userId, emoji) { localStorage.setItem('pb_avatar_' + userId, emoji); }
-function getStoredBio(userId, fallback) {
-  var v = localStorage.getItem('pb_bio_' + userId);
-  return v !== null ? v : (fallback || '');
+/* ── Storage helpers ── */
+function getStoredAvatar(uid){ return localStorage.getItem('pb_avatar_'+uid)||'👤'; }
+function setStoredAvatar(uid,e){ localStorage.setItem('pb_avatar_'+uid,e); }
+function getStoredBio(uid,fb){ var v=localStorage.getItem('pb_bio_'+uid); return v!==null?v:(fb||''); }
+function setStoredBio(uid,b){ localStorage.setItem('pb_bio_'+uid,b); }
+function getLikedLevels(){ return JSON.parse(localStorage.getItem('pb_liked_levels')||'[]'); }
+function getInventory(){ try{return JSON.parse(localStorage.getItem('pb_user_inventory')||'[]');}catch(_){return[];} }
+function getEquipped(){ try{return JSON.parse(localStorage.getItem('pb_user_equipped')||'{}');}catch(_){return{};} }
+function saveEquipped(eq){
+  localStorage.setItem('pb_user_equipped',JSON.stringify(eq));
+  /* sync avatar emoji so other pages read it */
+  if(loggedUser && eq['avatar']){
+    var idx=parseInt(eq['avatar'].replace('avatar_',''));
+    if(!isNaN(idx) && AVATARS_LIST[idx]) setStoredAvatar(loggedUser.id, AVATARS_LIST[idx]);
+  }
 }
-function setStoredBio(userId, bio) { localStorage.setItem('pb_bio_' + userId, bio); }
-function getLikedLevels() { return JSON.parse(localStorage.getItem('pb_liked_levels') || '[]'); }
 
-function showToast(msg, ms) {
-  ms = ms || 2000;
-  var t = document.getElementById('toast-profile');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, ms);
+function isOwned(itemId, price_xp){
+  if(price_xp===0) return true;
+  return getInventory().indexOf(itemId)!==-1;
 }
 
-let pendingDeleteId  = null;
-let currentProfileId = null;
-let selectedAvatar   = null;
+function showToast(msg,ms){
+  ms=ms||2000; var t=document.getElementById('toast-profile');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},ms);
+}
 
-function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-document.querySelectorAll('.modal-overlay').forEach(function(ov) {
-  ov.addEventListener('click', function(e) { if (e.target === ov) ov.classList.add('hidden'); });
+let pendingDeleteId=null, currentProfileId=null;
+
+function openModal(id){ document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+document.querySelectorAll('.modal-overlay').forEach(function(ov){
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.classList.add('hidden');});
 });
 
-function openAvatarModal() {
-  const current = getStoredAvatar(currentProfileId);
-  selectedAvatar = current;
-  document.getElementById('avatar-grid').innerHTML = AVATARS.map(function(a) {
-    return '<div class="avatar-opt' + (a === current ? ' selected' : '') + '" onclick="selectAvatar(this,\'' + a + '\')">' + a + '</div>';
-  }).join('');
-  openModal('modal-avatar');
-}
-function selectAvatar(el, emoji) {
-  document.querySelectorAll('.avatar-opt').forEach(function(o) { o.classList.remove('selected'); });
-  el.classList.add('selected');
-  selectedAvatar = emoji;
-}
-function saveAvatar() {
-  if (!selectedAvatar) return;
-  setStoredAvatar(currentProfileId, selectedAvatar);
-  document.querySelectorAll('.user-avatar').forEach(function(el) { el.textContent = selectedAvatar; });
-  closeModal('modal-avatar');
-  showToast(t('perfil.toast_avatar'));
+/* ═══════════════════════════════════════════════
+   COSMETICS MODAL
+═══════════════════════════════════════════════ */
+var currentCosmTab = 'avatar';
+/* pendingSelections — stores what the user clicked before saving */
+var pendingSelections = {};
+
+function openCosmModal(){
+  /* copy current equipped as starting point */
+  var eq = getEquipped();
+  pendingSelections = {};
+  Object.keys(eq).forEach(function(k){ pendingSelections[k]=eq[k]; });
+  currentCosmTab = 'avatar';
+  document.querySelectorAll('.cosm-tab').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tab')==='avatar');
+  });
+  renderCosmGrid('avatar');
+  openModal('modal-cosm');
 }
 
-function openBioModal(currentBio) {
-  const input = document.getElementById('bio-input');
-  input.value = currentBio || '';
-  document.getElementById('bio-counter').textContent = (currentBio || '').length;
-  input.oninput = function() { document.getElementById('bio-counter').textContent = input.value.length; };
-  document.getElementById('change-pass-fields').style.display = 'none';
-  document.getElementById('old-pass').value = '';
-  document.getElementById('new-pass').value = '';
-  document.getElementById('change-pass-msg').textContent = '';
+function switchCosmTab(tab, btn){
+  currentCosmTab = tab;
+  document.querySelectorAll('.cosm-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderCosmGrid(tab);
+}
+
+function renderCosmGrid(tab){
+  var grid = document.getElementById('cosm-grid');
+  grid.innerHTML = '';
+  var items = COSM_CATALOG[tab] || [];
+  var eq = getEquipped();
+
+  /* "Nenhum" option for non-avatar tabs */
+  if(tab !== 'avatar'){
+    var noneDiv = document.createElement('div');
+    noneDiv.className = 'cosm-none-opt' + (!pendingSelections[tab] ? ' selected' : '');
+    noneDiv.textContent = '✕ Nenhum';
+    noneDiv.onclick = function(){
+      pendingSelections[tab] = null;
+      renderCosmGrid(tab);
+    };
+    grid.appendChild(noneDiv);
+  }
+
+  items.forEach(function(item){
+    var owned = isOwned(item.id, item.price_xp||0);
+    var selected = pendingSelections[tab] === item.id;
+    var wrapper = document.createElement('div');
+    wrapper.style.position='relative';
+    if(!owned) wrapper.classList.add('cosm-locked');
+
+    var el;
+    if(tab==='avatar'){
+      el = document.createElement('div');
+      el.className = 'cosm-opt-emoji' + (selected?' selected':'');
+      el.textContent = item.value;
+      el.title = owned?'Clique para selecionar':'Grátis — clique para selecionar';
+    } else if(tab==='color'){
+      el = document.createElement('div');
+      el.className = 'cosm-opt-color' + (selected?' selected':'');
+      el.style.background = item.value;
+      el.title = item.label + (owned?'':' ('+item.price_xp+' XP)');
+    } else if(tab==='bg'){
+      el = document.createElement('div');
+      el.className = 'cosm-opt-bg' + (selected?' selected':'');
+      el.style.background = item.value;
+      el.style.color = item.textColor||'#333';
+      el.textContent = item.label;
+      el.title = item.label + (owned?'':' ('+item.price_xp+' XP)');
+    } else if(tab==='frame'){
+      el = document.createElement('div');
+      el.className = 'cosm-opt-frame' + (selected?' selected':'');
+      var mini = document.createElement('div');
+      mini.className = 'frame-mini';
+      if(item.animated){
+        mini.style.border = '3px solid';
+        mini.style.borderTopColor = 'var(--yellow)';
+        mini.style.borderRightColor = 'var(--accent)';
+        mini.style.borderBottomColor = 'transparent';
+        mini.style.borderLeftColor = 'transparent';
+      } else {
+        mini.style.borderColor = item.color||'#888';
+      }
+      mini.textContent = 'PB';
+      el.appendChild(mini);
+      var lbl = document.createElement('div');
+      lbl.style = 'font-size:8px;font-family:var(--font-title);text-transform:uppercase;color:var(--text-muted);margin-top:3px;text-align:center;';
+      lbl.textContent = item.label;
+      el.appendChild(lbl);
+      el.title = item.label + (owned?'':' ('+item.price_xp+' XP)');
+    } else if(tab==='badge'){
+      el = document.createElement('div');
+      el.className = 'cosm-opt-badge' + (selected?' selected':'');
+      el.style.background = item.bg;
+      el.style.color = item.color;
+      el.style.borderColor = selected?'var(--yellow)':item.color;
+      el.textContent = item.label;
+      el.title = item.label + (owned?'':' ('+item.price_xp+' XP)');
+    } else if(tab==='title'){
+      el = document.createElement('div');
+      el.className = 'cosm-opt-title' + (selected?' selected':'');
+      el.style.color = item.color;
+      el.style.borderColor = selected?'var(--yellow)':item.color;
+      el.textContent = item.label;
+      el.title = item.label + (owned?'':' ('+item.price_xp+' XP)');
+    }
+
+    if(!owned){
+      var lock = document.createElement('div');
+      lock.className = 'cosm-lock-badge';
+      lock.textContent = '🔒'+item.price_xp+'xp';
+      wrapper.appendChild(lock);
+    } else {
+      el.onclick = function(){
+        pendingSelections[tab] = item.id;
+        renderCosmGrid(tab);
+      };
+    }
+
+    wrapper.appendChild(el);
+    grid.appendChild(wrapper);
+  });
+}
+
+function saveCosmetics(){
+  var eq = getEquipped();
+  /* Apply pending selections */
+  Object.keys(pendingSelections).forEach(function(k){
+    if(pendingSelections[k]===null){ delete eq[k]; }
+    else if(pendingSelections[k]){ eq[k]=pendingSelections[k]; }
+  });
+  saveEquipped(eq);
+  /* Update avatar emoji in localStorage */
+  if(eq['avatar'] !== undefined){
+    var idx = parseInt((eq['avatar']||'').replace('avatar_',''));
+    if(!isNaN(idx) && AVATARS_LIST[idx]){
+      setStoredAvatar(currentProfileId, AVATARS_LIST[idx]);
+    }
+  }
+  closeModal('modal-cosm');
+  showToast('✅ Visual atualizado!');
+  /* Reload profile to reflect changes */
+  loadProfile();
+}
+
+/* ═══ Bio modal ═══ */
+function openBioModal(currentBio){
+  var input=document.getElementById('bio-input');
+  input.value=currentBio||'';
+  document.getElementById('bio-counter').textContent=(currentBio||'').length;
+  input.oninput=function(){document.getElementById('bio-counter').textContent=input.value.length;};
+  document.getElementById('change-pass-fields').style.display='none';
+  document.getElementById('old-pass').value='';
+  document.getElementById('new-pass').value='';
+  document.getElementById('change-pass-msg').textContent='';
   openModal('modal-bio');
 }
 
-async function saveBio() {
-  const bio    = (document.getElementById('bio-input').value || '').trim();
-  const oldPass = (document.getElementById('old-pass').value || '').trim();
-  const newPass = (document.getElementById('new-pass').value || '').trim();
-  const passSectionOpen = document.getElementById('change-pass-fields').style.display !== 'none';
-  if (passSectionOpen && (oldPass || newPass)) {
-    const ok = await changePassword(oldPass, newPass);
-    if (!ok) return;
-  }
-  try {
-    await fetch(API + '/users/' + currentProfileId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
-      body: JSON.stringify({ bio })
-    });
-    setStoredBio(currentProfileId, bio);
-    window._currentBio = bio;
-    document.querySelectorAll('.user-bio').forEach(function(el) { el.textContent = bio ? '"' + bio + '"' : ''; });
-    if (loggedUser && loggedUser.id === currentProfileId) {
-      loggedUser.bio = bio;
-      saveSession(loggedUser, authToken);
-    }
-  } catch (_) { setStoredBio(currentProfileId, bio); }
+async function saveBio(){
+  var bio=(document.getElementById('bio-input').value||'').trim();
+  var oldPass=(document.getElementById('old-pass').value||'').trim();
+  var newPass=(document.getElementById('new-pass').value||'').trim();
+  var passSectionOpen=document.getElementById('change-pass-fields').style.display!=='none';
+  if(passSectionOpen&&(oldPass||newPass)){var ok=await changePassword(oldPass,newPass);if(!ok)return;}
+  try{
+    await fetch(API+'/users/'+currentProfileId,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+authToken},body:JSON.stringify({bio})});
+    setStoredBio(currentProfileId,bio); window._currentBio=bio;
+    document.querySelectorAll('.user-bio').forEach(function(el){el.textContent=bio?'"'+bio+'"':'';});
+    if(loggedUser&&loggedUser.id===currentProfileId){loggedUser.bio=bio;saveSession(loggedUser,authToken);}
+  }catch(_){setStoredBio(currentProfileId,bio);}
   closeModal('modal-bio');
-  showToast(t('perfil.toast_perfil'));
+  showToast('Perfil atualizado!');
 }
 
-function toggleChangePass() {
-  const el = document.getElementById('change-pass-fields');
-  el.style.display = el.style.display === 'none' ? 'flex' : 'none';
-  el.style.flexDirection = 'column';
-  if (el.style.display !== 'none') document.getElementById('old-pass').focus();
+function toggleChangePass(){
+  var el=document.getElementById('change-pass-fields');
+  el.style.display=el.style.display==='none'?'flex':'none'; el.style.flexDirection='column';
+  if(el.style.display!=='none')document.getElementById('old-pass').focus();
+}
+function checkNewPassRules(){
+  var pass=document.getElementById('new-pass').value;
+  var wrap=document.getElementById('new-pass-rules');
+  wrap.style.display=pass.length?'flex':'none';
+  if(!pass.length)return;
+  [['np-rule-len',pass.length>7,(pass.length>7?'✓':'✗')+' Mais de 7 caracteres'],
+   ['np-rule-upper',/[A-Z]/.test(pass),(/[A-Z]/.test(pass)?'✓':'✗')+' Pelo menos uma letra maiúscula'],
+   ['np-rule-special',/[!@#$%^&*()+\-=\[\]{};:\'",./<>?|]/.test(pass),(/[!@#$%^&*()+\-=\[\]{};:\'",./<>?|]/.test(pass)?'✓':'✗')+' Pelo menos um caractere especial']
+  ].forEach(function(r){var el=document.getElementById(r[0]);if(el){el.style.color=r[1]?'#5dba60':'var(--text-muted)';el.textContent=r[2];}});
+}
+async function changePassword(oldPass,newPass){
+  var msgEl=document.getElementById('change-pass-msg');
+  if(!oldPass){msgEl.style.color='#e07070';msgEl.textContent='Informe a senha atual.';return false;}
+  if(!newPass||newPass.length<=7){msgEl.style.color='#e07070';msgEl.textContent='Nova senha deve ter mais de 7 caracteres.';return false;}
+  if(!/[A-Z]/.test(newPass)){msgEl.style.color='#e07070';msgEl.textContent='Nova senha precisa de letra maiúscula.';return false;}
+  if(!/[!@#$%^&*()+\-=\[\]{};:\'",./<>?|]/.test(newPass)){msgEl.style.color='#e07070';msgEl.textContent='Nova senha precisa de caractere especial.';return false;}
+  try{
+    var loginResp=await fetch(API+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:loggedUser.username,password:oldPass})});
+    if(!loginResp.ok){msgEl.style.color='#e07070';msgEl.textContent='Senha atual incorreta.';return false;}
+    var tempToken=(await loginResp.json()).token;
+    var resetResp=await fetch(API+'/auth/recovery/reset',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+tempToken},body:JSON.stringify({password:newPass})});
+    if(!resetResp.ok){var err=await resetResp.json();msgEl.style.color='#e07070';msgEl.textContent=err.error||'Erro ao alterar senha.';return false;}
+    msgEl.style.color='#5dba60';msgEl.textContent='✓ Senha alterada!';return true;
+  }catch(_){msgEl.style.color='#e07070';msgEl.textContent='Erro de conexão.';return false;}
 }
 
-function checkNewPassRules() {
-  const pass = document.getElementById('new-pass').value;
-  const wrap = document.getElementById('new-pass-rules');
-  wrap.style.display = pass.length ? 'flex' : 'none';
-  if (!pass.length) return;
-  [['np-rule-len',     pass.length > 7,    (pass.length > 7    ? '✓' : '✗') + ' Mais de 7 caracteres'],
-   ['np-rule-upper',   /[A-Z]/.test(pass), (/[A-Z]/.test(pass) ? '✓' : '✗') + ' Pelo menos uma letra maiúscula'],
-   ['np-rule-special', /[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass), (/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(pass) ? '✓' : '✗') + ' Pelo menos um caractere especial']
-  ].forEach(function(r) {
-    var el = document.getElementById(r[0]);
-    if (el) { el.style.color = r[1] ? '#5dba60' : 'var(--text-muted)'; el.textContent = r[2]; }
-  });
-}
-
-async function changePassword(oldPass, newPass) {
-  const msgEl = document.getElementById('change-pass-msg');
-  if (!oldPass) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Informe a senha atual.'; return false; }
-  if (!newPass || newPass.length <= 7) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha deve ter mais de 7 caracteres.'; return false; }
-  if (!/[A-Z]/.test(newPass)) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha precisa de letra maiúscula.'; return false; }
-  if (!/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(newPass)) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha precisa de caractere especial.'; return false; }
-  try {
-    const loginResp = await fetch(API + '/auth/login', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: loggedUser.username, password: oldPass })
-    });
-    if (!loginResp.ok) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Senha atual incorreta.'; return false; }
-    const loginData = await loginResp.json();
-    const tempToken = loginData.token;
-    const resetResp = await fetch(API + '/auth/recovery/reset', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tempToken },
-      body: JSON.stringify({ password: newPass })
-    });
-    if (!resetResp.ok) { const err = await resetResp.json(); msgEl.style.color = '#e07070'; msgEl.textContent = err.error || 'Erro ao alterar senha.'; return false; }
-    msgEl.style.color = '#5dba60'; msgEl.textContent = '✓ Senha alterada com sucesso!';
-    return true;
-  } catch (_) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Erro de conexão.'; return false; }
-}
-
-function openDeleteModal(levelId, levelName) {
-  pendingDeleteId = levelId;
-  document.getElementById('delete-level-name').textContent = levelName;
-  const btn = document.getElementById('confirm-delete-btn');
-  btn.disabled = false; btn.textContent = '🗑 Apagar';
+/* ═══ Delete modal ═══ */
+function openDeleteModal(levelId,levelName){
+  pendingDeleteId=levelId;
+  document.getElementById('delete-level-name').textContent=levelName;
+  var btn=document.getElementById('confirm-delete-btn');
+  btn.disabled=false; btn.textContent='🗑 Apagar';
   openModal('modal-delete');
 }
-
-async function confirmDelete() {
-  if (!pendingDeleteId) return;
-  const id  = pendingDeleteId;
-  const btn = document.getElementById('confirm-delete-btn');
-  btn.disabled = true; btn.textContent = 'Apagando...';
-  closeModal('modal-delete');
-  pendingDeleteId = null;
-  try {
-    const res = await fetch(API + '/levels/' + id, {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + authToken }
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(function() { return {}; });
-      showToast('❌ ' + (err.error || res.status));
-      return;
-    }
-    const card = document.getElementById('level-card-' + id);
-    if (card) {
-      card.style.transition = 'opacity .3s, transform .3s';
-      card.style.opacity = '0'; card.style.transform = 'scale(0.95)';
-      setTimeout(function() { card.remove(); }, 300);
-    }
+async function confirmDelete(){
+  if(!pendingDeleteId)return;
+  var id=pendingDeleteId;
+  var btn=document.getElementById('confirm-delete-btn');
+  btn.disabled=true; btn.textContent='Apagando...';
+  closeModal('modal-delete'); pendingDeleteId=null;
+  try{
+    var res=await fetch(API+'/levels/'+id,{method:'DELETE',headers:{'Authorization':'Bearer '+authToken}});
+    if(!res.ok){var err=await res.json().catch(function(){return{};});showToast('❌ '+(err.error||res.status));return;}
+    var card=document.getElementById('level-card-'+id);
+    if(card){card.style.transition='opacity .3s,transform .3s';card.style.opacity='0';card.style.transform='scale(0.95)';setTimeout(function(){card.remove();},300);}
     sessionStorage.removeItem('pb_niveis_v2');
-    showToast(t('perfil.toast_del_ok'));
-  } catch (_) { showToast(t('perfil.toast_del_err')); }
+    showToast('Fase apagada!');
+  }catch(_){showToast('Erro ao apagar.');}
 }
 
-function renderLikedSection() {
-  const likedIds = getLikedLevels();
-  if (!likedIds.length) return '';
-  const cards = likedIds.map(function(id) {
-    return '<a href="perfil_do_jogo.html?id=' + id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
-      '<div class="created-card-thumb">' + emojiFor(id) + '</div>' +
-      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.curtido_por_vc') + '</div></div>' +
-      '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked(' + id + ',this.closest(\'a\'))">' + t('perfil.remover') + '</button></div>' +
+/* ═══ Liked / Downloads sections ═══ */
+function renderLikedSection(){
+  var likedIds=getLikedLevels();
+  if(!likedIds.length)return'';
+  var cards=likedIds.map(function(id){
+    return'<a href="perfil_do_jogo.html?id='+id+'" class="created-card" style="text-decoration:none;color:inherit;display:block;">'+
+      '<div class="created-card-thumb">'+emojiFor(id)+'</div>'+
+      '<div class="created-card-info"><div class="created-card-name">Fase #'+id+'</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">Curtida por você</div></div>'+
+      '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked('+id+',this.closest(\'a\'))">Remover</button></div>'+
     '</a>';
   }).join('');
-  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.fases_curtidas') + '</div><div class="created-strip">' + cards + '</div>';
+  return'<div class="created-title" style="margin-top:28px;">Fases Curtidas</div><div class="created-strip">'+cards+'</div>';
 }
-
-function removeLiked(id, card) {
-  var list = getLikedLevels().filter(function(x) { return x !== id; });
-  localStorage.setItem('pb_liked_levels', JSON.stringify(list));
-  if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(function() { card.remove(); }, 300); }
+function removeLiked(id,card){
+  var list=getLikedLevels().filter(function(x){return x!==id;});
+  localStorage.setItem('pb_liked_levels',JSON.stringify(list));
+  if(card){card.style.transition='opacity .3s';card.style.opacity='0';setTimeout(function(){card.remove();},300);}
 }
-
-function renderDownloadHistory() {
-  const history = JSON.parse(localStorage.getItem('pb_download_history') || '[]');
-  if (!history.length) return '';
-  const cards = history.slice(0, 12).map(function(item) {
-    var date = new Date(item.at).toLocaleDateString(getLang().replace('_','-'), { day:'2-digit', month:'short' });
-    return '<a href="perfil_do_jogo.html?id=' + item.id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
-      '<div class="created-card-thumb">' + emojiFor(item.id) + '</div>' +
-      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + item.id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.baixado_em') + ' ' + date + '</div></div>' +
+function renderDownloadHistory(){
+  var history=JSON.parse(localStorage.getItem('pb_download_history')||'[]');
+  if(!history.length)return'';
+  var cards=history.slice(0,12).map(function(item){
+    var date=new Date(item.at).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+    return'<a href="perfil_do_jogo.html?id='+item.id+'" class="created-card" style="text-decoration:none;color:inherit;display:block;">'+
+      '<div class="created-card-thumb">'+emojiFor(item.id)+'</div>'+
+      '<div class="created-card-info"><div class="created-card-name">Fase #'+item.id+'</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">Baixado em '+date+'</div></div>'+
     '</a>';
   }).join('');
-  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.downloads_rec') + '</div><div class="created-strip">' + cards + '</div>';
+  return'<div class="created-title" style="margin-top:28px;">Downloads Recentes</div><div class="created-strip">'+cards+'</div>';
 }
 
-async function loadProfile() {
-  const id = getUserId();
-  currentProfileId = id;
-  let u;
-  try {
-    const resp = await fetch(API + '/users/' + id);
-    if (resp.status === 404) { window.location.href = '404.html'; return; }
-    if (!resp.ok) throw new Error('server');
-    u = await resp.json();
-  } catch (_) {
-    u = { id:1, username:'xx_poste_xx', bio:'Viva Jesus', downloaded_levels:11, liked_levels:9,
-          levels:[{id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10},{id:2,name:'Meu Level Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9}] };
+/* ═══════════════════════════════════════════════
+   LOAD PROFILE — reads equipped and applies visually
+═══════════════════════════════════════════════ */
+async function loadProfile(){
+  var id=getUserId(); currentProfileId=id;
+  var u;
+  try{
+    var resp=await fetch(API+'/users/'+id);
+    if(resp.status===404){window.location.href='404.html';return;}
+    if(!resp.ok)throw new Error();
+    u=await resp.json();
+  }catch(_){
+    u={id:1,username:'xx_poste_xx',bio:'Viva Jesus',downloaded_levels:11,liked_levels:9,
+       levels:[{id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10}]};
   }
 
-  document.title = u.username + ' — Pellizzola Brothers';
-  const own    = isOwn(u.id);
-  const avatar = getStoredAvatar(u.id);
-  const bio    = getStoredBio(u.id, u.bio);
-  const levels = u.levels || [];
+  document.title=u.username+' — Pellizzola Brothers';
+  var own   = isOwn(u.id);
+  var avatar= getStoredAvatar(u.id);
+  var bio   = getStoredBio(u.id,u.bio);
+  var levels= u.levels||[];
+  var eq    = own ? getEquipped() : {};
 
-  window._currentBio = bio;
+  window._currentBio=bio;
 
-  const actionBtn = own
-    ? '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
-        '<a href="upload.html" class="btn btn-green btn-sm">' + t('perfil.enviar_fase') + '</a>' +
-        '<button class="btn btn-outline btn-sm" id="btn-bio" onclick="openBioModal(window._currentBio)">' + t('perfil.editar') + '</button>' +
-        '<button class="btn btn-outline btn-sm" onclick="openAvatarModal()">' + t('perfil.avatar') + '</button>' +
-        '<button class="btn-red" onclick="logout()">' + t('perfil.sair') + '</button>' +
+  /* ── Avatar color ── */
+  var avatarBg='linear-gradient(135deg,#1a3a5a 0%,#2a1a5a 100%)';
+  if(eq['color']){
+    var cmap={color_blue:'#378ADD',color_green:'#1D9E75',color_purple:'#7F77DD',color_orange:'#D85A30',color_gold:'#EF9F27'};
+    if(cmap[eq['color']]) avatarBg=cmap[eq['color']];
+  }
+
+  /* ── Hero background ── */
+  var heroBg='';
+  if(eq['bg']){
+    var bmap={bg_mint:'#E1F5EE',bg_lavender:'#EEEDFE',bg_sunset:'#FAEEDA',bg_night:'#2C2C2A'};
+    if(bmap[eq['bg']]) heroBg='background:'+bmap[eq['bg']]+';';
+  }
+
+  /* ── Frame ring ── */
+  var frameHTML='';
+  if(eq['frame']){
+    var fmap={frame_silver:'#B4B2A9',frame_gold:'#EF9F27',frame_emerald:'#1D9E75',frame_purple:'#7F77DD',frame_purple_neon:'#9B59B6'};
+    var isSpin=eq['frame']==='frame_spin'||eq['frame']==='frame_spinning'||eq['frame']==='frame_rainbow';
+    if(isSpin){
+      frameHTML='<div class="avatar-frame-ring frame-spin"></div>';
+    } else if(fmap[eq['frame']]){
+      frameHTML='<div class="avatar-frame-ring frame-active" style="--frame-color:'+fmap[eq['frame']]+'"></div>';
+    }
+  }
+
+  /* ── Badge ── */
+  var badgeHTML='';
+  if(eq['badge']){
+    var bdmap={
+      badge_creator:{color:'#633806',bg:'#FAEEDA',label:'Criador'},
+      badge_veteran:{color:'#085041',bg:'#E1F5EE',label:'Veterano'},
+      badge_top:    {color:'#0C447C',bg:'#E6F1FB',label:'Top Fase'},
+      badge_champ:  {color:'#3C3489',bg:'#EEEDFE',label:'Campeão'},
+      badge_legend: {color:'#633806',bg:'rgba(240,192,64,.2)',label:'Lenda'}
+    };
+    var bs=bdmap[eq['badge']];
+    if(bs) badgeHTML='<div class="profile-badge" style="background:'+bs.bg+';color:'+bs.color+';">'+bs.label+'</div>';
+  }
+
+  /* ── Title ── */
+  var titleHTML='';
+  if(eq['title']){
+    var tmap={
+      title_explorer:{color:'#1D9E75',text:'Explorador'},
+      title_arch:    {color:'#7F77DD',text:'Arquiteto de Fases'},
+      title_master:  {color:'#EF9F27',text:'Mestre das Fases'},
+      title_legend:  {color:'#f0c040',text:'Lendário'},
+      title_unique:  {color:'#f0c040',text:'O Inigualável'}
+    };
+    var ts=tmap[eq['title']];
+    if(ts) titleHTML='<div class="profile-title" style="color:'+ts.color+';">'+ts.text+'</div>';
+  }
+
+  /* ── Avatar: if equipped avatar item, use its emoji ── */
+  if(eq['avatar']){
+    var aidx=parseInt(eq['avatar'].replace('avatar_',''));
+    if(!isNaN(aidx)&&AVATARS_LIST[aidx]) avatar=AVATARS_LIST[aidx];
+  }
+
+  var actionBtn=own
+    ?'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'+
+        '<a href="upload.html" class="btn btn-green btn-sm">Enviar Fase</a>'+
+        '<button class="btn btn-outline btn-sm" onclick="openBioModal(window._currentBio)">Editar Perfil</button>'+
+        '<button class="btn btn-outline btn-sm" onclick="openCosmModal()">🎨 Visual</button>'+
+        '<a href="shop.html" class="btn btn-outline btn-sm">🛒 Loja</a>'+
+        '<button class="btn-red" onclick="logout()">Sair</button>'+
       '</div>'
-    : (function() {
-        var fav = isFavCreator(u.id);
-        return '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
-          '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">' + t('perfil.seguir') + '</button>' +
-          '<button class="btn-fav-creator' + (fav ? ' favoritado' : '') + '" id="btn-fav-creator" onclick="onFavCreator(' + parseInt(u.id) + ')" title="' + (fav ? t('perfil.fav_rem') : t('perfil.fav_add')) + '">' + (fav ? t('perfil.favoritado') : t('perfil.favoritar')) + '</button>' +
+    :(function(){
+        var fav=isFavCreator(u.id);
+        return'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">'+
+          '<button class="btn btn-green" id="follow-btn" onclick="toggleFollow(this)">Seguir</button>'+
+          '<button class="btn-fav-creator'+(fav?' favoritado':'')+'" id="btn-fav-creator" onclick="onFavCreator('+parseInt(u.id)+')">'+(fav?'❤️ Favoritado':'🤍 Favoritar')+'</button>'+
         '</div>';
       })();
 
-  const createdCards = levels.map(function(l) {
-    return '<div class="created-card" id="level-card-' + l.id + '">' +
-      '<a href="perfil_do_jogo.html?id=' + l.id + '" style="text-decoration:none;color:inherit;display:block;">' +
-        '<div class="created-card-thumb">' + emojiFor(l.id) + '</div>' +
-        '<div class="created-card-info">' +
-          '<div class="created-card-name">' + escHtml(l.name) + '</div>' +
-          '<div class="created-card-desc">' + (l.description ? '"' + escHtml(l.description) + '"' : '') + '</div>' +
-          '<div class="created-card-stats"><div>Downloads: ' + l.downloads + '</div><div>Curtidas: ' + l.likes + '</div></div>' +
-        '</div>' +
-      '</a>' +
-      (own ? '<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal(' + l.id + ',' + JSON.stringify(l.name) + ')">' + t('modal.apagar_btn') + '</button></div>' : '') +
+  var createdCards=levels.map(function(l){
+    return'<div class="created-card" id="level-card-'+l.id+'">'+
+      '<a href="perfil_do_jogo.html?id='+l.id+'" style="text-decoration:none;color:inherit;display:block;">'+
+        '<div class="created-card-thumb">'+emojiFor(l.id)+'</div>'+
+        '<div class="created-card-info">'+
+          '<div class="created-card-name">'+escHtml(l.name)+'</div>'+
+          '<div class="created-card-desc">'+(l.description?'"'+escHtml(l.description)+'"':'')+'</div>'+
+          '<div class="created-card-stats"><div>Downloads: '+l.downloads+'</div><div>Curtidas: '+l.likes+'</div></div>'+
+        '</div>'+
+      '</a>'+
+      (own?'<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal('+l.id+','+JSON.stringify(l.name)+')">Apagar</button></div>':'')+
     '</div>';
   }).join('');
 
-  const moreCard = '<a href="levels.html" class="created-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;"><div style="text-align:center;padding:16px;color:var(--text-muted);"><div style="font-size:20px;margin-bottom:6px;">→</div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">' + t('perfil.ver_todos') + '</div></div></a>';
+  var moreCard='<a href="levels.html" class="created-card" style="border-style:dashed;align-items:center;justify-content:center;min-height:110px;"><div style="text-align:center;padding:16px;color:var(--text-muted);"><div style="font-size:20px;margin-bottom:6px;">→</div><div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Ver todos</div></div></a>';
 
-  document.getElementById('main').innerHTML =
-    '<div class="user-hero">' +
-      '<div class="user-avatar"' + (own ? ' onclick="openAvatarModal()" style="cursor:pointer;transition:transform .15s;" onmouseenter="this.style.transform=\'scale(1.06)\'" onmouseleave="this.style.transform=\'scale(1)\'"' : '') + '>' + escHtml(avatar) + '</div>' +
-      '<div class="user-hero-info">' +
-        '<div class="user-name">' + escHtml(u.username) + '</div>' +
-        '<div class="user-bio">' + (bio ? '"' + escHtml(bio) + '"' : '') + '</div>' +
-        '<div class="user-stats">' +
-          '<div class="user-stat">' + t('perfil.fases_jogadas') + ': ' + u.downloaded_levels + '</div>' +
-          '<div class="user-stat">' + t('perfil.curtidas') + ': ' + u.liked_levels + '</div>' +
-          '<div class="user-stat">' + t('perfil.criadas') + ': ' + levels.length + '</div>' +
-          '<div class="user-stat" style="color:var(--text-dim);font-size:11px;">' + t('perfil.membro_desde') + parseInt(u.id) + '</div>' +
-        '</div>' +
-        actionBtn +
-      '</div>' +
-    '</div>' +
-    (levels.length > 0
-      ? '<div class="created-title">' + t('perfil.fases_criadas') + '</div><div class="created-strip">' + createdCards + moreCard + '</div>'
-      : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">' + t('perfil.nenhuma_fase') + '</div>') +
-    (own ? renderLikedSection() : '') +
-    (own ? renderDownloadHistory() : '');
+  document.getElementById('main').innerHTML=
+    '<div class="user-hero" style="'+heroBg+'">'+
+      '<div class="user-avatar" style="background:'+avatarBg+';'+(own?'cursor:pointer;':'')+'" '+(own?'onclick="openCosmModal()"':'')+'>'+
+        escHtml(avatar)+
+        frameHTML+
+      '</div>'+
+      '<div class="user-hero-info">'+
+        badgeHTML+titleHTML+
+        '<div class="user-name">'+escHtml(u.username)+'</div>'+
+        '<div class="user-bio">'+(bio?'"'+escHtml(bio)+'"':'')+'</div>'+
+        '<div class="user-stats">'+
+          '<div class="user-stat">Fases jogadas: '+u.downloaded_levels+'</div>'+
+          '<div class="user-stat">Curtidas: '+u.liked_levels+'</div>'+
+          '<div class="user-stat">Criadas: '+levels.length+'</div>'+
+          '<div class="user-stat" style="color:var(--text-dim);font-size:11px;">Membro desde conta #'+parseInt(u.id)+'</div>'+
+        '</div>'+
+        actionBtn+
+      '</div>'+
+    '</div>'+
+    (levels.length>0?'<div class="created-title">Fases Criadas</div><div class="created-strip">'+createdCards+moreCard+'</div>':'<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">Nenhuma fase criada ainda.</div>')+
+    (own?renderLikedSection():'')+
+    (own?renderDownloadHistory():'');
 }
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function getFavCreators() { try { return JSON.parse(localStorage.getItem('pb_criadores_fav') || '[]'); } catch(e) { return []; } }
-function isFavCreator(id) { return getFavCreators().indexOf(id) !== -1; }
-function toggleFavCreator(id) {
-  var favs = getFavCreators();
-  var idx  = favs.indexOf(id);
-  if (idx === -1) { favs.push(id); } else { favs.splice(idx, 1); }
-  localStorage.setItem('pb_criadores_fav', JSON.stringify(favs));
-  return idx === -1;
-}
-
-function onFavCreator(id) {
-  var nowFav = toggleFavCreator(id);
-  var btn    = document.getElementById('btn-fav-creator');
-  if (!btn) return;
-  btn.classList.toggle('favoritado', nowFav);
-  btn.innerHTML = nowFav ? t('perfil.favoritado') : t('perfil.favoritar');
-  btn.title     = nowFav ? t('perfil.fav_rem') : t('perfil.fav_add');
-  showToast(nowFav ? t('perfil.fav_add') : t('perfil.fav_rem'));
-}
-
-function toggleFollow(btn) {
-  if (btn.textContent === t('perfil.seguir')) { btn.textContent = t('perfil.seguindo'); btn.classList.replace('btn-green','btn-outline'); }
-  else { btn.textContent = t('perfil.seguir'); btn.classList.replace('btn-outline','btn-green'); }
-}
-
-function logout() {
-  clearSession();
-  window.location.href = 'index.html';
-}
+/* ═══ Helpers ═══ */
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function getFavCreators(){ try{return JSON.parse(localStorage.getItem('pb_criadores_fav')||'[]');}catch(e){return[];} }
+function isFavCreator(id){ return getFavCreators().indexOf(id)!==-1; }
+function toggleFavCreator(id){ var f=getFavCreators(),i=f.indexOf(id);if(i===-1){f.push(id);}else{f.splice(i,1);}localStorage.setItem('pb_criadores_fav',JSON.stringify(f));return i===-1; }
+function onFavCreator(id){ var n=toggleFavCreator(id);var b=document.getElementById('btn-fav-creator');if(!b)return;b.classList.toggle('favoritado',n);b.innerHTML=n?'❤️ Favoritado':'🤍 Favoritar';showToast(n?'Adicionado aos favoritos!':'Removido dos favoritos.'); }
+function toggleFollow(btn){ if(btn.textContent==='Seguir'){btn.textContent='Seguindo';btn.classList.replace('btn-green','btn-outline');}else{btn.textContent='Seguir';btn.classList.replace('btn-outline','btn-green');} }
+function logout(){ clearSession(); window.location.href='index.html'; }
+function navSearch(e){ e.preventDefault();var q=document.getElementById('nav-search').value.trim();if(q)window.location.href='levels.html?q='+encodeURIComponent(q); }
 
 loadProfile();
-
-function navSearch(e) {
-  e.preventDefault();
-  var q = document.getElementById('nav-search').value.trim();
-  if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
-}
 </script>
 <script>
 (function(){
-  var b = document.querySelector(".nav-brand");
-  if (b) {
-    b.addEventListener("click", function(e) {
-      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
-      if (n >= 9) {
-        sessionStorage.removeItem("pb_brand_clicks");
-        e.preventDefault();
-        window.location.href = "creditos.html";
-      } else {
-        sessionStorage.setItem("pb_brand_clicks", n);
-      }
-    });
-  }
-  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
-  var idx = 0;
-  document.addEventListener("keydown", function(e) {
-    if (e.key === seq[idx]) {
-      idx++;
-      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
-    } else {
-      idx = (e.key === seq[0]) ? 1 : 0;
-    }
-  });
+  var b=document.querySelector(".nav-brand");
+  if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}
+  var seq=["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"],idx=0;
+  document.addEventListener("keydown",function(e){if(e.key===seq[idx]){idx++;if(idx===seq.length){idx=0;window.location.href="admin.html";}}else{idx=(e.key===seq[0])?1:0;}});
 })();
 </script>
 </body>

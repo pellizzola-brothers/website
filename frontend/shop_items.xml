@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shop>
+
+  <!--
+    Tipos válidos (type):
+      color     → cor do avatar
+      bg        → cor/tema de fundo do perfil
+      frame     → moldura do avatar
+      badge     → badge exibido no perfil e nos cards de fase
+      title     → título exibido abaixo do nome
+      card_theme → tema visual do card de fase na listagem
+
+    Raridades (rarity):
+      common    → itens básicos, baratos
+      uncommon  → um pouco mais especiais
+      rare      → difíceis de obter
+      legendary → itens exclusivos, caros
+
+    O campo <value> é o que será salvo no banco e aplicado no frontend:
+      - Para color/bg: código hex  ex: #FF5733
+      - Para frame/badge/card_theme: slug identificador  ex: frame_gold
+      - Para title: o texto exato que aparece no perfil
+  -->
+
+  <!-- ════════════════════════════════
+       COR DO AVATAR
+  ════════════════════════════════ -->
+
+  <item>
+    <name>Azul Oceano</name>
+    <type>color</type>
+    <price_xp>50</price_xp>
+    <image>shop/colors/blue_ocean.png</image>
+    <value>#378ADD</value>
+    <rarity>common</rarity>
+    <description>Um azul tranquilo, como o mar em dia de calma.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Verde Esmeralda</name>
+    <type>color</type>
+    <price_xp>50</price_xp>
+    <image>shop/colors/green_emerald.png</image>
+    <value>#1D9E75</value>
+    <rarity>common</rarity>
+    <description>Verde vibrante de quem está sempre na ativa.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Roxo Galáxia</name>
+    <type>color</type>
+    <price_xp>100</price_xp>
+    <image>shop/colors/purple_galaxy.png</image>
+    <value>#7F77DD</value>
+    <rarity>uncommon</rarity>
+    <description>Para quem tem estilo fora deste mundo.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Laranja Fogo</name>
+    <type>color</type>
+    <price_xp>100</price_xp>
+    <image>shop/colors/orange_fire.png</image>
+    <value>#D85A30</value>
+    <rarity>uncommon</rarity>
+    <description>Quente como as fases mais desafiadoras.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Dourado Lenda</name>
+    <type>color</type>
+    <price_xp>200</price_xp>
+    <image>shop/colors/gold_legend.png</image>
+    <value>#EF9F27</value>
+    <rarity>rare</rarity>
+    <description>Reservado para os verdadeiros campeões.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <!-- ════════════════════════════════
+       COR DE FUNDO DO PERFIL
+  ════════════════════════════════ -->
+
+  <item>
+    <name>Fundo Menta</name>
+    <type>bg</type>
+    <price_xp>100</price_xp>
+    <image>shop/bg/bg_mint.png</image>
+    <value>#E1F5EE</value>
+    <rarity>common</rarity>
+    <description>Fresco e tranquilo.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundo Lavanda</name>
+    <type>bg</type>
+    <price_xp>100</price_xp>
+    <image>shop/bg/bg_lavender.png</image>
+    <value>#EEEDFE</value>
+    <rarity>common</rarity>
+    <description>Suave como uma brisa.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundo Pôr do Sol</name>
+    <type>bg</type>
+    <price_xp>250</price_xp>
+    <image>shop/bg/bg_sunset.png</image>
+    <value>#FAEEDA</value>
+    <rarity>uncommon</rarity>
+    <description>Tons quentes que lembram o fim de um dia épico.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundo Noite Estrelada</name>
+    <type>bg</type>
+    <price_xp>500</price_xp>
+    <image>shop/bg/bg_night.png</image>
+    <value>#2C2C2A</value>
+    <rarity>rare</rarity>
+    <description>Escuro, misterioso e cheio de brilho.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <!-- ════════════════════════════════
+       MOLDURA DO AVATAR (FRAME)
+  ════════════════════════════════ -->
+
+  <item>
+    <name>Moldura Prata</name>
+    <type>frame</type>
+    <price_xp>150</price_xp>
+    <image>shop/frames/frame_silver.png</image>
+    <value>frame_silver</value>
+    <rarity>common</rarity>
+    <description>Uma borda limpa e elegante em prata.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Dourada</name>
+    <type>frame</type>
+    <price_xp>400</price_xp>
+    <image>shop/frames/frame_gold.png</image>
+    <value>frame_gold</value>
+    <rarity>uncommon</rarity>
+    <description>Brilha como ouro, reservada para os dedicados.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Esmeralda</name>
+    <type>frame</type>
+    <price_xp>400</price_xp>
+    <image>shop/frames/frame_emerald.png</image>
+    <value>frame_emerald</value>
+    <rarity>uncommon</rarity>
+    <description>Verde intenso para quem domina as fases.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Roxa Neon</name>
+    <type>frame</type>
+    <price_xp>500</price_xp>
+    <image>shop/frames/frame_purple_neon.png</image>
+    <value>frame_purple_neon</value>
+    <rarity>rare</rarity>
+    <description>Roxo vibrante que chama atenção na listagem.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Giratória</name>
+    <type>frame</type>
+    <price_xp>800</price_xp>
+    <image>shop/frames/frame_spinning.png</image>
+    <value>frame_spinning</value>
+    <rarity>rare</rarity>
+    <description>Animação contínua. Impossível não notar.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
+  <item>
+    <name>Moldura Arco-Íris</name>
+    <type>frame</type>
+    <price_xp>1500</price_xp>
+    <image>shop/frames/frame_rainbow.png</image>
+    <value>frame_rainbow</value>
+    <rarity>legendary</rarity>
+    <description>As cores do arco-íris giram ao redor do seu avatar. Item lendário.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
+  <!-- ════════════════════════════════
+       BADGES
+  ════════════════════════════════ -->
+
+  <item>
+    <name>Criador</name>
+    <type>badge</type>
+    <price_xp>200</price_xp>
+    <image>shop/badges/badge_creator.png</image>
+    <value>badge_creator</value>
+    <rarity>common</rarity>
+    <description>Para quem já publicou sua primeira fase.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Veterano</name>
+    <type>badge</type>
+    <price_xp>300</price_xp>
+    <image>shop/badges/badge_veteran.png</image>
+    <value>badge_veteran</value>
+    <rarity>uncommon</rarity>
+    <description>Está aqui há muito tempo e tem histórias pra contar.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Top Fase</name>
+    <type>badge</type>
+    <price_xp>400</price_xp>
+    <image>shop/badges/badge_top_level.png</image>
+    <value>badge_top_level</value>
+    <rarity>uncommon</rarity>
+    <description>Suas fases são curtidas pela comunidade.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Campeão</name>
+    <type>badge</type>
+    <price_xp>600</price_xp>
+    <image>shop/badges/badge_champion.png</image>
+    <value>badge_champion</value>
+    <rarity>rare</rarity>
+    <description>Conquistou o topo do placar.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Lenda</name>
+    <type>badge</type>
+    <price_xp>1200</price_xp>
+    <image>shop/badges/badge_legend.png</image>
+    <value>badge_legend</value>
+    <rarity>legendary</rarity>
+    <description>Poucos chegam aqui. Você é uma lenda da comunidade.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <!-- ════════════════════════════════
+       TÍTULOS
+  ════════════════════════════════ -->
+
+  <item>
+    <name>Explorador</name>
+    <type>title</type>
+    <price_xp>300</price_xp>
+    <image>shop/titles/title_explorer.png</image>
+    <value>Explorador</value>
+    <rarity>common</rarity>
+    <description>Para quem curte explorar novas fases.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Arquiteto de Fases</name>
+    <type>title</type>
+    <price_xp>500</price_xp>
+    <image>shop/titles/title_architect.png</image>
+    <value>Arquiteto de Fases</value>
+    <rarity>uncommon</rarity>
+    <description>Constrói mundos onde outros jogam.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Mestre das Fases</name>
+    <type>title</type>
+    <price_xp>800</price_xp>
+    <image>shop/titles/title_master.png</image>
+    <value>Mestre das Fases</value>
+    <rarity>rare</rarity>
+    <description>Domínio total sobre criação e desafios.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Lendário</name>
+    <type>title</type>
+    <price_xp>1000</price_xp>
+    <image>shop/titles/title_legendary.png</image>
+    <value>Lendário</value>
+    <rarity>legendary</rarity>
+    <description>Um título que fala por si só.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>O Inigualável</name>
+    <type>title</type>
+    <price_xp>2000</price_xp>
+    <image>shop/titles/title_unmatched.png</image>
+    <value>O Inigualável</value>
+    <rarity>legendary</rarity>
+    <description>Item mais raro da loja. Para quem realmente se destacou.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <!-- ════════════════════════════════
+       TEMA DO CARD DE FASE
+  ════════════════════════════════ -->
+
+  <item>
+    <name>Card Dourado</name>
+    <type>card_theme</type>
+    <price_xp>400</price_xp>
+    <image>shop/card_themes/card_gold.png</image>
+    <value>card_gold</value>
+    <rarity>uncommon</rarity>
+    <description>Suas fases aparecem com borda dourada na listagem.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Card Roxo</name>
+    <type>card_theme</type>
+    <price_xp>400</price_xp>
+    <image>shop/card_themes/card_purple.png</image>
+    <value>card_purple</value>
+    <rarity>uncommon</rarity>
+    <description>Borda roxa para suas fases se destacarem.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Card Esmeralda</name>
+    <type>card_theme</type>
+    <price_xp>400</price_xp>
+    <image>shop/card_themes/card_emerald.png</image>
+    <value>card_emerald</value>
+    <rarity>uncommon</rarity>
+    <description>Verde intenso para suas fases na listagem.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Card Lenda</name>
+    <type>card_theme</type>
+    <price_xp>1000</price_xp>
+    <image>shop/card_themes/card_legend.png</image>
+    <value>card_legend</value>
+    <rarity>legendary</rarity>
+    <description>Borda animada e brilhante. Suas fases nunca passarão despercebidas.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
+</shop>

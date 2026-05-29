@@ -14,7 +14,7 @@ router.get('/:id', async (req, res) => {
 
     const [userResult, levelsResult] = await Promise.all([
       pool.query(
-        `SELECT id, username, bio, downloaded_levels, liked_levels
+        `SELECT id, username, bio, downloaded_levels, liked_levels, exp
          FROM users WHERE id = $1`,
         [id]
       ),

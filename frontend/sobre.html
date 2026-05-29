@@ -11,6 +11,25 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <style>
+    /* ── SOBRE LINK NEXT TO NAV BRAND ── */
+    .nav-brand-sobre {
+      font-family: var(--font-title);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      text-decoration: none;
+      opacity: 0.6;
+      margin-left: 2px;
+      transition: opacity .2s, color .2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .nav-brand-sobre:hover {
+      opacity: 1;
+      color: var(--text-muted);
+    }
+
     /* ── HERO ── */
     .sobre-hero {
       position: relative;
@@ -28,8 +47,6 @@
         radial-gradient(ellipse 40% 30% at 80% 80%, rgba(61,100,200,.06) 0%, transparent 60%);
       pointer-events: none;
     }
-
-    /* Scanline decorativo */
     .sobre-hero::after {
       content: '';
       position: absolute;
@@ -76,7 +93,7 @@
     .sobre-tagline {
       font-size: 15px;
       color: var(--text-muted);
-      max-width: 540px;
+      max-width: 580px;
       margin: 0 auto 32px;
       line-height: 1.75;
       position: relative;
@@ -202,6 +219,51 @@
       color: var(--accent);
     }
 
+    /* Componentes cards */
+    .componentes-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .comp-card {
+      background: var(--bg-nav);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .comp-card-icon { font-size: 26px; margin-bottom: 8px; }
+    .comp-card-name {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .comp-card-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+    /* Objetivos list */
+    .objetivos-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .objetivo-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--bg-nav);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+    }
+    .objetivo-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+    .objetivo-text { font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+
     /* Timeline */
     .sobre-timeline {
       position: relative;
@@ -216,7 +278,7 @@
     }
     .timeline-item {
       position: relative;
-      padding-bottom: 20px;
+      padding-bottom: 22px;
     }
     .timeline-item:last-child { padding-bottom: 0; }
     .timeline-dot {
@@ -244,6 +306,24 @@
       line-height: 1.6;
     }
     .timeline-text strong { color: var(--text); }
+
+    /* Subsection pill */
+    .sub-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(61,158,66,.08);
+      border: 1px solid rgba(61,158,66,.2);
+      border-radius: 20px;
+      padding: 3px 12px;
+      font-family: var(--font-title);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
 
     /* ── SIDEBAR (coluna direita) ── */
     .sobre-sidebar {
@@ -327,7 +407,7 @@
     .sobre-facts-inner {
       display: flex;
       gap: 60px;
-      animation: ticker 30s linear infinite;
+      animation: ticker 35s linear infinite;
       white-space: nowrap;
     }
     @keyframes ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
@@ -342,23 +422,61 @@
     }
     .sobre-fact .num { color: var(--yellow); }
 
+    /* Proximas etapas */
+    .etapas-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .etapa-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-nav);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .etapa-status {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .etapa-body { flex: 1; }
+    .etapa-title {
+      font-family: var(--font-title);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+    .etapa-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+
     @media (max-width: 860px) {
       .sobre-layout { grid-template-columns: 1fr; }
       .sobre-sidebar { position: static; }
+      .componentes-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 500px) {
+      .componentes-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
 <nav>
-  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-right:auto;">
+    <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+    <a href="sobre.html" class="nav-brand-sobre">Sobre</a>
+  </div>
   <ul class="nav-links">
     <li><a href="index.html" data-i18n="nav.home">Home</a></li>
-    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Levels</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
     <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
-    <li><a href="sobre.html" class="active">Sobre</a></li>
+    <li><a href="shop.html">🛒 Loja</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -369,19 +487,18 @@
 </nav>
 
 <div class="sobre-hero">
-  <div class="sobre-eyebrow">★ Nossa História ★</div>
+  <div class="sobre-eyebrow">★ IFSP — Câmpus Campos do Jordão · PRI 2026 ★</div>
   <h1 class="sobre-title">Pellizzola <span class="highlight">Brothers</span></h1>
   <p class="sobre-tagline">
-    Um universo de fases criadas por jogadores, para jogadores.
-    Descubra como tudo começou e para onde estamos indo.
+    Plataforma web integrada para criação, publicação e gestão de conteúdo gerado por usuários em jogos digitais — um ecossistema completo composto por jogo, editor de levels e plataforma online.
   </p>
   <div class="sobre-version-badge">
     <div class="dot"></div>
-    Versão 6.1 · Em desenvolvimento ativo
+    Versão 6.1 · 2º Bimestre em andamento
   </div>
 </div>
 
-<!-- Ticker de fatos -->
+<!-- Ticker de fatos reais -->
 <div class="sobre-facts-strip">
   <div class="sobre-facts-inner" id="ticker-inner"></div>
 </div>
@@ -394,38 +511,88 @@
     <!-- ═══ ARTIGO ═══ -->
     <div class="sobre-article">
 
-      <!-- Origem -->
+      <!-- O Projeto -->
       <div class="sobre-section" style="animation-delay:.05s">
         <div class="sobre-section-header">
           <span class="sobre-section-icon">🌱</span>
-          <span class="sobre-section-label">A Origem</span>
+          <span class="sobre-section-label">O Projeto</span>
         </div>
         <div class="sobre-section-body">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellizzola Brothers nasceu de uma ideia simples:
-            <strong>criar um espaço onde qualquer pessoa pudesse compartilhar suas fases</strong> e encontrar criações
-            incríveis feitas por outros jogadores ao redor do mundo. O projeto começou num final de semana,
-            com um editor de código aberto e muita vontade de construir algo diferente.
+            Pellizzola Brothers é um <strong>ecossistema integrado de criação e compartilhamento de conteúdo gerado por usuários (UGC)</strong> aplicado a um jogo do gênero plataforma. O projeto nasceu da ideia de unir, em um único ambiente coeso, três domínios da computação: o desenvolvimento de jogos digitais, a engenharia de sistemas colaborativos e o gerenciamento de conteúdo gerado por usuários.
           </p>
           <p>
-            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+            A proposta é simples e ambiciosa ao mesmo tempo: qualquer pessoa pode <strong>criar um level</strong> usando o editor desktop, <strong>publicá-lo</strong> na plataforma web e deixar que outros jogadores ao redor do mundo o <strong>baixem e joguem</strong> diretamente no jogo Pellizzola Brothers — tudo integrado por um único formato de arquivo, o <strong>.lvl</strong>.
           </p>
           <div class="sobre-quote">
-            <p>Comecei esse jogo num final de semana e nunca mais consegui parar. Cada bug resolvido abria
-            espaço para dez novas ideias.</p>
-            <div class="quote-author">— Mateus Pellizzola, Fundador</div>
+            <p>Plataformas que incorporam mecanismos de criação e compartilhamento de conteúdo tendem a apresentar níveis mais elevados de engajamento da comunidade e maior longevidade, já que novos conteúdos continuam sendo produzidos pelos próprios usuários.</p>
+            <div class="quote-author">— Jenkins (2009) &amp; Schäfer (2011), referências do projeto</div>
           </div>
           <p>
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt.
+            Desenvolvido como <strong>Projeto Integrador (PRI)</strong> no Instituto Federal de Educação, Ciência e Tecnologia de São Paulo — Câmpus Campos do Jordão, o sistema foi construído pelos autores com foco em <strong>arquitetura modular, tecnologias acessíveis e código aberto</strong>, constituindo tanto uma base concreta para pesquisas futuras quanto um referencial prático para projetos de natureza semelhante.
           </p>
+
+          <div class="componentes-grid">
+            <div class="comp-card">
+              <div class="comp-card-icon">🕹️</div>
+              <div class="comp-card-name">O Jogo</div>
+              <div class="comp-card-desc">Desenvolvido em C com raylib. Carrega arquivos .lvl, executa física AABB, animações e áudio MIDI em tempo real.</div>
+            </div>
+            <div class="comp-card">
+              <div class="comp-card-icon">⚙️</div>
+              <div class="comp-card-name">Editor de Levels</div>
+              <div class="comp-card-desc">App desktop em Electron. Grade 30×20, até 9 cenas por level, exportação no formato .lvl.</div>
+            </div>
+            <div class="comp-card">
+              <div class="comp-card-icon">🌐</div>
+              <div class="comp-card-name">Plataforma Web</div>
+              <div class="comp-card-desc">HTML/CSS/JS + Node.js + PostgreSQL. Upload, download, curtidas, comentários, ranking e perfis.</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- História / Timeline -->
-      <div class="sobre-section" style="animation-delay:.1s">
+      <!-- Objetivos -->
+      <div class="sobre-section" style="animation-delay:.08s">
+        <div class="sobre-section-header">
+          <span class="sobre-section-icon">🎯</span>
+          <span class="sobre-section-label">Objetivos do Projeto</span>
+        </div>
+        <div class="sobre-section-body">
+          <p>
+            O objetivo geral é propor e desenvolver uma plataforma integrada de gerenciamento de UGC aplicada a um jogo digital do gênero plataforma, permitindo que os próprios jogadores criem, compartilhem e explorem levels personalizadas dentro de um ecossistema digital estruturado.
+          </p>
+          <div class="objetivos-list">
+            <div class="objetivo-item">
+              <span class="objetivo-icon">📚</span>
+              <span class="objetivo-text">Realizar levantamento conceitual sobre UGC e sua aplicação em jogos digitais, investigando modelos existentes de criação e compartilhamento de levels.</span>
+            </div>
+            <div class="objetivo-item">
+              <span class="objetivo-icon">🏗️</span>
+              <span class="objetivo-text">Projetar a arquitetura do sistema, considerando a integração entre o jogo, o editor de levels e a plataforma web.</span>
+            </div>
+            <div class="objetivo-item">
+              <span class="objetivo-icon">💻</span>
+              <span class="objetivo-text">Desenvolver o jogo base com suas mecânicas principais, o editor de levels e a plataforma online de gerenciamento de conteúdo.</span>
+            </div>
+            <div class="objetivo-item">
+              <span class="objetivo-icon">🗄️</span>
+              <span class="objetivo-text">Projetar um banco de dados relacional (PostgreSQL) que supra as necessidades do ecossistema, com 5 tabelas interligadas e integridade referencial em cascata.</span>
+            </div>
+            <div class="objetivo-item">
+              <span class="objetivo-icon">🎨</span>
+              <span class="objetivo-text">Desenvolver os elementos visuais do jogo em pixel art com paleta inspirada no NES, incluindo sprites de personagens, blocos e animações.</span>
+            </div>
+            <div class="objetivo-item">
+              <span class="objetivo-icon">✅</span>
+              <span class="objetivo-text">Avaliar o funcionamento da solução quanto à sua capacidade de apoiar a criação, o gerenciamento e o compartilhamento de conteúdo pela comunidade.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="sobre-section" style="animation-delay:.11s">
         <div class="sobre-section-header">
           <span class="sobre-section-icon">📅</span>
           <span class="sobre-section-label">Linha do Tempo</span>
@@ -434,84 +601,95 @@
           <div class="sobre-timeline">
             <div class="timeline-item">
               <div class="timeline-dot"></div>
-              <div class="timeline-year">2023 · Q1</div>
-              <div class="timeline-text"><strong>O início:</strong> Lorem ipsum dolor sit amet, consectetur adipiscing elit. O primeiro protótipo foi construído em uma semana, com suporte básico a upload de fases no formato JSON.</div>
+              <div class="timeline-year">2026 · 1º Bimestre (Fev–Abr)</div>
+              <div class="timeline-text"><strong>Fundação do ecossistema:</strong> Revisão da literatura sobre UGC, definição da arquitetura modular com formato .lvl, início do desenvolvimento dos três componentes, criação dos sprites fundamentais (bricks, excla_block, marcadores de início e fim) e implementação das páginas iniciais da plataforma web com integração ao banco de dados PostgreSQL.</div>
             </div>
             <div class="timeline-item">
               <div class="timeline-dot"></div>
-              <div class="timeline-year">2023 · Q3</div>
-              <div class="timeline-text"><strong>Versão 2 — Comunidade:</strong> Sed ut perspiciatis unde omnis iste natus error sit voluptatem. Adicionamos perfis de usuário, comentários e o sistema de curtidas que persiste até hoje.</div>
+              <div class="timeline-year">2026 · 2º Bimestre (Abr–Jun)</div>
+              <div class="timeline-text"><strong>Evolução completa do ecossistema:</strong> No jogo — física AABB, pulo, animação por spritesheet, câmera com suavização e áudio MIDI via FluidSynth. No editor — multi-cena (até 9 cenas), BLOCK_REGISTRY, favoritos, histórico e exportação .lvl. Na plataforma — comentários, recuperação de senha em 3 etapas, filtros multi-select, cache de sessão e alternância PT/EN. Na arte — 29 sprites completos incluindo os personagens Leandro e Mauro com animações.</div>
             </div>
             <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-year">2024 · Q1</div>
-              <div class="timeline-text"><strong>Versão 4 — Estabilidade:</strong> Nemo enim ipsam voluptatem quia voluptas sit aspernatur. Migração para PostgreSQL com índices GIN, autenticação JWT e rate limiting global.</div>
+              <div class="timeline-dot" style="background:rgba(61,158,66,.4);box-shadow:none;border-color:var(--border-light);"></div>
+              <div class="timeline-year">2026 · 3º Bimestre (Ago–Out) — Planejado</div>
+              <div class="timeline-text"><strong>Expansão e integração:</strong> Implementação de inimigos e mecânicas adicionais no jogo, tela de vitória, seleção dinâmica de personagem, otimização de colisões e ampliação das funcionalidades da plataforma e do editor.</div>
             </div>
             <div class="timeline-item">
-              <div class="timeline-dot"></div>
-              <div class="timeline-year">2024 · Q4</div>
-              <div class="timeline-text"><strong>Versão 6 — Deploy na Railway:</strong> At vero eos et accusamus et iusto odio dignissimos. Internacionalização PT-BR/EN, recuperação de senha, denúncias e o Cafézinho da Chapeleira.</div>
-            </div>
-            <div class="timeline-item">
-              <div class="timeline-dot" style="background:var(--yellow);box-shadow:0 0 8px rgba(240,192,64,.5);"></div>
-              <div class="timeline-year" style="color:var(--accent);">Agora · v6.1</div>
-              <div class="timeline-text"><strong>Em desenvolvimento ativo:</strong> Lorem ipsum dolor sit amet. Painel de admin, download do aplicativo Studio e Game, novas mecânicas de ranking e muito mais.</div>
+              <div class="timeline-dot" style="background:rgba(240,192,64,.4);box-shadow:none;border-color:var(--border-light);"></div>
+              <div class="timeline-year">2026 · 4º Bimestre (Out–SNCT) — Planejado</div>
+              <div class="timeline-text"><strong>Implantação e apresentação:</strong> Testes finais, refinamento da experiência do usuário, implantação da versão estável e apresentação do projeto na Semana Nacional de Ciência e Tecnologia (SNCT).</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Missão e visão -->
-      <div class="sobre-section" style="animation-delay:.15s">
-        <div class="sobre-section-header">
-          <span class="sobre-section-icon">🎯</span>
-          <span class="sobre-section-label">Missão & Visão</span>
-        </div>
-        <div class="sobre-section-body">
-          <p>
-            <strong>Nossa missão</strong> é democratizar a criação de fases, tornando ferramentas poderosas acessíveis
-            a qualquer pessoa — do iniciante ao level designer experiente. Lorem ipsum dolor sit amet,
-            consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-          </p>
-          <p>
-            <strong>Nossa visão</strong> é construir a maior comunidade de criadores de fases do Brasil.
-            Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-            consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse.
-          </p>
-          <p>
-            Cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
-            sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde
-            omnis iste natus error sit voluptatem accusantium doloremque laudantium.
-          </p>
-        </div>
-      </div>
-
       <!-- Tecnologia -->
-      <div class="sobre-section" style="animation-delay:.2s">
+      <div class="sobre-section" style="animation-delay:.14s">
         <div class="sobre-section-header">
           <span class="sobre-section-icon">⚙️</span>
-          <span class="sobre-section-label">Tecnologia</span>
+          <span class="sobre-section-label">Arquitetura &amp; Tecnologia</span>
         </div>
         <div class="sobre-section-body">
+
+          <div class="sub-pill">🕹️ O Jogo</div>
           <p>
-            Pellizzola Brothers é construído com uma stack moderna e leve: <strong>Node.js + Express</strong>
-            no backend, <strong>PostgreSQL via Neon</strong> como banco de dados serverless, e um
-            frontend em <strong>Vanilla JS</strong> — sem frameworks, sem dependências desnecessárias.
+            O jogo é desenvolvido em <strong>linguagem C</strong>, seguindo a filosofia <em>suckless</em> — código simples, mínimo e sem abstrações desnecessárias. A renderização gráfica e a câmera com suavização de movimento são feitas com <strong>raylib</strong>; a leitura dos arquivos de level usa <strong>jansson</strong>; a síntese de áudio MIDI em tempo real é feita por <strong>FluidSynth</strong> via SoundFont; e o formato de empacotamento <strong>.lvl</strong> (um arquivo ZIP) é lido com <strong>libzip</strong>. O jogo suporta <strong>múltiplas cenas</strong> por level, física de colisão AABB por eixo e animação por spritesheet a 16 FPS.
           </p>
+
+          <div class="sub-pill">⚙️ Editor de Levels</div>
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Autenticação via <strong>JWT Bearer Token</strong>,
-            hashing de senhas com <strong>bcrypt</strong>, upload de arquivos via <strong>Multer</strong> e
-            deploy automático na <strong>Railway</strong>. Tudo isso com rate limiting global para garantir
-            estabilidade mesmo sob alta carga.
+            O editor é uma aplicação desktop cross-platform construída com <strong>Electron e JavaScript</strong>. A área de edição é uma grade de <strong>30×20 células</strong> (600 por cena) renderizada via <strong>Canvas API</strong>, com suporte a até <strong>9 cenas independentes</strong> por level. Os blocos são gerenciados por um <strong>BLOCK_REGISTRY centralizado</strong> com categorias, tags de busca, favoritos e histórico dos últimos 8 utilizados. O level exportado é um arquivo <strong>.lvl</strong> — um ZIP contendo LEVEL_DATA.json e uma pasta MIDI_DATA com até 10 arquivos .mid de trilha sonora.
           </p>
+
+          <div class="sub-pill">🌐 Plataforma Web</div>
           <p>
-            Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-            quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            O frontend é construído em <strong>HTML, CSS e JavaScript puro</strong> — sem frameworks, com internacionalização PT-BR/EN integrada. O backend utiliza <strong>Node.js + Express</strong>, com autenticação via <strong>JWT Bearer Token</strong>, hashing de senhas com <strong>bcrypt</strong> e upload de arquivos via <strong>Multer</strong>. O banco de dados é <strong>PostgreSQL serverless via Neon</strong>, com 5 tabelas (users, levels, files, comments, download_history), chaves estrangeiras em cascata e índices compostos para filtragem por relevância. O deploy é feito via <strong>Railway</strong>.
           </p>
         </div>
       </div>
 
-    </div>
+      <!-- Próximas etapas -->
+      <div class="sobre-section" style="animation-delay:.17s">
+        <div class="sobre-section-header">
+          <span class="sobre-section-icon">🚀</span>
+          <span class="sobre-section-label">Próximas Etapas</span>
+        </div>
+        <div class="sobre-section-body">
+          <p>Com as bases do ecossistema estabelecidas nos dois primeiros bimestres, os próximos ciclos focam na evolução incremental de cada componente:</p>
+          <div class="etapas-list">
+            <div class="etapa-item">
+              <span class="etapa-status">🎮</span>
+              <div class="etapa-body">
+                <div class="etapa-title">Inimigos e mecânicas</div>
+                <div class="etapa-desc">Implementação de inimigos, tela de vitória (WIN_MENU), seleção dinâmica de personagem e otimização de colisões com detecção lazy.</div>
+              </div>
+            </div>
+            <div class="etapa-item">
+              <span class="etapa-status">⚙️</span>
+              <div class="etapa-body">
+                <div class="etapa-title">Editor expandido</div>
+                <div class="etapa-desc">Seleção de tipos de inimigos na grade e ampliação da variedade de elementos construtivos disponíveis no BLOCK_REGISTRY.</div>
+              </div>
+            </div>
+            <div class="etapa-item">
+              <span class="etapa-status">🌐</span>
+              <div class="etapa-body">
+                <div class="etapa-title">Plataforma — Painel de Admin</div>
+                <div class="etapa-desc">Moderação de levels e usuários, gestão de denúncias e novas mecânicas de ranking e engajamento da comunidade.</div>
+              </div>
+            </div>
+            <div class="etapa-item">
+              <span class="etapa-status">🎨</span>
+              <div class="etapa-body">
+                <div class="etapa-title">Spritesheets de blocos</div>
+                <div class="etapa-desc">Migração das texturas individuais para spritesheets e conclusão das animações dos personagens jogáveis.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /sobre-article -->
 
     <!-- ═══ SIDEBAR ═══ -->
     <div class="sobre-sidebar">
@@ -520,71 +698,69 @@
       <div class="widget">
         <div class="widget-header">📋 Ficha Técnica</div>
         <div class="widget-body">
-          <div class="spec-row"><span class="spec-label">Versão</span><span class="spec-value">6.1</span></div>
+          <div class="spec-row"><span class="spec-label">Versão atual</span><span class="spec-value">6.1</span></div>
+          <div class="spec-row"><span class="spec-label">Jogo</span><span class="spec-value">C + raylib</span></div>
+          <div class="spec-row"><span class="spec-label">Editor</span><span class="spec-value">Electron + JS</span></div>
+          <div class="spec-row"><span class="spec-label">Frontend</span><span class="spec-value">HTML / CSS / JS</span></div>
           <div class="spec-row"><span class="spec-label">Backend</span><span class="spec-value">Node.js + Express</span></div>
           <div class="spec-row"><span class="spec-label">Banco</span><span class="spec-value">PostgreSQL (Neon)</span></div>
           <div class="spec-row"><span class="spec-label">Deploy</span><span class="spec-value">Railway</span></div>
           <div class="spec-row"><span class="spec-label">Auth</span><span class="spec-value">JWT + bcrypt</span></div>
-          <div class="spec-row"><span class="spec-label">Licença</span><span class="spec-value">MIT</span></div>
+          <div class="spec-row"><span class="spec-label">Formato level</span><span class="spec-value">.lvl (ZIP)</span></div>
           <div class="spec-row"><span class="spec-label">Idiomas</span><span class="spec-value">PT-BR / EN</span></div>
+          <div class="spec-row"><span class="spec-label">Sprites</span><span class="spec-value">29 elementos</span></div>
+          <div class="spec-row"><span class="spec-label">Tabelas BD</span><span class="spec-value">5 tabelas</span></div>
+          <div class="spec-row"><span class="spec-label">Instituição</span><span class="spec-value">IFSP — CJO</span></div>
         </div>
       </div>
 
-      <!-- Equipe -->
+      <!-- Equipe real -->
       <div class="widget">
         <div class="widget-header">👥 Equipe</div>
         <div class="widget-body">
           <div class="team-item">
+            <div class="team-avatar">🕊️</div>
+            <div class="team-info">
+              <div class="team-name">Gabriel Osti</div>
+              <div class="team-role">Documentação &amp; Análise técnica</div>
+            </div>
+          </div>
+          <div class="team-item">
+            <div class="team-avatar">🔨</div>
+            <div class="team-info">
+              <div class="team-name">Igor Julio</div>
+              <div class="team-role">Editor de Levels (Electron)</div>
+            </div>
+          </div>
+          <div class="team-item">
+            <div class="team-avatar">😎</div>
+            <div class="team-info">
+              <div class="team-name">Mauro Lopes de Almeida</div>
+              <div class="team-role">Jogo (C + raylib)</div>
+            </div>
+          </div>
+          <div class="team-item">
             <div class="team-avatar">🧑‍💻</div>
             <div class="team-info">
-              <div class="team-name">Mateus Pellizzola</div>
-              <div class="team-role">⭐ Fundador & Dev</div>
+              <div class="team-name">Miguel Custódio</div>
+              <div class="team-role">Plataforma Web &amp; Banco de Dados</div>
             </div>
           </div>
           <div class="team-item">
             <div class="team-avatar">🎨</div>
             <div class="team-info">
-              <div class="team-name">Ana Clara</div>
-              <div class="team-role">Designer</div>
-            </div>
-          </div>
-          <div class="team-item">
-            <div class="team-avatar">⚙️</div>
-            <div class="team-info">
-              <div class="team-name">Rafael Torres</div>
-              <div class="team-role">Backend Dev</div>
-            </div>
-          </div>
-          <div class="team-item">
-            <div class="team-avatar">🎵</div>
-            <div class="team-info">
-              <div class="team-name">Lucas Moraes</div>
-              <div class="team-role">Trilha Sonora</div>
-            </div>
-          </div>
-          <div class="team-item">
-            <div class="team-avatar">🕹️</div>
-            <div class="team-info">
-              <div class="team-name">Juliana Farias</div>
-              <div class="team-role">Game Design</div>
+              <div class="team-name">Rafael Francisco</div>
+              <div class="team-role">Arte &amp; Pixel Art (Aseprite)</div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- CTA -->
-      <div class="widget">
-        <div class="widget-header">🚀 Junte-se a nós</div>
-        <div class="widget-body sobre-cta">
-          <a href="download.html" class="btn btn-green" style="text-align:center;">⬇ Baixar o jogo</a>
-          <a href="upload.html" class="btn btn-outline" style="text-align:center;">📤 Enviar uma fase</a>
-          <a href="creditos.html" class="btn btn-outline" style="text-align:center;font-size:12px;">🏆 Ver créditos completos</a>
-        </div>
-      </div>
 
-    </div>
-  </div>
-</div>
+
+    </div><!-- /sobre-sidebar -->
+  </div><!-- /sobre-layout -->
+</div><!-- /page -->
 
 <script>
 (function() {
@@ -596,19 +772,24 @@
     el.removeAttribute('data-i18n');
   }
 
-  // Ticker de fatos
+  // Ticker com dados reais do relatório
   var facts = [
-    { num: '148+', label: 'Membros registrados' },
-    { num: '23',   label: 'Fases publicadas' },
-    { num: '2',    label: 'Idiomas suportados' },
-    { num: '10MB', label: 'Tamanho máximo de fase' },
-    { num: '6.1',  label: 'Versão atual' },
-    { num: '100%', label: 'Open Community' },
-    { num: '0',    label: 'Anúncios (zero!)' },
-    { num: '∞',    label: 'Possibilidades' },
+    { num: '3',    label: 'Componentes integrados' },
+    { num: '29',   label: 'Sprites em pixel art' },
+    { num: '5',    label: 'Tabelas no banco de dados' },
+    { num: '9',    label: 'Cenas por level' },
+    { num: '600',  label: 'Células por cena (30×20)' },
+    { num: '54',   label: 'Cores na paleta NES' },
+    { num: '10MB', label: 'Limite de upload por level' },
+    { num: '2',    label: 'Idiomas suportados (PT/EN)' },
+    { num: '4',    label: 'Bimestres de desenvolvimento' },
+    { num: '10',   label: 'Arquivos MIDI por level' },
+    { num: '500',  label: 'Caracteres por comentário' },
+    { num: '100',  label: 'Último histórico de downloads' },
+    { num: '0',    label: 'Anúncios na plataforma' },
+    { num: '∞',    label: 'Possibilidades de criação' },
   ];
   var html = '';
-  // duplica para loop contínuo
   for (var rep = 0; rep < 2; rep++) {
     facts.forEach(function(f) {
       html += '<span class="sobre-fact"><span class="num">' + f.num + '</span> · ' + f.label + '</span>';
