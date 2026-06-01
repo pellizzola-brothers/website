@@ -1,3 +1,2 @@
 // config.js — alter this single line to change the API target everywhere
-const API = ''; // Desenvolvimento local
-// const API = 'https://backend-production-d722.up.railway.app/api'; // Produção
+const API = 'website-production-1e89.up.railway.app'; // Produção
