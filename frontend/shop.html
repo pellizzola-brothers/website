@@ -568,6 +568,21 @@ function inicializar(){
   atualizarContadores();
   renderGrade();
   renderEquippedBar();
+  carregarInventario();
+}
+
+function carregarInventario(){
+  if(!usuario)return;
+  fetch(API+'/shop/inventory',{headers:{'Authorization':'Bearer '+getToken()}})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){
+      if(!d)return;
+      saveInventory(d.inventory||[]);
+      saveEquipped(d.equipped||{});
+      renderGrade();
+      renderEquippedBar();
+    })
+    .catch(function(){});
 }
 
 function atualizarSaldo(){
@@ -575,7 +590,7 @@ function atualizarSaldo(){
   if(usuario){
     fetch(API+'/users/'+usuario.id)
       .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){if(d&&d.xp!==undefined)setXP(d.xp);})
+      .then(function(d){if(d&&d.exp!==undefined)setXP(d.exp);})
       .catch(function(){});
   }
 }
@@ -809,15 +824,18 @@ function desequipar(itemId){
   var item=SHOP_ITEMS.find(function(i){return i.id===itemId;});
   if(!item)return;
   var eq=getEquipped();
-  if(eq[item.type]===itemId)delete eq[item.type];
+  if(eq[item.type]!==itemId)return;
+  delete eq[item.type];
   saveEquipped(eq);
-  /* If unequipping avatar, clear pb_avatar_<id> so profile shows default */
   if(item.type==='avatar'&&usuario){
     localStorage.removeItem('pb_avatar_'+usuario.id);
   }
   updateCard(itemId);
   renderEquippedBar();
   showToast('↩️ '+item.name+' desequipado.');
+  if(usuario){
+    fetch(API+'/shop/unequip',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({item_id:itemId})}).catch(function(){});
+  }
 }
 
 /* ═══ BUY MODAL ═══ */
@@ -852,25 +870,43 @@ function confirmarCompra(){
   if(!itemSelecionado||!usuario)return;
   var item=itemSelecionado, xp=getXP();
   if(xp<item.price_xp){showToast('XP insuficiente!');return;}
-  setXP(xp-item.price_xp);
-  var inv=getInventory();
-  if(inv.indexOf(item.id)===-1)inv.push(item.id);
-  saveInventory(inv);
-  var eq=getEquipped();
-  var anteriorId=eq[item.type];
-  eq[item.type]=item.id;
-  saveEquipped(eq);
-  fecharModal();
-  if(anteriorId&&anteriorId!==item.id)updateCard(anteriorId);
-  updateCard(item.id);
-  renderEquippedBar();
-  showToast('🎉 '+item.name+' comprado e equipado!');
-  if(usuario){
-    fetch(API+'/shop/buy',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({item_id:item.id})})
-      .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){if(d&&d.xp!==undefined)setXP(d.xp);})
-      .catch(function(){});
-  }
+  var footer=document.getElementById('buy-modal-footer');
+  var confirmBtn=footer.querySelector('.btn-green');
+  if(confirmBtn){confirmBtn.disabled=true;confirmBtn.textContent='Processando...';}
+  fetch(API+'/shop/buy',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
+    body:JSON.stringify({item_id:item.id})
+  })
+  .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
+  .then(function(result){
+    if(!result.ok){
+      showToast('Erro: '+(result.data.error||'Falha na compra'));
+      if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent='⚡ Confirmar Compra';}
+      return;
+    }
+    var d=result.data;
+    if(d.xp!==undefined)setXP(d.xp);
+    var inv=getInventory();
+    if(inv.indexOf(item.id)===-1){inv.push(item.id);saveInventory(inv);}
+    var eq=getEquipped();
+    var anteriorId=eq[item.type];
+    if(d.equipped){
+      saveEquipped(d.equipped);
+    } else {
+      eq[item.type]=item.id;
+      saveEquipped(eq);
+    }
+    fecharModal();
+    if(anteriorId&&anteriorId!==item.id)updateCard(anteriorId);
+    updateCard(item.id);
+    renderEquippedBar();
+    showToast('🎉 '+item.name+' comprado e equipado!');
+  })
+  .catch(function(){
+    showToast('Erro de conexão. Tente novamente.');
+    if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent='⚡ Confirmar Compra';}
+  });
 }
 
 /* ═══ HELPERS ═══ */

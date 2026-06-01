@@ -128,7 +128,12 @@ router.post('/buy', authMiddleware, async (req, res) => {
       }
 
       await client.query('COMMIT');
-      res.json({ ok: true, xp: newExp, item_id });
+
+      const eqResult = await pool.query(
+        `SELECT equipped FROM shop_equipped WHERE user_id = $1`,
+        [userId]
+      );
+      res.json({ ok: true, xp: newExp, item_id, equipped: eqResult.rows[0]?.equipped || {} });
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -185,6 +190,35 @@ router.post('/equip', authMiddleware, async (req, res) => {
     res.json({ ok: true, equipped: result.rows[0]?.equipped || {} });
   } catch (err) {
     console.error('[POST /shop/equip]', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// ── POST /api/shop/unequip ──────────────────────────────────
+router.post('/unequip', authMiddleware, async (req, res) => {
+  const userId  = req.user.id;
+  const { item_id } = req.body;
+
+  if (!item_id || typeof item_id !== 'string')
+    return res.status(400).json({ error: 'item_id inválido' });
+
+  const type = resolveType(item_id);
+  if (!type)
+    return res.status(400).json({ error: 'Tipo de item desconhecido' });
+
+  try {
+    const pool = await getPool();
+    await pool.query(
+      `UPDATE shop_equipped SET equipped = equipped - $1 WHERE user_id = $2`,
+      [type, userId]
+    );
+    const result = await pool.query(
+      `SELECT equipped FROM shop_equipped WHERE user_id = $1`,
+      [userId]
+    );
+    res.json({ ok: true, equipped: result.rows[0]?.equipped || {} });
+  } catch (err) {
+    console.error('[POST /shop/unequip]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
