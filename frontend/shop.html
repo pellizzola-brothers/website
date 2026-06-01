@@ -572,17 +572,21 @@ function inicializar(){
 }
 
 function carregarInventario(){
-  if(!usuario)return;
+  if(!usuario){console.log('[shop] carregarInventario: sem usuário logado');return;}
+  console.log('[shop] carregarInventario: chamando',API+'/shop/inventory');
   fetch(API+'/shop/inventory',{headers:{'Authorization':'Bearer '+getToken()}})
-    .then(function(r){return r.ok?r.json():null;})
+    .then(function(r){
+      console.log('[shop] /shop/inventory status:',r.status);
+      return r.ok?r.json():r.json().then(function(d){throw new Error(r.status+': '+JSON.stringify(d));});
+    })
     .then(function(d){
-      if(!d)return;
+      console.log('[shop] /shop/inventory resposta:',d);
       saveInventory(d.inventory||[]);
       saveEquipped(d.equipped||{});
       renderGrade();
       renderEquippedBar();
     })
-    .catch(function(){});
+    .catch(function(e){console.error('[shop] carregarInventario falhou:',e);});
 }
 
 function atualizarSaldo(){
@@ -590,8 +594,11 @@ function atualizarSaldo(){
   if(usuario){
     fetch(API+'/users/'+usuario.id)
       .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){if(d&&d.exp!==undefined)setXP(d.exp);})
-      .catch(function(){});
+      .then(function(d){
+        console.log('[shop] /users/'+usuario.id+' exp:',d&&d.exp);
+        if(d&&d.exp!==undefined)setXP(d.exp);
+      })
+      .catch(function(e){console.error('[shop] atualizarSaldo falhou:',e);});
   }
 }
 
@@ -913,6 +920,28 @@ function confirmarCompra(){
 function tipoLabel(type){ return{avatar:'Avatar',color:'Cor do Avatar',bg:'Fundo do Perfil',frame:'Moldura',badge:'Badge',title:'Título',card_theme:'Tema de Card'}[type]||type; }
 function escapeHTML(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function showToast(msg){ var t=document.getElementById('shop-toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},3000); }
+
+/* ═══ DEBUG — chame debugShop() no console do navegador ═══ */
+window.debugShop = function(){
+  console.group('=== debugShop ===');
+  console.log('API URL:', API);
+  console.log('Usuario:', usuario);
+  console.log('Token presente:', !!getToken(), '| Token válido:', isTokenValid());
+  console.log('XP local (localStorage):', localStorage.getItem(STORAGE_XP));
+  console.log('Inventário local:', getInventory());
+  console.log('Equipados local:', getEquipped());
+
+  if(!usuario){console.warn('Não logado — testes de API pulados');console.groupEnd();return;}
+
+  Promise.all([
+    fetch(API+'/users/'+usuario.id).then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});}).catch(function(e){return{error:String(e)};}),
+    fetch(API+'/shop/inventory',{headers:{'Authorization':'Bearer '+getToken()}}).then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});}).catch(function(e){return{error:String(e)};})
+  ]).then(function(results){
+    console.log('GET /api/users/'+usuario.id+':', results[0]);
+    console.log('GET /api/shop/inventory:', results[1]);
+    console.groupEnd();
+  });
+};
 
 document.getElementById('buy-modal').addEventListener('click',function(e){ if(e.target===this)fecharModal(); });
 function navSearch(e){ e.preventDefault(); var q=document.getElementById('nav-search').value.trim(); if(q)window.location.href='levels.html?q='+encodeURIComponent(q); }
