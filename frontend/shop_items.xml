@@ -81,6 +81,84 @@
     <is_active>true</is_active>
   </item>
 
+  <item>
+    <name>Vermelho Rubi</name>
+    <type>color</type>
+    <price_xp>100</price_xp>
+    <image>shop/colors/red_ruby.png</image>
+    <value>#C0392B</value>
+    <rarity>uncommon</rarity>
+    <description>Intenso como a determinação dos melhores jogadores.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Rosa Neon</name>
+    <type>color</type>
+    <price_xp>150</price_xp>
+    <image>shop/colors/pink_neon.png</image>
+    <value>#FF2D9B</value>
+    <rarity>uncommon</rarity>
+    <description>Vibrante, chamativo e impossível de ignorar.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Ciano Elétrico</name>
+    <type>color</type>
+    <price_xp>150</price_xp>
+    <image>shop/colors/cyan_electric.png</image>
+    <value>#00E5FF</value>
+    <rarity>uncommon</rarity>
+    <description>Brilha como raio num dia de tempestade.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Branco Gelo</name>
+    <type>color</type>
+    <price_xp>50</price_xp>
+    <image>shop/colors/white_ice.png</image>
+    <value>#E8F4FD</value>
+    <rarity>common</rarity>
+    <description>Limpo e minimalista. Clássico que nunca sai de moda.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Preto Obsidiana</name>
+    <type>color</type>
+    <price_xp>200</price_xp>
+    <image>shop/colors/black_obsidian.png</image>
+    <value>#1A1A2E</value>
+    <rarity>rare</rarity>
+    <description>Escuro e misterioso. Para os jogadores de poucas palavras.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Verde Tóxico</name>
+    <type>color</type>
+    <price_xp>300</price_xp>
+    <image>shop/colors/green_toxic.png</image>
+    <value>#39FF14</value>
+    <rarity>rare</rarity>
+    <description>Verde radioativo que brilha nas trevas.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Cromado Arco-Íris</name>
+    <type>color</type>
+    <price_xp>1800</price_xp>
+    <image>shop/colors/chrome_rainbow.png</image>
+    <value>#FF6B9D</value>
+    <rarity>legendary</rarity>
+    <description>A cor muda conforme a luz. Efeito único e exclusivo.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
   <!-- ════════════════════════════════
        COR DE FUNDO DO PERFIL
   ════════════════════════════════ -->
@@ -126,6 +204,63 @@
     <value>#2C2C2A</value>
     <rarity>rare</rarity>
     <description>Escuro, misterioso e cheio de brilho.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundo Aurora Boreal</name>
+    <type>bg</type>
+    <price_xp>600</price_xp>
+    <image>shop/bg/bg_aurora.png</image>
+    <value>#0D1B2A</value>
+    <rarity>rare</rarity>
+    <description>Verde e azul dançando no céu do norte.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
+  <item>
+    <name>Fundo Rosa Candy</name>
+    <type>bg</type>
+    <price_xp>100</price_xp>
+    <image>shop/bg/bg_candy.png</image>
+    <value>#FDEEF4</value>
+    <rarity>common</rarity>
+    <description>Suave e docinho como um sonho cor-de-rosa.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundo Oceano Profundo</name>
+    <type>bg</type>
+    <price_xp>350</price_xp>
+    <image>shop/bg/bg_deep_ocean.png</image>
+    <value>#0A2342</value>
+    <rarity>uncommon</rarity>
+    <description>Mergulhe fundo onde poucos chegam.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundo Galáxia</name>
+    <type>bg</type>
+    <price_xp>800</price_xp>
+    <image>shop/bg/bg_galaxy.png</image>
+    <value>#0B0B2E</value>
+    <rarity>legendary</rarity>
+    <description>O cosmos inteiro como pano de fundo do seu perfil.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
+  <item>
+    <name>Fundo Floresta</name>
+    <type>bg</type>
+    <price_xp>150</price_xp>
+    <image>shop/bg/bg_forest.png</image>
+    <value>#E8F5E9</value>
+    <rarity>common</rarity>
+    <description>Fresco como uma tarde entre as árvores.</description>
     <is_active>true</is_active>
   </item>
 
@@ -201,6 +336,63 @@
     <animated>true</animated>
   </item>
 
+  <item>
+    <name>Moldura Cobre</name>
+    <type>frame</type>
+    <price_xp>200</price_xp>
+    <image>shop/frames/frame_copper.png</image>
+    <value>frame_copper</value>
+    <rarity>common</rarity>
+    <description>Quente e rústica. Para quem está começando a brilhar.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Diamante</name>
+    <type>frame</type>
+    <price_xp>1000</price_xp>
+    <image>shop/frames/frame_diamond.png</image>
+    <value>frame_diamond</value>
+    <rarity>rare</rarity>
+    <description>Cristalina e afiada. Apenas os mais precisos a obtêm.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Chamas</name>
+    <type>frame</type>
+    <price_xp>700</price_xp>
+    <image>shop/frames/frame_fire.png</image>
+    <value>frame_fire</value>
+    <rarity>rare</rarity>
+    <description>Chamas que nunca se apagam ao redor do seu avatar.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
+  <item>
+    <name>Moldura Gelo Eterno</name>
+    <type>frame</type>
+    <price_xp>600</price_xp>
+    <image>shop/frames/frame_ice.png</image>
+    <value>frame_ice</value>
+    <rarity>rare</rarity>
+    <description>Gelada e reluzente. Para quem mantém a cabeça fria.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Moldura Lendária Dourada Animada</name>
+    <type>frame</type>
+    <price_xp>2000</price_xp>
+    <image>shop/frames/frame_legendary_anim.png</image>
+    <value>frame_legendary_anim</value>
+    <rarity>legendary</rarity>
+    <description>A moldura mais rara da loja. Pulsa com luz própria.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+
   <!-- ════════════════════════════════
        BADGES
   ════════════════════════════════ -->
@@ -257,6 +449,61 @@
     <value>badge_legend</value>
     <rarity>legendary</rarity>
     <description>Poucos chegam aqui. Você é uma lenda da comunidade.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Novato</name>
+    <type>badge</type>
+    <price_xp>50</price_xp>
+    <image>shop/badges/badge_newbie.png</image>
+    <value>badge_newbie</value>
+    <rarity>common</rarity>
+    <description>Todo grande jogador começou aqui.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Maratonista</name>
+    <type>badge</type>
+    <price_xp>350</price_xp>
+    <image>shop/badges/badge_marathon.png</image>
+    <value>badge_marathon</value>
+    <rarity>uncommon</rarity>
+    <description>Jogou por horas sem parar. Resistência é sua marca.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Speedrunner</name>
+    <type>badge</type>
+    <price_xp>500</price_xp>
+    <image>shop/badges/badge_speedrun.png</image>
+    <value>badge_speedrun</value>
+    <rarity>rare</rarity>
+    <description>Termina fases antes de qualquer um. Velocidade é tudo.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Caçador de Bugs</name>
+    <type>badge</type>
+    <price_xp>400</price_xp>
+    <image>shop/badges/badge_bugcatcher.png</image>
+    <value>badge_bugcatcher</value>
+    <rarity>uncommon</rarity>
+    <description>Encontrou e reportou erros. A comunidade agradece.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fundador</name>
+    <type>badge</type>
+    <price_xp>1500</price_xp>
+    <image>shop/badges/badge_founder.png</image>
+    <value>badge_founder</value>
+    <rarity>legendary</rarity>
+    <description>Estava aqui desde o início. Faz parte da história.</description>
     <is_active>true</is_active>
   </item>
 
@@ -319,6 +566,61 @@
     <is_active>true</is_active>
   </item>
 
+  <item>
+    <name>Iniciante</name>
+    <type>title</type>
+    <price_xp>50</price_xp>
+    <image>shop/titles/title_beginner.png</image>
+    <value>Iniciante</value>
+    <rarity>common</rarity>
+    <description>Todo mundo começa de algum lugar.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Desafiador</name>
+    <type>title</type>
+    <price_xp>400</price_xp>
+    <image>shop/titles/title_challenger.png</image>
+    <value>Desafiador</value>
+    <rarity>uncommon</rarity>
+    <description>Não foge de nenhuma fase difícil.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Rei das Fases</name>
+    <type>title</type>
+    <price_xp>1200</price_xp>
+    <image>shop/titles/title_king.png</image>
+    <value>Rei das Fases</value>
+    <rarity>legendary</rarity>
+    <description>A coroa pertence a você. Ninguém discute.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Fantasma</name>
+    <type>title</type>
+    <price_xp>600</price_xp>
+    <image>shop/titles/title_ghost.png</image>
+    <value>Fantasma</value>
+    <rarity>rare</rarity>
+    <description>Passa pelas fases sem deixar rastro.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Sem Limites</name>
+    <type>title</type>
+    <price_xp>2500</price_xp>
+    <image>shop/titles/title_nolimits.png</image>
+    <value>Sem Limites</value>
+    <rarity>legendary</rarity>
+    <description>O título definitivo. Para quem superou tudo.</description>
+    <is_active>true</is_active>
+  </item>
+
   <!-- ════════════════════════════════
        TEMA DO CARD DE FASE
   ════════════════════════════════ -->
@@ -364,6 +666,50 @@
     <value>card_legend</value>
     <rarity>legendary</rarity>
     <description>Borda animada e brilhante. Suas fases nunca passarão despercebidas.</description>
+    <is_active>true</is_active>
+    <animated>true</animated>
+  </item>
+  <item>
+    <name>Card Vermelho</name>
+    <type>card_theme</type>
+    <price_xp>400</price_xp>
+    <image>shop/card_themes/card_red.png</image>
+    <value>card_red</value>
+    <rarity>uncommon</rarity>
+    <description>Borda vermelha para suas fases chamarem atenção.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Card Ciano</name>
+    <type>card_theme</type>
+    <price_xp>400</price_xp>
+    <image>shop/card_themes/card_cyan.png</image>
+    <value>card_cyan</value>
+    <rarity>uncommon</rarity>
+    <description>Borda ciano elétrica. Moderno e marcante.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Card Prata</name>
+    <type>card_theme</type>
+    <price_xp>250</price_xp>
+    <image>shop/card_themes/card_silver.png</image>
+    <value>card_silver</value>
+    <rarity>common</rarity>
+    <description>Elegância discreta para suas fases na listagem.</description>
+    <is_active>true</is_active>
+  </item>
+
+  <item>
+    <name>Card Chamas</name>
+    <type>card_theme</type>
+    <price_xp>1200</price_xp>
+    <image>shop/card_themes/card_fire.png</image>
+    <value>card_fire</value>
+    <rarity>legendary</rarity>
+    <description>Borda animada em chamas. Suas fases estão pegando fogo.</description>
     <is_active>true</is_active>
     <animated>true</animated>
   </item>

@@ -568,25 +568,6 @@ function inicializar(){
   atualizarContadores();
   renderGrade();
   renderEquippedBar();
-  carregarInventario();
-}
-
-function carregarInventario(){
-  if(!usuario){console.log('[shop] carregarInventario: sem usuário logado');return;}
-  console.log('[shop] carregarInventario: chamando',API+'/shop/inventory');
-  fetch(API+'/shop/inventory',{headers:{'Authorization':'Bearer '+getToken()}})
-    .then(function(r){
-      console.log('[shop] /shop/inventory status:',r.status);
-      return r.ok?r.json():r.json().then(function(d){throw new Error(r.status+': '+JSON.stringify(d));});
-    })
-    .then(function(d){
-      console.log('[shop] /shop/inventory resposta:',d);
-      saveInventory(d.inventory||[]);
-      saveEquipped(d.equipped||{});
-      renderGrade();
-      renderEquippedBar();
-    })
-    .catch(function(e){console.error('[shop] carregarInventario falhou:',e);});
 }
 
 function atualizarSaldo(){
@@ -594,11 +575,8 @@ function atualizarSaldo(){
   if(usuario){
     fetch(API+'/users/'+usuario.id)
       .then(function(r){return r.ok?r.json():null;})
-      .then(function(d){
-        console.log('[shop] /users/'+usuario.id+' exp:',d&&d.exp);
-        if(d&&d.exp!==undefined)setXP(d.exp);
-      })
-      .catch(function(e){console.error('[shop] atualizarSaldo falhou:',e);});
+      .then(function(d){if(d&&d.xp!==undefined)setXP(d.xp);})
+      .catch(function(){});
   }
 }
 
@@ -831,18 +809,15 @@ function desequipar(itemId){
   var item=SHOP_ITEMS.find(function(i){return i.id===itemId;});
   if(!item)return;
   var eq=getEquipped();
-  if(eq[item.type]!==itemId)return;
-  delete eq[item.type];
+  if(eq[item.type]===itemId)delete eq[item.type];
   saveEquipped(eq);
+  /* If unequipping avatar, clear pb_avatar_<id> so profile shows default */
   if(item.type==='avatar'&&usuario){
     localStorage.removeItem('pb_avatar_'+usuario.id);
   }
   updateCard(itemId);
   renderEquippedBar();
   showToast('↩️ '+item.name+' desequipado.');
-  if(usuario){
-    fetch(API+'/shop/unequip',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({item_id:itemId})}).catch(function(){});
-  }
 }
 
 /* ═══ BUY MODAL ═══ */
@@ -877,71 +852,31 @@ function confirmarCompra(){
   if(!itemSelecionado||!usuario)return;
   var item=itemSelecionado, xp=getXP();
   if(xp<item.price_xp){showToast('XP insuficiente!');return;}
-  var footer=document.getElementById('buy-modal-footer');
-  var confirmBtn=footer.querySelector('.btn-green');
-  if(confirmBtn){confirmBtn.disabled=true;confirmBtn.textContent='Processando...';}
-  fetch(API+'/shop/buy',{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},
-    body:JSON.stringify({item_id:item.id})
-  })
-  .then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d};});})
-  .then(function(result){
-    if(!result.ok){
-      showToast('Erro: '+(result.data.error||'Falha na compra'));
-      if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent='⚡ Confirmar Compra';}
-      return;
-    }
-    var d=result.data;
-    if(d.xp!==undefined)setXP(d.xp);
-    var inv=getInventory();
-    if(inv.indexOf(item.id)===-1){inv.push(item.id);saveInventory(inv);}
-    var eq=getEquipped();
-    var anteriorId=eq[item.type];
-    if(d.equipped){
-      saveEquipped(d.equipped);
-    } else {
-      eq[item.type]=item.id;
-      saveEquipped(eq);
-    }
-    fecharModal();
-    if(anteriorId&&anteriorId!==item.id)updateCard(anteriorId);
-    updateCard(item.id);
-    renderEquippedBar();
-    showToast('🎉 '+item.name+' comprado e equipado!');
-  })
-  .catch(function(){
-    showToast('Erro de conexão. Tente novamente.');
-    if(confirmBtn){confirmBtn.disabled=false;confirmBtn.textContent='⚡ Confirmar Compra';}
-  });
+  setXP(xp-item.price_xp);
+  var inv=getInventory();
+  if(inv.indexOf(item.id)===-1)inv.push(item.id);
+  saveInventory(inv);
+  var eq=getEquipped();
+  var anteriorId=eq[item.type];
+  eq[item.type]=item.id;
+  saveEquipped(eq);
+  fecharModal();
+  if(anteriorId&&anteriorId!==item.id)updateCard(anteriorId);
+  updateCard(item.id);
+  renderEquippedBar();
+  showToast('🎉 '+item.name+' comprado e equipado!');
+  if(usuario){
+    fetch(API+'/shop/buy',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()},body:JSON.stringify({item_id:item.id})})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(d){if(d&&d.xp!==undefined)setXP(d.xp);})
+      .catch(function(){});
+  }
 }
 
 /* ═══ HELPERS ═══ */
 function tipoLabel(type){ return{avatar:'Avatar',color:'Cor do Avatar',bg:'Fundo do Perfil',frame:'Moldura',badge:'Badge',title:'Título',card_theme:'Tema de Card'}[type]||type; }
 function escapeHTML(str){ return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function showToast(msg){ var t=document.getElementById('shop-toast'); t.textContent=msg; t.classList.add('show'); setTimeout(function(){t.classList.remove('show');},3000); }
-
-/* ═══ DEBUG — chame debugShop() no console do navegador ═══ */
-window.debugShop = function(){
-  console.group('=== debugShop ===');
-  console.log('API URL:', API);
-  console.log('Usuario:', usuario);
-  console.log('Token presente:', !!getToken(), '| Token válido:', isTokenValid());
-  console.log('XP local (localStorage):', localStorage.getItem(STORAGE_XP));
-  console.log('Inventário local:', getInventory());
-  console.log('Equipados local:', getEquipped());
-
-  if(!usuario){console.warn('Não logado — testes de API pulados');console.groupEnd();return;}
-
-  Promise.all([
-    fetch(API+'/users/'+usuario.id).then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});}).catch(function(e){return{error:String(e)};}),
-    fetch(API+'/shop/inventory',{headers:{'Authorization':'Bearer '+getToken()}}).then(function(r){return r.json().then(function(d){return{status:r.status,data:d};});}).catch(function(e){return{error:String(e)};})
-  ]).then(function(results){
-    console.log('GET /api/users/'+usuario.id+':', results[0]);
-    console.log('GET /api/shop/inventory:', results[1]);
-    console.groupEnd();
-  });
-};
 
 document.getElementById('buy-modal').addEventListener('click',function(e){ if(e.target===this)fecharModal(); });
 function navSearch(e){ e.preventDefault(); var q=document.getElementById('nav-search').value.trim(); if(q)window.location.href='levels.html?q='+encodeURIComponent(q); }
