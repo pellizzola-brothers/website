@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["caddy"]
+
+[start]
+cmd = "caddy file-server --root . --listen :${PORT:-8080}"
