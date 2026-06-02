@@ -56,6 +56,34 @@
     }
     .avatar-frame-ring.frame-active{border-color:var(--frame-color,#888);}
     @keyframes spinFrame{to{transform:rotate(360deg);}}
+    /* Shape: circle (default) */
+    .avatar-frame-ring.frame-circle{border-radius:50%;}
+    .avatar-frame-ring.frame-circle.frame-spin{border-top-color:var(--yellow);border-right-color:var(--accent);animation:spinFrame 2s linear infinite;}
+    /* Shape: square */
+    .avatar-frame-ring.frame-square{border-radius:6px;}
+    .avatar-frame-ring.frame-square.frame-spin{animation:spinFrame 2.5s linear infinite;}
+    /* Shape: diamond */
+    .avatar-frame-ring.frame-diamond{border-radius:4px;transform:rotate(45deg);}
+    .avatar-frame-ring.frame-diamond.frame-spin{animation:spinFrame 2.5s linear infinite;}
+    /* Shape: hex */
+    .avatar-frame-ring.frame-hex{
+      clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+      border:none;background:var(--frame-color,#888);opacity:.35;
+    }
+    .avatar-frame-ring.frame-hex.frame-spin{animation:spinFrame 3s linear infinite;}
+    /* Shape: star */
+    .avatar-frame-ring.frame-star{
+      clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+      border:none;background:var(--frame-color,#f0c040);opacity:.4;
+    }
+    .avatar-frame-ring.frame-star.frame-spin{animation:spinFrame 2s linear infinite;}
+    /* Shape: triangle */
+    .avatar-frame-ring.frame-triangle{
+      clip-path:polygon(50% 0%,100% 100%,0% 100%);
+      border:none;background:var(--frame-color,#1D9E75);opacity:.35;
+    }
+    .avatar-frame-ring.frame-triangle.frame-spin{animation:spinFrame 3s linear infinite;}
+    /* Legacy fallback */
     .avatar-frame-ring.frame-spin{border-top-color:var(--yellow);border-right-color:var(--accent);animation:spinFrame 2s linear infinite;}
     .profile-badge{
       display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;
@@ -305,12 +333,33 @@ const COSM_CATALOG = {
     {id:'bg_night',    value:'#2C2C2A', label:'Noite',      price_xp:500, rarity:'rare',     textColor:'#aaaaaa'},
   ],
   frame: [
-    {id:'frame_silver',  color:'#B4B2A9', label:'Prata',     price_xp:150,  rarity:'common',    animated:false},
-    {id:'frame_gold',    color:'#EF9F27', label:'Dourada',   price_xp:400,  rarity:'uncommon',  animated:false},
-    {id:'frame_emerald', color:'#1D9E75', label:'Esmeralda', price_xp:400,  rarity:'uncommon',  animated:false},
-    {id:'frame_purple',  color:'#7F77DD', label:'Roxa Neon', price_xp:500,  rarity:'rare',      animated:false},
-    {id:'frame_spin',    color:null,      label:'Giratória', price_xp:800,  rarity:'rare',      animated:true},
-    {id:'frame_rainbow', color:null,      label:'Arco-Íris', price_xp:1500, rarity:'legendary', animated:true},
+    /* Círculo */
+    {id:'frame_silver',       color:'#B4B2A9', label:'Prata',              price_xp:150,  rarity:'common',    animated:false, shape:'circle'},
+    {id:'frame_gold',         color:'#EF9F27', label:'Dourada',            price_xp:400,  rarity:'uncommon',  animated:false, shape:'circle'},
+    {id:'frame_emerald',      color:'#1D9E75', label:'Esmeralda',          price_xp:400,  rarity:'uncommon',  animated:false, shape:'circle'},
+    {id:'frame_purple',       color:'#7F77DD', label:'Roxa Neon',          price_xp:500,  rarity:'rare',      animated:false, shape:'circle'},
+    {id:'frame_spin',         color:'#7F77DD', label:'Giratória',          price_xp:800,  rarity:'rare',      animated:true,  shape:'circle'},
+    {id:'frame_rainbow',      color:'#EF9F27', label:'Arco-Íris',          price_xp:1500, rarity:'legendary', animated:true,  shape:'circle'},
+    /* Quadrado */
+    {id:'frame_sq_silver',    color:'#B4B2A9', label:'Quadro Prata',       price_xp:200,  rarity:'common',    animated:false, shape:'square'},
+    {id:'frame_sq_gold',      color:'#EF9F27', label:'Quadro Dourado',     price_xp:500,  rarity:'uncommon',  animated:false, shape:'square'},
+    {id:'frame_sq_spin',      color:'#7F77DD', label:'Quadro Giratório',   price_xp:900,  rarity:'rare',      animated:true,  shape:'square'},
+    /* Losango */
+    {id:'frame_diamond_blue', color:'#378ADD', label:'Losango Azul',       price_xp:350,  rarity:'uncommon',  animated:false, shape:'diamond'},
+    {id:'frame_diamond_fire', color:'#D85A30', label:'Losango de Fogo',    price_xp:700,  rarity:'rare',      animated:false, shape:'diamond'},
+    {id:'frame_diamond_spin', color:'#EF9F27', label:'Losango Giratório',  price_xp:1000, rarity:'rare',      animated:true,  shape:'diamond'},
+    /* Hexágono */
+    {id:'frame_hex_emerald',  color:'#1D9E75', label:'Hexágono Esmeralda', price_xp:600,  rarity:'rare',      animated:false, shape:'hex'},
+    {id:'frame_hex_purple',   color:'#7F77DD', label:'Hexágono Roxo',      price_xp:600,  rarity:'rare',      animated:false, shape:'hex'},
+    {id:'frame_hex_spin',     color:'#EF9F27', label:'Hex Giratório',      price_xp:1200, rarity:'legendary', animated:true,  shape:'hex'},
+    /* Estrela */
+    {id:'frame_star_gold',    color:'#EF9F27', label:'Estrela Dourada',    price_xp:800,  rarity:'rare',      animated:false, shape:'star'},
+    {id:'frame_star_purple',  color:'#9B59B6', label:'Estrela Roxa',       price_xp:800,  rarity:'rare',      animated:false, shape:'star'},
+    {id:'frame_star_spin',    color:'#f0c040', label:'Estrela Giratória',  price_xp:1800, rarity:'legendary', animated:true,  shape:'star'},
+    /* Triângulo */
+    {id:'frame_tri_green',    color:'#1D9E75', label:'Triângulo Verde',    price_xp:500,  rarity:'rare',      animated:false, shape:'triangle'},
+    {id:'frame_tri_fire',     color:'#D85A30', label:'Triângulo de Fogo',  price_xp:500,  rarity:'rare',      animated:false, shape:'triangle'},
+    {id:'frame_tri_spin',     color:'#ff4466', label:'Triângulo Giratório',price_xp:1400, rarity:'legendary', animated:true,  shape:'triangle'},
   ],
   badge: [
     {id:'badge_creator', label:'Criador',  price_xp:200,  color:'#633806', bg:'#FAEEDA',              rarity:'common'},
@@ -451,21 +500,39 @@ function renderCosmGrid(tab){
     } else if(tab==='frame'){
       el = document.createElement('div');
       el.className = 'cosm-opt-frame' + (selected?' selected':'');
+      var shape = item.shape||'circle';
+      var color = item.color||'#888';
+      /* Shape-aware mini frame */
+      var shapeClipMap = {
+        circle:   '',
+        square:   'border-radius:4px;',
+        diamond:  'border-radius:3px;transform:rotate(45deg);',
+        hex:      'clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);border-radius:0;',
+        star:     'clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);border-radius:0;',
+        triangle: 'clip-path:polygon(50% 0%,100% 100%,0% 100%);border-radius:0;'
+      };
+      var clipStyle = shapeClipMap[shape]||'';
       var mini = document.createElement('div');
       mini.className = 'frame-mini';
-      if(item.animated){
-        mini.style.border = '3px solid';
-        mini.style.borderTopColor = 'var(--yellow)';
-        mini.style.borderRightColor = 'var(--accent)';
-        mini.style.borderBottomColor = 'transparent';
-        mini.style.borderLeftColor = 'transparent';
+      mini.style.cssText = clipStyle;
+      if(shape==='hex'||shape==='star'||shape==='triangle'){
+        mini.style.background = color;
+        mini.style.opacity = '0.5';
+        mini.style.border = 'none';
+        mini.textContent = '';
+      } else if(item.animated){
+        mini.style.borderTop = '3px solid var(--yellow)';
+        mini.style.borderRight = '3px solid var(--accent)';
+        mini.style.borderBottom = '3px solid transparent';
+        mini.style.borderLeft = '3px solid transparent';
+        mini.textContent = 'PB';
       } else {
-        mini.style.borderColor = item.color||'#888';
+        mini.style.borderColor = color;
+        mini.textContent = 'PB';
       }
-      mini.textContent = 'PB';
       el.appendChild(mini);
       var lbl = document.createElement('div');
-      lbl.style = 'font-size:8px;font-family:var(--font-title);text-transform:uppercase;color:var(--text-muted);margin-top:3px;text-align:center;';
+      lbl.style.cssText = 'font-size:8px;font-family:var(--font-title);text-transform:uppercase;color:var(--text-muted);margin-top:3px;text-align:center;line-height:1.1;';
       lbl.textContent = item.label;
       el.appendChild(lbl);
       el.title = item.label + (owned?'':' ('+item.price_xp+' XP)');
@@ -678,15 +745,39 @@ async function loadProfile(){
     if(bmap[eq['bg']]) heroBg='background:'+bmap[eq['bg']]+';';
   }
 
-  /* ── Frame ring ── */
+  /* ── Frame ring (shape-aware) ── */
   var frameHTML='';
   if(eq['frame']){
-    var fmap={frame_silver:'#B4B2A9',frame_gold:'#EF9F27',frame_emerald:'#1D9E75',frame_purple:'#7F77DD',frame_purple_neon:'#9B59B6'};
-    var isSpin=eq['frame']==='frame_spin'||eq['frame']==='frame_spinning'||eq['frame']==='frame_rainbow';
-    if(isSpin){
-      frameHTML='<div class="avatar-frame-ring frame-spin"></div>';
-    } else if(fmap[eq['frame']]){
-      frameHTML='<div class="avatar-frame-ring frame-active" style="--frame-color:'+fmap[eq['frame']]+'"></div>';
+    /* Map all known frame IDs to {color, shape, animated} */
+    var FRAME_DATA={
+      frame_silver:         {color:'#B4B2A9',shape:'circle',animated:false},
+      frame_gold:           {color:'#EF9F27',shape:'circle',animated:false},
+      frame_emerald:        {color:'#1D9E75',shape:'circle',animated:false},
+      frame_purple:         {color:'#7F77DD',shape:'circle',animated:false},
+      frame_purple_neon:    {color:'#9B59B6',shape:'circle',animated:false},
+      frame_spin:           {color:'#7F77DD',shape:'circle',animated:true},
+      frame_spinning:       {color:'#7F77DD',shape:'circle',animated:true},
+      frame_rainbow:        {color:'#EF9F27',shape:'circle',animated:true},
+      frame_sq_silver:      {color:'#B4B2A9',shape:'square',animated:false},
+      frame_sq_gold:        {color:'#EF9F27',shape:'square',animated:false},
+      frame_sq_spin:        {color:'#7F77DD',shape:'square',animated:true},
+      frame_diamond_blue:   {color:'#378ADD',shape:'diamond',animated:false},
+      frame_diamond_fire:   {color:'#D85A30',shape:'diamond',animated:false},
+      frame_diamond_spin:   {color:'#EF9F27',shape:'diamond',animated:true},
+      frame_hex_emerald:    {color:'#1D9E75',shape:'hex',animated:false},
+      frame_hex_purple:     {color:'#7F77DD',shape:'hex',animated:false},
+      frame_hex_spin:       {color:'#EF9F27',shape:'hex',animated:true},
+      frame_star_gold:      {color:'#EF9F27',shape:'star',animated:false},
+      frame_star_purple:    {color:'#9B59B6',shape:'star',animated:false},
+      frame_star_spin:      {color:'#f0c040',shape:'star',animated:true},
+      frame_tri_green:      {color:'#1D9E75',shape:'triangle',animated:false},
+      frame_tri_fire:       {color:'#D85A30',shape:'triangle',animated:false},
+      frame_tri_spin:       {color:'#ff4466',shape:'triangle',animated:true}
+    };
+    var fd=FRAME_DATA[eq['frame']];
+    if(fd){
+      var fCls='avatar-frame-ring frame-'+fd.shape+(fd.animated?' frame-spin':'');
+      frameHTML='<div class="'+fCls+'" style="--frame-color:'+fd.color+';border-color:'+((!fd.animated&&fd.shape!=='hex'&&fd.shape!=='star'&&fd.shape!=='triangle')?fd.color:'transparent')+'"></div>';
     }
   }
 

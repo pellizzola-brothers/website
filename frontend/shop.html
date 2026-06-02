@@ -208,7 +208,8 @@
     @keyframes spinRing { to { transform:rotate(360deg); } }
     .preview-frame-wrap { position:relative; width:70px; height:70px; display:flex; align-items:center; justify-content:center; }
     .preview-frame-ring { position:absolute; inset:-5px; border-radius:50%; border:3px solid transparent; }
-    .frame-anim .preview-frame-ring { border-top-color:var(--yellow); border-right-color:var(--accent); animation:spinRing 2s linear infinite; }
+    /* circle shape animated - default */
+    .frame-shape-circle.frame-anim .preview-frame-ring { border-top-color:var(--yellow); border-right-color:var(--accent); animation:spinRing 2s linear infinite; }
     @media (prefers-reduced-motion:reduce) { .frame-anim .preview-frame-ring { animation:none; border-color:var(--yellow); } }
     @keyframes cardLegendGlow {
       0%,100% { border-color:var(--yellow); box-shadow:0 0 8px rgba(240,192,64,.3); }
@@ -291,6 +292,128 @@
     #shop-toast.show { transform:translateY(0); opacity:1; }
 
     @media (max-width:900px) { .shop-layout { grid-template-columns:1fr; } .shop-header { flex-wrap:wrap; } }
+
+    /* ═══ FREE TAB BANNER ═══ */
+    .free-tab-banner {
+      grid-column:1/-1; display:none;
+      background:linear-gradient(135deg,rgba(61,158,66,.15),rgba(94,204,102,.08));
+      border:2px solid rgba(61,158,66,.4); border-radius:var(--radius-lg);
+      padding:14px 20px; align-items:center; gap:14px;
+    }
+    .free-tab-banner.visible { display:flex; }
+    .free-banner-icon { font-size:32px; }
+    .free-banner-text { flex:1; }
+    .free-banner-title { font-family:var(--font-title); font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:#5ecc66; margin-bottom:3px; }
+    .free-banner-sub   { font-size:12px; color:var(--text-muted); }
+
+    /* ═══ SHOP TABS (Grátis / Todos) ═══ */
+    .shop-tabs {
+      display:flex; gap:6px; background:var(--bg-card);
+      border:2px solid var(--border); border-radius:var(--radius-lg);
+      padding:6px; width:fit-content;
+    }
+    .shop-tab {
+      padding:7px 18px; border-radius:var(--radius);
+      font-family:var(--font-title); font-size:11px; font-weight:700;
+      letter-spacing:.5px; text-transform:uppercase; cursor:pointer;
+      border:none; background:none; color:var(--text-muted);
+      transition:background .15s,color .15s; display:flex; align-items:center; gap:6px;
+    }
+    .shop-tab:hover { background:rgba(255,255,255,.06); color:var(--text); }
+    .shop-tab.active { background:rgba(61,158,66,.2); color:#5ecc66; }
+    .shop-tab.active.tab-paid { background:rgba(240,192,64,.15); color:var(--yellow); }
+    .shop-tab-count {
+      font-size:10px; padding:1px 7px; border-radius:10px;
+      background:var(--bg-nav); color:var(--text-dim);
+    }
+
+    /* ═══ PAGINATION ═══ */
+    .pagination-bar {
+      display:flex; align-items:center; justify-content:center; gap:6px;
+      padding:12px 0; margin-top:4px;
+    }
+    .pagination-bar.hidden { display:none; }
+    .pg-btn {
+      width:34px; height:34px; border-radius:var(--radius);
+      background:var(--bg-card); border:2px solid var(--border);
+      color:var(--text-muted); font-family:var(--font-title); font-size:12px; font-weight:700;
+      cursor:pointer; transition:background .15s,color .15s,border-color .15s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .pg-btn:hover { background:rgba(255,255,255,.06); color:var(--text); border-color:var(--border-light); }
+    .pg-btn.active { background:rgba(61,158,66,.2); color:#5ecc66; border-color:rgba(61,158,66,.5); }
+    .pg-btn:disabled { opacity:.3; cursor:not-allowed; }
+    .pg-ellipsis { color:var(--text-dim); font-size:13px; padding:0 4px; }
+    .pg-info { font-size:12px; color:var(--text-dim); margin:0 8px; }
+
+    /* ═══ NEW FRAME SHAPES ═══ */
+    /* Circle frame (default - existing) */
+    .frame-shape-circle .preview-frame-ring { border-radius:50%; }
+    .frame-shape-circle .preview-avatar-circle { border-radius:50%; }
+
+    /* Square frame */
+    .frame-shape-square .preview-frame-ring { border-radius:6px; }
+    .frame-shape-square .preview-avatar-circle { border-radius:4px; }
+
+    /* Diamond frame */
+    .frame-shape-diamond { transform:rotate(45deg); }
+    .frame-shape-diamond .preview-avatar-circle { transform:rotate(-45deg); border-radius:4px; }
+    .frame-shape-diamond .preview-frame-ring    { border-radius:4px; transform:rotate(0deg); }
+
+    /* Hexagon frame */
+    .frame-shape-hex .preview-frame-ring {
+      clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+      border-radius:0; border:none !important;
+    }
+    .frame-shape-hex .hex-fill {
+      position:absolute; inset:-5px;
+      clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+    }
+    .frame-shape-hex .preview-avatar-circle {
+      clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);
+      border-radius:0;
+    }
+
+    /* Star frame */
+    .frame-shape-star .preview-frame-ring {
+      clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+      border-radius:0; border:none !important;
+    }
+    .frame-shape-star .star-fill {
+      position:absolute; inset:-5px;
+      clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    }
+    .frame-shape-star .preview-avatar-circle {
+      clip-path:polygon(50% 5%,61% 35%,95% 35%,68% 57%,78% 88%,50% 68%,22% 88%,32% 57%,5% 35%,39% 35%);
+      border-radius:0;
+    }
+
+    /* Triangle frame */
+    .frame-shape-triangle .preview-frame-ring {
+      clip-path:polygon(50% 0%,100% 100%,0% 100%);
+      border-radius:0; border:none !important;
+    }
+    .frame-shape-triangle .tri-fill {
+      position:absolute; inset:-5px;
+      clip-path:polygon(50% 0%,100% 100%,0% 100%);
+    }
+    .frame-shape-triangle .preview-avatar-circle {
+      clip-path:polygon(50% 5%,96% 97%,4% 97%);
+      border-radius:0;
+    }
+
+    /* Spinning animations per shape */
+    @keyframes spinRingSquare   { to { transform:rotate(360deg); } }
+    @keyframes spinRingDiamond  { to { transform:rotate(360deg) rotate(45deg); } }
+    @keyframes spinRingHex      { to { transform:rotate(360deg); } }
+    @keyframes spinRingStar     { to { transform:rotate(360deg); } }
+    @keyframes spinRingTriangle { to { transform:rotate(360deg); } }
+
+    .frame-shape-square.frame-anim   .preview-frame-ring { animation:spinRingSquare 2.5s linear infinite; }
+    .frame-shape-diamond.frame-anim  .preview-frame-ring { animation:spinRingDiamond 2.5s linear infinite; }
+    .frame-shape-hex.frame-anim      .hex-fill  { animation:spinRingHex 3s linear infinite; transform-origin:center; }
+    .frame-shape-star.frame-anim     .star-fill { animation:spinRingStar 2s linear infinite; transform-origin:center; }
+    .frame-shape-triangle.frame-anim .tri-fill  { animation:spinRingTriangle 3s linear infinite; transform-origin:center; }
   </style>
 </head>
 <body>
@@ -383,14 +506,32 @@
     </div>
 
     <div class="shop-main">
-      <div class="shop-search-bar">
-        <span class="shop-search-icon">🔍</span>
-        <input type="text" class="shop-search-input" id="shop-search" placeholder="Buscar itens na loja..." oninput="renderGrade()">
-        <span class="shop-result-count" id="result-count"></span>
+      <!-- TABS -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div class="shop-tabs">
+          <button class="shop-tab active" id="tab-all"  onclick="setShopTab('all',this)">🗂 Todos <span class="shop-tab-count" id="tab-count-all">0</span></button>
+          <button class="shop-tab"        id="tab-free" onclick="setShopTab('free',this)">✨ Grátis <span class="shop-tab-count" id="tab-count-free">0</span></button>
+          <button class="shop-tab tab-paid" id="tab-paid" onclick="setShopTab('paid',this)">⚡ Pagos <span class="shop-tab-count" id="tab-count-paid">0</span></button>
+        </div>
+        <div class="shop-search-bar" style="flex:1;min-width:180px;">
+          <span class="shop-search-icon">🔍</span>
+          <input type="text" class="shop-search-input" id="shop-search" placeholder="Buscar itens na loja..." oninput="renderGrade()">
+          <span class="shop-result-count" id="result-count"></span>
+        </div>
+      </div>
+      <!-- FREE BANNER -->
+      <div class="free-tab-banner" id="free-tab-banner">
+        <span class="free-banner-icon">🎁</span>
+        <div class="free-banner-text">
+          <div class="free-banner-title">Itens 100% Grátis!</div>
+          <div class="free-banner-sub">Todos os avatares e itens gratuitos — sem gastar nenhum XP.</div>
+        </div>
       </div>
       <div class="shop-grid" id="shop-grid">
         <div class="shop-empty"><span class="shop-empty-icon">🛒</span>Carregando itens...</div>
       </div>
+      <!-- PAGINACAO -->
+      <div class="pagination-bar hidden" id="pagination-bar"></div>
     </div>
 
   </div>
@@ -430,6 +571,20 @@ var usuario = getUser();
 var categoriaAtiva  = 'all';
 var raridadesFiltro = ['free','common','uncommon','rare','legendary'];
 var itemSelecionado = null;
+var shopTab         = 'all';
+var paginaAtual     = 1;
+var ITENS_POR_PAGINA = 12;
+
+function setShopTab(tab, btn){
+  shopTab = tab;
+  paginaAtual = 1;
+  document.querySelectorAll('.shop-tab').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var banner = document.getElementById('free-tab-banner');
+  if(tab === 'free') banner.classList.add('visible');
+  else               banner.classList.remove('visible');
+  renderGrade();
+}
 
 if (usuario) {
   document.getElementById('nav-auth').textContent = usuario.username.toUpperCase();
@@ -512,12 +667,33 @@ var FALLBACK_ITEMS = [
   {id:'bg_lavender',  name:'Fundo Lavanda',     type:'bg',        price_xp:100,  value:'#EEEDFE',rarity:'common',   description:'Suave como uma brisa.',                               is_active:true,animated:false},
   {id:'bg_sunset',    name:'Fundo Pôr do Sol',  type:'bg',        price_xp:250,  value:'#FAEEDA',rarity:'uncommon', description:'Tons quentes que lembram o fim de um dia épico.',     is_active:true,animated:false},
   {id:'bg_night',     name:'Fundo Noite',       type:'bg',        price_xp:500,  value:'#2C2C2A',rarity:'rare',     description:'Escuro, misterioso e cheio de brilho.',               is_active:true,animated:false},
-  {id:'frame_silver', name:'Moldura Prata',     type:'frame',     price_xp:150,  value:'frame_silver', rarity:'common',   description:'Uma borda limpa e elegante em prata.',          is_active:true,animated:false,frame_color:'#B4B2A9'},
-  {id:'frame_gold',   name:'Moldura Dourada',   type:'frame',     price_xp:400,  value:'frame_gold',   rarity:'uncommon', description:'Brilha como ouro, reservada para os dedicados.', is_active:true,animated:false,frame_color:'#EF9F27'},
-  {id:'frame_emerald',name:'Moldura Esmeralda', type:'frame',     price_xp:400,  value:'frame_emerald',rarity:'uncommon', description:'Verde intenso para quem domina as fases.',       is_active:true,animated:false,frame_color:'#1D9E75'},
-  {id:'frame_purple', name:'Moldura Roxa Neon', type:'frame',     price_xp:500,  value:'frame_purple', rarity:'rare',     description:'Roxo vibrante que chama atenção.',               is_active:true,animated:false,frame_color:'#7F77DD'},
-  {id:'frame_spin',   name:'Moldura Giratória', type:'frame',     price_xp:800,  value:'frame_spin',   rarity:'rare',     description:'Animação contínua. Impossível não notar.',       is_active:true,animated:true, frame_color:'#7F77DD'},
-  {id:'frame_rainbow',name:'Moldura Arco-Íris', type:'frame',     price_xp:1500, value:'frame_rainbow',rarity:'legendary',description:'As cores do arco-íris giram ao redor do avatar.',is_active:true,animated:true, frame_color:'#EF9F27'},
+  /* Círculo */
+  {id:'frame_silver',         name:'Moldura Prata',           type:'frame', price_xp:150,  value:'frame_silver',         rarity:'common',    description:'Uma borda limpa e elegante em prata.',               is_active:true,animated:false,frame_color:'#B4B2A9',frame_shape:'circle'},
+  {id:'frame_gold',           name:'Moldura Dourada',         type:'frame', price_xp:400,  value:'frame_gold',           rarity:'uncommon',  description:'Brilha como ouro, reservada para os dedicados.',     is_active:true,animated:false,frame_color:'#EF9F27',frame_shape:'circle'},
+  {id:'frame_emerald',        name:'Moldura Esmeralda',       type:'frame', price_xp:400,  value:'frame_emerald',        rarity:'uncommon',  description:'Verde intenso para quem domina as fases.',           is_active:true,animated:false,frame_color:'#1D9E75',frame_shape:'circle'},
+  {id:'frame_purple',         name:'Moldura Roxa Neon',       type:'frame', price_xp:500,  value:'frame_purple',         rarity:'rare',      description:'Roxo vibrante que chama atenção.',                   is_active:true,animated:false,frame_color:'#7F77DD',frame_shape:'circle'},
+  {id:'frame_spin',           name:'Moldura Giratória',       type:'frame', price_xp:800,  value:'frame_spin',           rarity:'rare',      description:'Círculo giratório. Impossível não notar.',           is_active:true,animated:true, frame_color:'#7F77DD',frame_shape:'circle'},
+  {id:'frame_rainbow',        name:'Moldura Arco-Íris',       type:'frame', price_xp:1500, value:'frame_rainbow',        rarity:'legendary', description:'As cores do arco-íris giram ao redor do avatar.',    is_active:true,animated:true, frame_color:'#EF9F27',frame_shape:'circle'},
+  /* Quadrado */
+  {id:'frame_sq_silver',      name:'Quadro Prata',            type:'frame', price_xp:200,  value:'frame_sq_silver',      rarity:'common',    description:'Moldura quadrada elegante em prata.',                is_active:true,animated:false,frame_color:'#B4B2A9',frame_shape:'square'},
+  {id:'frame_sq_gold',        name:'Quadro Dourado',          type:'frame', price_xp:500,  value:'frame_sq_gold',        rarity:'uncommon',  description:'Moldura quadrada dourada para destaque.',            is_active:true,animated:false,frame_color:'#EF9F27',frame_shape:'square'},
+  {id:'frame_sq_spin',        name:'Quadro Giratório',        type:'frame', price_xp:900,  value:'frame_sq_spin',        rarity:'rare',      description:'Quadrado que gira em volta do quadrado.',            is_active:true,animated:true, frame_color:'#7F77DD',frame_shape:'square'},
+  /* Losango */
+  {id:'frame_diamond_blue',   name:'Losango Azul',            type:'frame', price_xp:350,  value:'frame_diamond_blue',   rarity:'uncommon',  description:'Forma de losango em azul oceano.',                   is_active:true,animated:false,frame_color:'#378ADD',frame_shape:'diamond'},
+  {id:'frame_diamond_fire',   name:'Losango de Fogo',         type:'frame', price_xp:700,  value:'frame_diamond_fire',   rarity:'rare',      description:'Losango em laranja intenso.',                        is_active:true,animated:false,frame_color:'#D85A30',frame_shape:'diamond'},
+  {id:'frame_diamond_spin',   name:'Losango Giratório',       type:'frame', price_xp:1000, value:'frame_diamond_spin',   rarity:'rare',      description:'Losango girando ao redor do avatar.',                is_active:true,animated:true, frame_color:'#EF9F27',frame_shape:'diamond'},
+  /* Hexágono */
+  {id:'frame_hex_emerald',    name:'Hexágono Esmeralda',      type:'frame', price_xp:600,  value:'frame_hex_emerald',    rarity:'rare',      description:'Forma hexagonal em verde esmeralda.',                is_active:true,animated:false,frame_color:'#1D9E75',frame_shape:'hex'},
+  {id:'frame_hex_purple',     name:'Hexágono Roxo',           type:'frame', price_xp:600,  value:'frame_hex_purple',     rarity:'rare',      description:'Hexágono roxo neon para verdadeiros campeões.',      is_active:true,animated:false,frame_color:'#7F77DD',frame_shape:'hex'},
+  {id:'frame_hex_spin',       name:'Hexágono Giratório',      type:'frame', price_xp:1200, value:'frame_hex_spin',       rarity:'legendary', description:'Hexágono que gira continuamente.',                   is_active:true,animated:true, frame_color:'#EF9F27',frame_shape:'hex'},
+  /* Estrela */
+  {id:'frame_star_gold',      name:'Estrela Dourada',         type:'frame', price_xp:800,  value:'frame_star_gold',      rarity:'rare',      description:'Moldura em forma de estrela dourada.',               is_active:true,animated:false,frame_color:'#EF9F27',frame_shape:'star'},
+  {id:'frame_star_purple',    name:'Estrela Roxa',            type:'frame', price_xp:800,  value:'frame_star_purple',    rarity:'rare',      description:'Estrela roxa que brilha no perfil.',                 is_active:true,animated:false,frame_color:'#9B59B6',frame_shape:'star'},
+  {id:'frame_star_spin',      name:'Estrela Giratória',       type:'frame', price_xp:1800, value:'frame_star_spin',      rarity:'legendary', description:'Uma estrela que gira em torno de você.',             is_active:true,animated:true, frame_color:'#f0c040',frame_shape:'star'},
+  /* Triângulo */
+  {id:'frame_tri_green',      name:'Triângulo Verde',         type:'frame', price_xp:500,  value:'frame_tri_green',      rarity:'rare',      description:'Moldura triangular em verde vibrante.',              is_active:true,animated:false,frame_color:'#1D9E75',frame_shape:'triangle'},
+  {id:'frame_tri_fire',       name:'Triângulo de Fogo',       type:'frame', price_xp:500,  value:'frame_tri_fire',       rarity:'rare',      description:'Triângulo laranja fogo para quem é ousado.',         is_active:true,animated:false,frame_color:'#D85A30',frame_shape:'triangle'},
+  {id:'frame_tri_spin',       name:'Triângulo Giratório',     type:'frame', price_xp:1400, value:'frame_tri_spin',       rarity:'legendary', description:'Triângulo girando — único e poderoso.',              is_active:true,animated:true, frame_color:'#ff4466',frame_shape:'triangle'},
   {id:'badge_creator',name:'Criador',           type:'badge',     price_xp:200,  value:'badge_creator', rarity:'common',   description:'Para quem já publicou sua primeira fase.',     is_active:true,animated:false,badge_color:'#633806',badge_bg:'#FAEEDA'},
   {id:'badge_veteran',name:'Veterano',          type:'badge',     price_xp:300,  value:'badge_veteran', rarity:'uncommon', description:'Está aqui há muito tempo.',                    is_active:true,animated:false,badge_color:'#085041',badge_bg:'#E1F5EE'},
   {id:'badge_top',    name:'Top Fase',          type:'badge',     price_xp:400,  value:'badge_top',     rarity:'uncommon', description:'Suas fases são curtidas pela comunidade.',     is_active:true,animated:false,badge_color:'#0C447C',badge_bg:'#E6F1FB'},
@@ -554,7 +730,8 @@ function carregarXML(){
           var type=get('type'), value=get('value');
           var fallback=FALLBACK_ITEMS.find(function(fi){return fi.type===type&&fi.value===value;});
           var id=fallback?fallback.id:(type+'_'+value.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'').slice(0,30));
-          parsed.push({id:id,name:get('name'),type:type,price_xp:parseInt(get('price_xp'))||0,value:value,rarity:get('rarity')||'common',description:get('description'),is_active:true,animated:get('animated')==='true'});
+          var frameShape=get('frame_shape')||(fallback&&fallback.frame_shape)||'circle';
+          parsed.push({id:id,name:get('name'),type:type,price_xp:parseInt(get('price_xp'))||0,value:value,rarity:get('rarity')||'common',description:get('description'),is_active:true,animated:get('animated')==='true',frame_shape:frameShape,frame_color:get('frame_color')||(fallback&&fallback.frame_color)||''});
         });
         if(parsed.length){SHOP_ITEMS=AVATAR_ITEMS.concat(parsed);inicializar();}
       }catch(e){console.warn('XML',e);}
@@ -603,22 +780,31 @@ function renderEquippedBar(){
 /* ═══ COUNTERS ═══ */
 function atualizarContadores(){
   var tipos=['avatar','color','bg','frame','badge','title','card_theme'];
-  document.getElementById('count-all').textContent=SHOP_ITEMS.filter(function(i){return i.is_active;}).length;
+  var ativos=SHOP_ITEMS.filter(function(i){return i.is_active;});
+  document.getElementById('count-all').textContent=ativos.length;
   tipos.forEach(function(t){
     var el=document.getElementById('count-'+t);
     if(el)el.textContent=SHOP_ITEMS.filter(function(i){return i.type===t&&i.is_active;}).length;
   });
+  /* Tab counts */
+  var freeItems=ativos.filter(function(i){return i.rarity==='free'||i.price_xp===0;});
+  var paidItems=ativos.filter(function(i){return i.rarity!=='free'&&i.price_xp>0;});
+  document.getElementById('tab-count-all').textContent=ativos.length;
+  document.getElementById('tab-count-free').textContent=freeItems.length;
+  document.getElementById('tab-count-paid').textContent=paidItems.length;
 }
 
 /* ═══ FILTERS ═══ */
 function filtrarCategoria(cat,btn){
   categoriaAtiva=cat;
+  paginaAtual=1;
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
   renderGrade();
 }
 function atualizarFiltroRaridade(){
   raridadesFiltro=[];
+  paginaAtual=1;
   document.querySelectorAll('.rarity-filter input[type=checkbox]').forEach(function(cb){
     if(cb.checked)raridadesFiltro.push(cb.value);
   });
@@ -650,9 +836,26 @@ function buildPreview(item,container){
     container.innerHTML='<div class="preview-bg-strip" style="background:'+item.value+';color:'+(dark?'#aaa':'#333')+';">Fundo do Perfil</div>';
   } else if(item.type==='frame'){
     var fc=resolveFrameColor(item);
-    var cls=item.animated?'frame-anim':'';
-    container.innerHTML='<div class="preview-frame-wrap '+cls+'">'+
-      '<div class="preview-frame-ring"'+(!item.animated?' style="border:3px solid '+fc+'"':'')+' ></div>'+
+    var animCls=item.animated?'frame-anim':'';
+    var shape=item.frame_shape||'circle';
+    var shapeCls='frame-shape-'+shape;
+    var extraEls='';
+    if(shape==='hex'){
+      extraEls='<div class="hex-fill" style="background:'+fc+';opacity:.25;"></div>';
+    } else if(shape==='star'){
+      extraEls='<div class="star-fill" style="background:'+fc+';opacity:.25;"></div>';
+    } else if(shape==='triangle'){
+      extraEls='<div class="tri-fill" style="background:'+fc+';opacity:.25;"></div>';
+    }
+    var ringStyle='';
+    if(!item.animated&&(shape==='circle'||shape==='square'||shape==='diamond')){
+      ringStyle=' style="border:3px solid '+fc+'"';
+    } else if(item.animated&&(shape==='circle'||shape==='square'||shape==='diamond')){
+      ringStyle=' style="border-top-color:'+fc+';border-right-color:var(--accent);"';
+    }
+    container.innerHTML='<div class="preview-frame-wrap '+shapeCls+' '+animCls+'">'+
+      extraEls+
+      '<div class="preview-frame-ring"'+ringStyle+'></div>'+
       '<div class="preview-avatar-circle" style="background:var(--bg-card2);color:var(--text);width:58px;height:58px;">PB</div>'+
     '</div>';
   } else if(item.type==='badge'){
@@ -722,7 +925,7 @@ function renderCard(item){
   return card;
 }
 
-/* ═══ RENDER GRADE ═══ */
+/* ═══ RENDER GRADE (com paginacao e abas) ═══ */
 function renderGrade(){
   var busca=(document.getElementById('shop-search').value||'').toLowerCase().trim();
   var grid=document.getElementById('shop-grid');
@@ -731,22 +934,54 @@ function renderGrade(){
     if(categoriaAtiva!=='all'&&item.type!==categoriaAtiva)return false;
     if(raridadesFiltro.indexOf(item.rarity)===-1)return false;
     if(busca&&item.name.toLowerCase().indexOf(busca)===-1&&item.description.toLowerCase().indexOf(busca)===-1)return false;
+    if(shopTab==='free'&&!(item.rarity==='free'||item.price_xp===0))return false;
+    if(shopTab==='paid'&&(item.rarity==='free'||item.price_xp===0))return false;
     return true;
   });
   filtrados=ordenarItens(filtrados);
-  document.getElementById('result-count').textContent=filtrados.length+(filtrados.length===1?' item':' itens');
+  var total=filtrados.length;
+  document.getElementById('result-count').textContent=total+(total===1?' item':' itens');
+  var totalPaginas=Math.max(1,Math.ceil(total/ITENS_POR_PAGINA));
+  if(paginaAtual>totalPaginas)paginaAtual=totalPaginas;
+  var inicio=(paginaAtual-1)*ITENS_POR_PAGINA;
+  var fim=inicio+ITENS_POR_PAGINA;
+  var pagina=filtrados.slice(inicio,fim);
   grid.innerHTML='';
   if(!filtrados.length){
     grid.innerHTML='<div class="shop-empty"><span class="shop-empty-icon">🔍</span>Nenhum item encontrado com esses filtros.</div>';
+    renderPaginacao(0,1,0);
     return;
   }
-  filtrados.forEach(function(item,i){
+  pagina.forEach(function(item,i){
     var card=renderCard(item);
-    card.style.animationDelay=(i*0.04)+'s';
+    card.style.animationDelay=(i*0.03)+'s';
     grid.appendChild(card);
-    /* FIX: buildPreview AFTER appendChild, using querySelector on card node */
     buildPreview(item,card.querySelector('.item-preview'));
   });
+  renderPaginacao(total,totalPaginas,inicio);
+}
+
+function renderPaginacao(total,totalPaginas,inicio){
+  var bar=document.getElementById('pagination-bar');
+  if(totalPaginas<=1){bar.classList.add('hidden');return;}
+  bar.classList.remove('hidden');
+  var html='';
+  html+='<button class="pg-btn" onclick="irPagina('+(paginaAtual-1)+')"'+(paginaAtual<=1?' disabled':'')+'>&#9664;</button>';
+  for(var p=1;p<=totalPaginas;p++){
+    if(totalPaginas>7&&p>2&&p<totalPaginas-1&&Math.abs(p-paginaAtual)>1){
+      if(p===3||p===totalPaginas-2)html+='<span class="pg-ellipsis">…</span>';
+      continue;
+    }
+    html+='<button class="pg-btn'+(p===paginaAtual?' active':'')+'" onclick="irPagina('+p+')">'+p+'</button>';
+  }
+  html+='<button class="pg-btn" onclick="irPagina('+(paginaAtual+1)+')"'+(paginaAtual>=totalPaginas?' disabled':'')+'>&#9654;</button>';
+  html+='<span class="pg-info">'+(inicio+1)+'-'+Math.min(paginaAtual*ITENS_POR_PAGINA,total)+' de '+total+'</span>';
+  bar.innerHTML=html;
+}
+function irPagina(p){
+  paginaAtual=p;
+  renderGrade();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 /* ═══ UPDATE SINGLE CARD ═══ */
