@@ -47,7 +47,8 @@ function renderNavbar() {
 }
 
 // Auto-render navbar when DOM is ready
-document.addEventListener('DOMContentLoaded', renderNavbar);
-if (document.readyState === 'complete') {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', renderNavbar);
+} else {
   renderNavbar();
 }
