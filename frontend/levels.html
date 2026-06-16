@@ -378,11 +378,6 @@ let debounceTimer   = null;
 
 /* ── SESSÃO ── */
 const user = getUser();
-if (user) {
-  const el = document.getElementById('nav-auth');
-  el.textContent = user.username.toUpperCase();
-  el.href = 'perfil_do_usuario.html?id=' + user.id;
-}
 
 /* ── UTILS ── */
 function showToast(msg, ms) {

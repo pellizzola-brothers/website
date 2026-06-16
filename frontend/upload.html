@@ -223,10 +223,7 @@
 
 var usuario = getUser();
 
-if (usuario != null) {
-  document.getElementById('nav-auth').textContent = usuario.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + usuario.id;
-} else {
+if (usuario == null) {
   document.getElementById('form-upload').style.display = 'none';
   document.getElementById('aviso-login').style.display = '';
 }
