@@ -301,9 +301,6 @@ i18nReady.then(function() {
   const user = getUser();
   if (user) {
     document.getElementById('greeting').textContent = getGreeting(user.username.toUpperCase());
-    document.getElementById('nav-auth').textContent = user.username.toUpperCase();
-    document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
-    document.getElementById('nav-auth').removeAttribute('data-i18n');
   } else {
     document.getElementById('greeting').textContent = getGreeting(t('home.visitante'));
   }
