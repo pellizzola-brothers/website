@@ -1,4 +1,4 @@
-# 🎮 Pellizzola Brothers
+# 🎮 Pellizzola Brothers (website)
 
 A platform for creating and managing user-generated content. (UGC) <br>
 Vanilla-JS frontend, Express/PostgreSQL backend, no build step.
@@ -33,7 +33,6 @@ Vanilla-JS frontend, Express/PostgreSQL backend, no build step.
 - ❤️ **Likes & comments** — atomic like/unlike (no race conditions), threaded comments, report/flag a level
 - 👤 **Profiles** — public creator profiles with stats, bio editing, avatar picker, like/download history
 - 🌐 **i18n** — PT-BR and EN, switchable live, works even opened directly via `file://`
-- 🥚 Click the nav logo 9 times for a surprise
 
 ## Tech Stack
 
