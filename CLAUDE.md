@@ -48,13 +48,16 @@ frontend/          Static HTML pages + vanilla JS
   config.js        Single source of truth for API base URL — change this one line to switch between local and production
   auth.js          LocalStorage session helpers (saveSession, getToken, getUser, isLoggedIn, clearSession)
   cache.js         Simple in-memory cache for API responses
+  util.js          Shared escHtml() — always use it when interpolating API/user data into innerHTML
+  nav.js           Nav-brand Easter egg click handler (see below); include via <script src="nav.js"> before </body>
   i18n.js          i18n loader; translations in i18n/en.json and i18n/pt_BR.json
                    (also compiled into i18n/en.js and i18n/pt_BR.js for file:// compatibility)
 
   download.html    Download page for PB Game and PB Studio — linked from the global nav
-  little_coffee.html  Cafézinho da Chapeleira community chat/lounge — linked from the global nav
+  little_coffee.html  Cafézinho da Chapeleira community chat/lounge — linked from the global nav; posts/replies/likes are localStorage-only (no backend persistence), seeded with example posts on first visit
   sobre.html       About page — linked from its own nav entry only
   creditos.html    Credits page — hidden Easter egg, accessible by clicking the nav brand 9 times
+  admin.html       Unlinked UI-mockup admin dashboard. The password gate (`admin123`) and every action (ban/promote/delete) are pure client-side decoration — there is no admin role or protected route on the backend. Don't mistake it for a real auth boundary.
 
 levels/            Uploaded level files stored on disk (multer destination)
 pauro_database.sql Full schema + seed data + migration scripts for v5→v6 and v6→v6.1
@@ -74,6 +77,8 @@ pauro_database.sql Full schema + seed data + migration scripts for v5→v6 and v
 
 **Switching to production API**: Edit `frontend/config.js` — comment/uncomment the two `const API =` lines.
 
-**Nav brand Easter egg**: Clicking "🎮 Pellizzola Brothers" 9 times navigates to `creditos.html`. The counter persists in `sessionStorage` under the key `pb_brand_clicks` and is reset after the redirect. The script is injected inline before `</body>` in every page.
+**Nav brand Easter egg**: Clicking "🎮 Pellizzola Brothers" 9 times navigates to `creditos.html`. The counter persists in `sessionStorage` under the key `pb_brand_clicks` and is reset after the redirect. Implemented once in `frontend/nav.js`, included via `<script src="nav.js"></script>` right before `</body>` on every page (it queries `.nav-brand` at load time, so it must load after the nav markup, not in `<head>`).
+
+**Escaping user data**: Every page builds its DOM via string-concatenated `innerHTML` rather than templates. Any value that originated from the API or user input (level name/description, username, bio, comments, report reason) **must** go through `escHtml()` from `util.js` before being concatenated in — plain `+` concatenation without it is a stored-XSS hole. Never splice such a value directly into an inline `onclick="fn('...')"` attribute either, even escaped — HTML-attribute-decoding happens before the browser parses the handler as JS, so `escHtml()` does not make that safe. Pass only the numeric id through the attribute and look the record up by id inside the handler (see `openDeleteModal` in `perfil_do_usuario.html` or `banUser`/`deleteLevel` in `admin.html`).
 
 **i18n keys to add**: When creating a new page, add `nav.download` and `nav.cafezinho` keys to both `i18n/en.json` + `i18n/en.js` and `i18n/pt_BR.json` + `i18n/pt_BR.js`. The `.js` files are the same content wrapped in `window.PB_I18N[lang] = {...}` for `file://` compatibility — keep both in sync.

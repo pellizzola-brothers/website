@@ -717,8 +717,6 @@ function navSearch(e) {
   if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
 }
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

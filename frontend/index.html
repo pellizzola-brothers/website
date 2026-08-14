@@ -236,6 +236,7 @@
   <script src="i18n.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
+  <script src="util.js"></script>
 </head>
 <body>
 
@@ -336,15 +337,11 @@ async function loadHome() {
     ]);
     creator = await fetch(API + '/users/' + featured.author_id).then(function(r){ if(!r.ok) throw new Error('Falha creator'); return r.json(); });
   } catch(e) {
-    levels   = [
-      {id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10,author_name:'xx_poste_xx'},
-      {id:2,name:'Meu Level Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9,author_name:'xx_poste_xx'},
-      {id:3,name:'A Extraordinaria Jornada de Henrique',description:'Um clássico!',downloads:0,likes:0,author_name:'BillyShears'},
-      {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6,author_name:'BillyShears'},
-      {id:5,name:'Eu Acompanho as Botas Douradas',description:'Bacanices',downloads:3,likes:2,author_name:'JacaboMassola'},
-    ];
-    featured = levels[0];
-    creator  = {id:1, username:'xx_poste_xx', bio:'Viva Jesus', downloaded_levels:11, liked_levels:9, levels:[levels[0],levels[1]]};
+    document.getElementById('featured-big-wrap').innerHTML =
+      '<div class="empty-state">😕 ' + t('levels.offline') + '</div>';
+    document.getElementById('course-grid').innerHTML = '';
+    document.getElementById('creator-card').innerHTML = '';
+    return;
   }
 
   document.getElementById('featured-big-wrap').innerHTML =
@@ -352,8 +349,8 @@ async function loadHome() {
       '<div class="featured-big-thumb">' + emojiFor(featured.id) + '</div>' +
       '<div class="featured-big-body">' +
         '<div class="featured-big-badge">' + t('home.destaque_badge') + '</div>' +
-        '<div class="featured-big-name">' + featured.name + '</div>' +
-        '<div class="featured-big-desc">' + (featured.description ? '"' + featured.description + '"' : '') + '</div>' +
+        '<div class="featured-big-name">' + escHtml(featured.name) + '</div>' +
+        '<div class="featured-big-desc">' + (featured.description ? '"' + escHtml(featured.description) + '"' : '') + '</div>' +
         '<div class="featured-big-stats">' +
           '<div class="featured-big-stat">⬇ Downloads: <strong>' + featured.downloads + '</strong></div>' +
           '<div class="featured-big-stat">♥ ' + t('perfil.curtidas').replace('Fases c','C').replace('Liked l','L') + ': <strong>' + featured.likes + '</strong></div>' +
@@ -372,8 +369,8 @@ async function loadHome() {
         emojiFor(l.id) +
       '</div>' +
       '<div class="course-card-body">' +
-        '<div class="course-card-name">' + l.name + '</div>' +
-        '<div class="course-card-author">' + t('levels.por') + ' ' + l.author_name + '</div>' +
+        '<div class="course-card-name">' + escHtml(l.name) + '</div>' +
+        '<div class="course-card-author">' + t('levels.por') + ' ' + escHtml(l.author_name) + '</div>' +
       '</div>' +
       '<div class="course-card-footer">' +
         '<span>⬇ ' + l.downloads + '</span>' +
@@ -386,7 +383,7 @@ async function loadHome() {
   var crLevels = (creator.levels || []).slice(0, 3).map(function(l) {
     return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="creator-level-row">' +
       '<div class="creator-level-icon">' + emojiFor(l.id) + '</div>' +
-      '<div class="creator-level-name">' + l.name + '</div>' +
+      '<div class="creator-level-name">' + escHtml(l.name) + '</div>' +
       '<div class="creator-level-dl">⬇ ' + (l.downloads || 0) + '</div>' +
     '</a>';
   }).join('');
@@ -395,8 +392,8 @@ async function loadHome() {
     '<div class="creator-card-header">' + t('home.criador_destaque') + '</div>' +
     '<div class="creator-card-body">' +
       '<div class="creator-avatar">👤</div>' +
-      '<div class="creator-name">' + creator.username + '</div>' +
-      '<div class="creator-bio">' + (creator.bio ? '"' + creator.bio + '"' : '') + '</div>' +
+      '<div class="creator-name">' + escHtml(creator.username) + '</div>' +
+      '<div class="creator-bio">' + (creator.bio ? '"' + escHtml(creator.bio) + '"' : '') + '</div>' +
       '<div class="creator-stats-row">' +
         '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels||[]).length + '</span><span class="creator-stat-lbl">' + t('home.fases_criadas') + '</span></div>' +
         '<div class="creator-stat"><span class="creator-stat-val">' + creator.downloaded_levels + '</span><span class="creator-stat-lbl">Plays</span></div>' +
@@ -415,8 +412,6 @@ function navSearch(e) {
   if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
 }
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
   <script src="auth.js"></script>
+  <script src="util.js"></script>
   <style>
     /* ── LAYOUT BASE ── */
     body { background: #0e0e28; }
@@ -832,36 +833,40 @@ function renderUsers() {
       '<td><span class="tbl-badge ' + role + '">' + roleLabel + '</span></td>' +
       '<td><div class="tbl-actions">' +
         '<a href="perfil_do_usuario.html?id=' + u.id + '" class="tbl-btn" target="_blank">Ver</a>' +
-        '<button class="tbl-btn danger" onclick="banUser(' + u.id + ',\'' + escHtml(u.username) + '\')">Ban</button>' +
+        '<button class="tbl-btn danger" onclick="banUser(' + u.id + ')">Ban</button>' +
         (u.role !== 'admin'
-          ? '<button class="tbl-btn success" onclick="promoteUser(' + u.id + ',\'' + escHtml(u.username) + '\')">Admin</button>'
-          : '<button class="tbl-btn danger" onclick="demoteUser(' + u.id + ',\'' + escHtml(u.username) + '\')">Revogar</button>') +
+          ? '<button class="tbl-btn success" onclick="promoteUser(' + u.id + ')">Admin</button>'
+          : '<button class="tbl-btn danger" onclick="demoteUser(' + u.id + ')">Revogar</button>') +
       '</div></td>' +
     '</tr>';
   }).join('');
 }
 
-function banUser(id, name) {
+function banUser(id) {
+  var u = MOCK_USERS.find(function(u){return u.id===id;});
+  var name = u ? u.username : '';
   openConfirm('Banir o usuário "' + name + '"? Esta ação remove o acesso imediatamente.', function() {
-    addLog('🚫', 'Usuário <strong>' + name + '</strong> foi banido.');
+    addLog('🚫', 'Usuário <strong>' + escHtml(name) + '</strong> foi banido.');
     showToast('🚫 Usuário ' + name + ' banido (simulação)');
     var row = document.getElementById('user-row-' + id);
     if (row) row.style.opacity = '.4';
   });
 }
-function promoteUser(id, name) {
+function promoteUser(id) {
+  var u = MOCK_USERS.find(function(u){return u.id===id;});
+  var name = u ? u.username : '';
   openConfirm('Promover "' + name + '" a administrador?', function() {
-    addLog('⭐', 'Usuário <strong>' + name + '</strong> promovido a Admin.');
+    addLog('⭐', 'Usuário <strong>' + escHtml(name) + '</strong> promovido a Admin.');
     showToast('⭐ ' + name + ' é agora admin (simulação)');
-    var u = MOCK_USERS.find(function(u){return u.id===id;});
     if (u) { u.role = 'admin'; renderUsers(); }
   });
 }
-function demoteUser(id, name) {
+function demoteUser(id) {
+  var u = MOCK_USERS.find(function(u){return u.id===id;});
+  var name = u ? u.username : '';
   openConfirm('Revogar privilégios de admin de "' + name + '"?', function() {
-    addLog('👤', 'Privilégios de admin de <strong>' + name + '</strong> revogados.');
+    addLog('👤', 'Privilégios de admin de <strong>' + escHtml(name) + '</strong> revogados.');
     showToast('👤 Admin revogado (simulação)');
-    var u = MOCK_USERS.find(function(u){return u.id===id;});
     if (u) { u.role = 'user'; renderUsers(); }
   });
 }
@@ -880,15 +885,17 @@ function renderLevels() {
       '<td>' + (l.file_id ? '<span class="tbl-badge badge-user">✅ Sim</span>' : '<span class="tbl-badge badge-banned">⚠️ Não</span>') + '</td>' +
       '<td><div class="tbl-actions">' +
         '<a href="perfil_do_jogo.html?id=' + l.id + '" class="tbl-btn" target="_blank">Ver</a>' +
-        '<button class="tbl-btn danger" onclick="deleteLevel(' + l.id + ',\'' + escHtml(l.name) + '\')">Deletar</button>' +
+        '<button class="tbl-btn danger" onclick="deleteLevel(' + l.id + ')">Deletar</button>' +
       '</div></td>' +
     '</tr>';
   }).join('');
 }
 
-function deleteLevel(id, name) {
+function deleteLevel(id) {
+  var l = MOCK_LEVELS.find(function(l){return l.id===id;});
+  var name = l ? l.name : '';
   openConfirm('Deletar a fase "' + name + '"? Esta ação não pode ser desfeita.', function() {
-    addLog('🗑', 'Fase <strong>' + name + '</strong> deletada pelo admin.');
+    addLog('🗑', 'Fase <strong>' + escHtml(name) + '</strong> deletada pelo admin.');
     showToast('🗑 Fase deletada (simulação)');
     var row = document.getElementById('level-row-' + id);
     if (row) row.style.opacity = '.4';
@@ -911,7 +918,7 @@ function renderReports() {
           '</div>' +
           '<div class="tbl-actions" style="flex-direction:column;gap:6px;align-items:flex-end;">' +
             '<button class="tbl-btn success" onclick="resolveReport(' + r.id + ')">✓ Resolver</button>' +
-            '<button class="tbl-btn danger"  onclick="deleteReportedLevel(' + r.id + ',' + r.level_id + ',\'' + escHtml(r.level_name) + '\')">🗑 Deletar fase</button>' +
+            '<button class="tbl-btn danger"  onclick="deleteReportedLevel(' + r.id + ')">🗑 Deletar fase</button>' +
           '</div>' +
         '</div>';
       }).join('')
@@ -931,11 +938,12 @@ function resolveReport(id) {
   renderReports();
 }
 
-function deleteReportedLevel(reportId, levelId, levelName) {
+function deleteReportedLevel(reportId) {
+  var r = MOCK_REPORTS.find(function(r){return r.id===reportId;});
+  var levelName = r ? r.level_name : '';
   openConfirm('Deletar a fase "' + levelName + '" (referente a esta denúncia)?', function() {
-    var r = MOCK_REPORTS.find(function(r){return r.id===reportId;});
     if (r) r.status = 'closed';
-    addLog('🗑', 'Fase <strong>' + levelName + '</strong> deletada via denúncia #' + reportId);
+    addLog('🗑', 'Fase <strong>' + escHtml(levelName) + '</strong> deletada via denúncia #' + reportId);
     showToast('🗑 Fase deletada e denúncia fechada (simulação)');
     renderReports();
   });
@@ -1023,11 +1031,6 @@ function filterTable(tbodyId, searchId, col) {
   });
 }
 
-/* ── UTILS ── */
-function escHtml(s) {
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
 /* ── TOGGLE SETTINGS ── */
 document.getElementById('toggle-manut').addEventListener('change', function() {
   showToast(this.checked ? '⚠️ Modo manutenção ATIVADO (simulação)' : '✅ Modo manutenção desativado');
@@ -1040,8 +1043,6 @@ document.getElementById('toggle-upload').addEventListener('change', function() {
   showToast(this.checked ? '✅ Upload ativado' : '⚠️ Upload bloqueado (simulação)');
 });
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Enviar Level — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
   <script src="i18n.js"></script>
   <style>
     .upload-card {
@@ -168,6 +170,7 @@
   </style>
   <script src="config.js"></script>
   <script src="auth.js"></script>
+  <script src="util.js"></script>
 </head>
 <body>
 
@@ -287,7 +290,7 @@ function mostrarArquivo(file) {
     ? (file.size / (1024 * 1024)).toFixed(2) + ' MB'
     : (file.size / 1024).toFixed(1) + ' KB';
   document.getElementById('drop-texto').innerHTML =
-    '<span class="file-name">' + file.name + '</span>' +
+    '<span class="file-name">' + escHtml(file.name) + '</span>' +
     '<br><small>' + tamanhoStr + '</small>';
 }
 
@@ -338,7 +341,7 @@ function enviar() {
 
     if (xhr.status === 201 && dados.ok) {
       mostrarMsg('ok',
-        '✅ ' + t('entity.fase') + ' <strong>' + dados.level.name + '</strong> ' + t('upload.ok_msg')
+        '✅ ' + t('entity.fase') + ' <strong>' + escHtml(dados.level.name) + '</strong> ' + t('upload.ok_msg')
       );
       setTimeout(function() {
         window.location.href = 'perfil_do_jogo.html?id=' + dados.level.id;
@@ -376,8 +379,6 @@ function navSearch(e) {
   if (q) window.location.href = "levels.html?q=" + encodeURIComponent(q);
 }
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

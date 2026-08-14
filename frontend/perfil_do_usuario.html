@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Perfil — Pellizzola Brothers</title>
   <link rel="stylesheet" href="style.css">
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
   <script src="i18n.js"></script>
   <script src="config.js"></script>
   <script src="auth.js"></script>
+  <script src="util.js"></script>
   <style>
     .btn-red {
       background: #c0392b; color: #fff; border: none;
@@ -317,9 +320,11 @@ async function changePassword(oldPass, newPass) {
   } catch (_) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Erro de conexão.'; return false; }
 }
 
-function openDeleteModal(levelId, levelName) {
+function openDeleteModal(levelId, triggerBtn) {
   pendingDeleteId = levelId;
-  document.getElementById('delete-level-name').textContent = levelName;
+  const card   = triggerBtn.closest('.created-card');
+  const nameEl = card && card.querySelector('.created-card-name');
+  document.getElementById('delete-level-name').textContent = nameEl ? nameEl.textContent : '';
   const btn = document.getElementById('confirm-delete-btn');
   btn.disabled = false; btn.textContent = '🗑 Apagar';
   openModal('modal-delete');
@@ -395,8 +400,9 @@ async function loadProfile() {
     if (!resp.ok) throw new Error('server');
     u = await resp.json();
   } catch (_) {
-    u = { id:1, username:'xx_poste_xx', bio:'Viva Jesus', downloaded_levels:11, liked_levels:9,
-          levels:[{id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10},{id:2,name:'Meu Level Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9}] };
+    document.getElementById('main').innerHTML =
+      '<div class="empty-state">😕 Não foi possível carregar este perfil. Tente novamente mais tarde.</div>';
+    return;
   }
 
   document.title = u.username + ' — Pellizzola Brothers';
@@ -432,7 +438,7 @@ async function loadProfile() {
           '<div class="created-card-stats"><div>Downloads: ' + l.downloads + '</div><div>Curtidas: ' + l.likes + '</div></div>' +
         '</div>' +
       '</a>' +
-      (own ? '<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal(' + l.id + ',' + JSON.stringify(l.name) + ')">' + t('modal.apagar_btn') + '</button></div>' : '') +
+      (own ? '<div class="created-card-foot"><button class="btn-delete-level" onclick="openDeleteModal(' + l.id + ',this)">' + t('modal.apagar_btn') + '</button></div>' : '') +
     '</div>';
   }).join('');
 
@@ -458,10 +464,6 @@ async function loadProfile() {
       : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">' + t('perfil.nenhuma_fase') + '</div>') +
     (own ? renderLikedSection() : '') +
     (own ? renderDownloadHistory() : '');
-}
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function getFavCreators() { try { return JSON.parse(localStorage.getItem('pb_criadores_fav') || '[]'); } catch(e) { return []; } }
@@ -502,8 +504,6 @@ function navSearch(e) {
   if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
 }
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

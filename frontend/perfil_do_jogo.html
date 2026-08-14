@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
   <script src="config.js"></script>
   <script src="auth.js"></script>
+  <script src="util.js"></script>
   <style>
     .btn-report {
       background: none; border: 1px solid var(--border-light); color: var(--text-muted);
@@ -212,7 +213,8 @@ function navSearch(e) {
 }
 
 const getLevelId = function() { return parseInt(new URLSearchParams(location.search).get('id')) || 1; };
-let currentLevelId = null;
+let currentLevelId   = null;
+let currentLevelName = '';
 
 function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -231,12 +233,6 @@ function updateCommentCount() {
   var el = document.getElementById('comment-char-count');
   var input = document.getElementById('comment-input');
   if (el && input) el.textContent = input.value.length;
-}
-
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 async function submitReport() {
@@ -272,7 +268,8 @@ function openReportModal() {
   openModal('modal-report');
 }
 
-function shareLevel(name) {
+function shareLevel() {
+  var name = currentLevelName;
   var url = window.location.href;
   if (navigator.share) {
     navigator.share({ title: name + ' — Pellizzola Brothers', url }).catch(function() {});
@@ -356,10 +353,13 @@ async function loadLevel() {
     if (!resp.ok) throw new Error('server');
     level = await resp.json();
   } catch (_) {
-    level = { id:1, name:'Meu Nivel Bacana', description:'Bacanices Bananas', downloads:11, likes:10, author_id:1, author_name:'xx_poste_xx', file_id:null, similar:[], comments:[] };
+    document.getElementById('main').innerHTML =
+      '<div class="empty-state">😕 Não foi possível carregar esta fase. Tente novamente mais tarde.</div>';
+    return;
   }
 
   document.title = level.name + ' — Pellizzola Brothers';
+  currentLevelName = level.name;
   commentsData = level.comments || [];
 
   var alreadyLiked = false;
@@ -414,7 +414,7 @@ async function loadLevel() {
         '<div class="level-hero-actions">' +
           '<button class="btn btn-green" id="dl-btn" onclick="handleDownload(' + parseInt(level.id) + ',' + (level.file_id ? parseInt(level.file_id) : 'null') + ')">⬇ Download</button>' +
           '<button class="btn btn-outline" id="like-btn" style="' + likeBtnStyle + '"' + (!user ? ' disabled title="Faça login para curtir"' : '') + ' onclick="handleLike(' + parseInt(level.id) + ')">' + likeBtnText + '</button>' +
-          '<button class="btn-share" onclick="shareLevel(' + JSON.stringify(level.name) + ')">🔗 Compartilhar</button>' +
+          '<button class="btn-share" onclick="shareLevel()">🔗 Compartilhar</button>' +
           '<a href="perfil_do_usuario.html?id=' + parseInt(level.author_id) + '" class="btn btn-outline">👤 ' + escHtml(level.author_name) + '</a>' +
           '<button class="btn-report" onclick="openReportModal()">🚩 Denunciar</button>' +
         '</div>' +
@@ -511,8 +511,6 @@ async function handleLike(id) {
 
 loadLevel();
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

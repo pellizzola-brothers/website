@@ -11,6 +11,7 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="cache.js"></script>
+  <script src="util.js"></script>
 
   <style>
     /* ══════════════════════════════════════════
@@ -1104,7 +1105,7 @@ var onlineHTML = visiveisOnline.map(function(u) {
   return '<div class="online-user">' +
     '<div class="online-user-avatar">' + u.avatar + '</div>' +
     '<div>' +
-      '<div class="online-user-name">' + escapeHTML(u.name) + '</div>' +
+      '<div class="online-user-name">' + escHtml(u.name) + '</div>' +
       '<div class="online-user-status">' + u.status + '</div>' +
     '</div>' +
   '</div>';
@@ -1293,8 +1294,8 @@ function renderPost(post) {
       return '<div class="reply-item">' +
         '<div class="reply-avatar">' + (r.avatar || '👤') + '</div>' +
         '<div class="reply-body">' +
-          '<div class="reply-author">' + r.autor + '</div>' +
-          '<div class="reply-text">' + escapeHTML(r.texto) + '</div>' +
+          '<div class="reply-author">' + escHtml(r.autor) + '</div>' +
+          '<div class="reply-text">' + escHtml(r.texto) + '</div>' +
           '<div class="reply-time">' + tempoRelativo(r.ts) + '</div>' +
         '</div>' +
       '</div>';
@@ -1307,7 +1308,7 @@ function renderPost(post) {
       '<a href="perfil_do_jogo.html?id=' + post.levelRec.id + '" class="post-level-embed">' +
         '<div class="post-level-embed-icon">🎮</div>' +
         '<div class="post-level-embed-info">' +
-          '<div class="post-level-embed-name">' + escapeHTML(post.levelRec.name) + '</div>' +
+          '<div class="post-level-embed-name">' + escHtml(post.levelRec.name) + '</div>' +
           '<div class="post-level-embed-sub">Level recomendado</div>' +
           '<div class="post-level-embed-dl">⬇ ' + post.levelRec.downloads + '  ♥ ' + post.levelRec.likes + '</div>' +
         '</div>' +
@@ -1320,13 +1321,13 @@ function renderPost(post) {
       '<div class="post-avatar">' + (post.avatar || '👤') + '</div>' +
       '<div class="post-meta">' +
         '<div class="post-author-row">' +
-          '<a href="perfil_do_usuario.html?id=' + post.autorId + '" class="post-author">' + escapeHTML(post.autor) + '</a>' +
+          '<a href="perfil_do_usuario.html?id=' + post.autorId + '" class="post-author">' + escHtml(post.autor) + '</a>' +
           '<span class="post-badge badge-topic">' + (TOPICO_LABEL[post.topico] || post.topico) + '</span>' +
           '<span class="post-time">' + tempoRelativo(post.ts) + '</span>' +
         '</div>' +
       '</div>' +
     '</div>' +
-    '<div class="post-text">' + escapeHTML(post.texto) + '</div>' +
+    '<div class="post-text">' + escHtml(post.texto) + '</div>' +
     levelEmbed +
     '<div class="post-actions">' +
       '<button class="post-action-btn' + (jaCurtiu ? ' liked' : '') + '" onclick="curtirPost(\'' + post.id + '\', this)">' +
@@ -1522,7 +1523,7 @@ function carregarRanking(tipo) {
     return '<tr>' +
       '<td class="rank-pos">' + (i+1) + '</td>' +
       '<td><div class="rank-user-cell"><span style="font-size:20px">' + item.avatar + '</span> ' +
-        '<div><div>' + escapeHTML(item.nome) + '</div><div class="rank-badge">' + item.sub + '</div></div>' +
+        '<div><div>' + escHtml(item.nome) + '</div><div class="rank-badge">' + item.sub + '</div></div>' +
       '</div></td>' +
       '<td>' + item.score + '</td>' +
     '</tr>';
@@ -1542,7 +1543,7 @@ function carregarRanking(tipo) {
     var emoji = EMOJIS_L[(l.id-1) % EMOJIS_L.length];
     return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="topic-mini">' +
       '<div class="topic-mini-icon">' + emoji + '</div>' +
-      '<div class="topic-mini-name">' + escapeHTML(l.name) + '</div>' +
+      '<div class="topic-mini-name">' + escHtml(l.name) + '</div>' +
       '<div class="topic-mini-count">⬇ ' + l.downloads + '</div>' +
     '</a>';
   }).join('');
@@ -1557,7 +1558,7 @@ function carregarRanking(tipo) {
       var h2 = top3.map(function(l) {
         return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="topic-mini">' +
           '<div class="topic-mini-icon">' + EMOJIS_L[(l.id-1) % EMOJIS_L.length] + '</div>' +
-          '<div class="topic-mini-name">' + escapeHTML(l.name) + '</div>' +
+          '<div class="topic-mini-name">' + escHtml(l.name) + '</div>' +
           '<div class="topic-mini-count">⬇ ' + l.downloads + '</div>' +
         '</a>';
       }).join('');
@@ -1574,15 +1575,6 @@ function participarDesafio() {
   var pct = Math.min(Math.round(p / 20 * 100), 100);
   document.getElementById('desafio-bar').style.width = pct + '%';
   showToast('🎯 Você entrou no desafio! Boa sorte ' + usuario.username + '!');
-}
-
-/* ── Escape HTML ── */
-function escapeHTML(str) {
-  return String(str)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
 }
 
 /* ── Toast ── */
@@ -1629,7 +1621,7 @@ function showToast(msg) {
       return '<a href="perfil_do_usuario.html?id=' + c.id + '" class="fav-creator-item">' +
         '<div class="fav-creator-avatar">' + c.avatar + '</div>' +
         '<div class="fav-creator-info">' +
-          '<div class="fav-creator-name">' + escapeHTML(c.nome) + '</div>' +
+          '<div class="fav-creator-name">' + escHtml(c.nome) + '</div>' +
           '<div class="fav-creator-sub">🎮 ' + c.fases + ' fase' + (c.fases !== 1 ? 's' : '') + '</div>' +
         '</div>' +
         '<button class="btn-fav-mini' + (isFav ? ' favoritado' : '') + '" ' +
@@ -1685,8 +1677,6 @@ function navSearch(e) {
 /* ── Init ── */
 renderFeed();
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

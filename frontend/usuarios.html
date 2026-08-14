@@ -8,6 +8,7 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="cache.js"></script>
+  <script src="util.js"></script>
   <style>
     /* ── TABS ── */
     .tabs-wrap {
@@ -347,13 +348,6 @@ function getAvatarLocal(id) {
   return localStorage.getItem('pb_avatar_' + id) || avatarFor(id);
 }
 
-/* ════════ XSS ESCAPE ════════ */
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 /* ════════ FETCH ════════ */
 async function carregarUsuarios() {
   setProgress(20);
@@ -370,16 +364,14 @@ async function carregarUsuarios() {
     cacheSave('pb_usuarios_v2', todosUsuarios);
     setProgress(100);
   } catch(err) {
-    /* Fallback offline — NÃO salvo em cache (dados mockados) */
-    todosUsuarios = [
-      {id:1, username:'xx_poste_xx',    bio:'Viva Jesus',                     total_levels:2, downloaded_levels:11, liked_levels:9},
-      {id:2, username:'JacaboMassola',  bio:null,                             total_levels:1, downloaded_levels:0,  liked_levels:0},
-      {id:3, username:'BillyShears',    bio:'The one and only Billy Shears!', total_levels:2, downloaded_levels:0,  liked_levels:0},
-      {id:4, username:'PellizzolaFan',  bio:'Fã número 1!',                   total_levels:0, downloaded_levels:5,  liked_levels:3},
-      {id:5, username:'NintendoKing',   bio:'Mario forever',                  total_levels:1, downloaded_levels:8,  liked_levels:6},
-    ];
     setProgress(100);
-    showToast('⚠️ Exibindo dados offline');
+    showToast('⚠️ Não foi possível carregar os criadores');
+    document.getElementById('users-list').innerHTML = '';
+    var vazio = document.getElementById('empty-busca');
+    document.getElementById('empty-icon').textContent = '😕';
+    document.getElementById('empty-msg').textContent = 'Não foi possível carregar os criadores. Tente novamente mais tarde.';
+    vazio.style.display = '';
+    return;
   }
   filtrar();
 }
@@ -541,8 +533,6 @@ document.getElementById('buscaUser').addEventListener('keydown', function(e) {
 /* ════════ INIT ════════ */
 carregarUsuarios();
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>

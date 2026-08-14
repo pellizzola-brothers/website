@@ -11,6 +11,7 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="cache.js"></script>
+  <script src="util.js"></script>
   <style>
     .filtros-wrap {
       display: flex;
@@ -420,12 +421,6 @@ function setProgress(pct) {
   }
 }
 
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 /* ── FILTER STATE (sessionStorage) ── */
 var _filterStateKey = 'pb_levels_filter_state';
 
@@ -677,15 +672,13 @@ async function carregarNiveis() {
     cacheSave('pb_niveis_v2', todosLevels);
     setProgress(100);
   } catch(err) {
-    todosLevels = [
-      {id:1,name:'Meu Nivel Bacana',description:'Bacanices Bananas',downloads:11,likes:10,author_name:'xx_poste_xx',author_id:1,file_id:1},
-      {id:2,name:'Meu Nivel Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9,author_name:'xx_poste_xx',author_id:1,file_id:2},
-      {id:3,name:'A Extraordinaria Jornada de Henrique',description:'Um clássico!',downloads:0,likes:0,author_name:'BillyShears',author_id:3,file_id:null},
-      {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6,author_name:'BillyShears',author_id:3,file_id:null},
-      {id:5,name:'Eu Acompanho as Botas Douradas',description:'Bacanices',downloads:3,likes:2,author_name:'JacaboMassola',author_id:2,file_id:null},
-    ];
     setProgress(100);
     showToast(t('levels.offline'));
+    document.getElementById('levels-list').innerHTML = '';
+    var empty = document.getElementById('empty-state');
+    empty.textContent = '😕 ' + t('levels.offline');
+    empty.style.display = '';
+    return;
   }
   autorInit(todosLevels);
   // Restore persisted author selection (must run after autorInit sets _autorTodos)
@@ -940,8 +933,6 @@ function navSearch(e) {
   if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
 }
 </script>
-<script>
-(function(){var b=document.querySelector(".nav-brand");if(b){b.addEventListener("click",function(e){var n=parseInt(sessionStorage.getItem("pb_brand_clicks")||"0")+1;if(n>=9){sessionStorage.removeItem("pb_brand_clicks");e.preventDefault();window.location.href="creditos.html";}else{sessionStorage.setItem("pb_brand_clicks",n);}});}})();
-</script>
+<script src="nav.js"></script>
 </body>
 </html>
