@@ -8,6 +8,7 @@ Vanilla-JS frontend, Express/PostgreSQL backend, no build step.
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon%20%7C%20Railway-4169E1?logo=postgresql&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/Frontend-Vanilla%20JS-F7DF1E?logo=javascript&logoColor=black)
 ![i18n](https://img.shields.io/badge/i18n-PT--BR%20%2F%20EN-informational)
+![License](https://img.shields.io/badge/license-MIT-red)
 
 ## Table of Contents
 
