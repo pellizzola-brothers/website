@@ -151,4 +151,4 @@ Issues and PRs are welcome. Keep changes framework-free and dependency-light —
 
 ## License
 
-No license file is currently included in this repository — all rights reserved by default until one is added.
+Except where otherwise noted, this repository is licensed under the MIT license.
