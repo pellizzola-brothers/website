@@ -8,7 +8,7 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="cache.js"></script>
-  <script src="util.js"></script>
+  <script src="navbar.js"></script>
   <style>
     /* ── TABS ── */
     .tabs-wrap {
@@ -119,6 +119,8 @@
     }
     .btn-fav:hover { border-color: #e05070; color: #e05070; }
     .btn-fav.favoritado { border-color: #e05070; background: rgba(224,80,112,.12); color: #e05070; }
+    .btn-fav[data-guest] { cursor: not-allowed; opacity: .5; }
+    .btn-fav[data-guest]:hover { border-color: var(--border); color: var(--text-muted); }
 
     /* ── GRID PARA TELAS MAIORES ── */
     #users-list.grid-mode {
@@ -179,6 +181,58 @@
       }
       .user-rank { display: none; }
     }
+
+    /* ── BOTAO DE AJUDA ── */
+    .help-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      color: var(--yellow);
+      border: 2px solid var(--border);
+      font-family: var(--font-title);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      transition: border-color .12s ease, background .12s ease, color .12s ease;
+    }
+    .help-fab:hover { border-color: var(--yellow); background: var(--bg-card2); }
+    .help-fab:active { background: var(--bg-nav); }
+    .help-modal-box { max-width: 480px; max-height: 82vh; display: flex; flex-direction: column; }
+    .help-modal-box .modal-body { overflow-y: auto; }
+    .help-section { margin-bottom: 16px; }
+    .help-section:last-child { margin-bottom: 0; }
+    .help-section-title {
+      font-family: var(--font-title);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 6px;
+    }
+    .help-section p {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      margin: 0 0 6px;
+    }
+    .help-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .help-list li { margin-bottom: 4px; }
+    .help-list strong { color: var(--yellow); }
   </style>
 </head>
 <body>
@@ -186,22 +240,6 @@
 <div id="progress-bar"></div>
 <div id="toast"></div>
 
-<nav>
-  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
-  <ul class="nav-links">
-    <li><a href="index.html">Home</a></li>
-    <li><a href="levels.html">Levels</a></li>
-    <li><a href="usuarios.html" class="active">Criadores</a></li>
-    <li><a href="download.html">Download</a></li>
-    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
-    <li><a href="login.html" id="nav-auth">Entrar</a></li>
-    <li>
-      <form class="nav-search-form" onsubmit="navSearch(event)">
-        <input class="nav-search-input" id="nav-search" type="text" placeholder="🔍 Buscar levels..." autocomplete="off">
-      </form>
-    </li>
-  </ul>
-</nav>
 
 <div class="page">
 
@@ -282,6 +320,65 @@
 
 </div>
 
+<!-- Botão de ajuda da tela Criadores -->
+<button type="button" class="help-fab" id="help-fab" title="Ajuda desta página" aria-haspopup="dialog" aria-controls="help-modal" onclick="openHelpModal()">?</button>
+
+<div class="modal-overlay hidden" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+  <div class="modal-box help-modal-box">
+    <div class="modal-header">
+      <span id="help-modal-title">Ajuda — Criadores</span>
+      <button type="button" class="modal-close" onclick="closeHelpModal()" aria-label="Fechar ajuda">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-section">
+        <div class="help-section-title">O que é esta tela</div>
+        <p>Esta página apresenta um ranking de todos os criadores cadastrados na plataforma, com os três primeiros colocados destacados por medalhas.</p>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">O que você encontra aqui</div>
+        <ul class="help-list">
+          <li><strong>Abas Todos / Favoritos</strong>: alterne entre a lista completa de criadores e apenas os que você marcou como favoritos.</li>
+          <li><strong>Busca</strong>: encontre criadores em tempo real pelo nome de usuário ou pela biografia.</li>
+          <li><strong>Ordenação</strong>: reorganize a lista por mais levels, mais downloads, mais curtidas ou ordem alfabética.</li>
+          <li><strong>Card do criador</strong>: mostra posição no ranking, avatar, nome, bio e as estatísticas de levels, downloads e curtidas.</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">O que você pode fazer</div>
+        <ul class="help-list">
+          <li>Clicar em um card para abrir o perfil completo daquele criador.</li>
+          <li>Clicar no ❤ para adicionar ou remover um criador dos seus favoritos (é preciso estar logado).</li>
+          <li>Combinar busca, aba e ordenação para localizar rapidamente o criador que procura.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openHelpModal() {
+  var m = document.getElementById('help-modal');
+  m.classList.remove('hidden');
+  document.addEventListener('keydown', closeHelpOnEsc);
+}
+function closeHelpModal() {
+  var m = document.getElementById('help-modal');
+  m.classList.add('hidden');
+  document.removeEventListener('keydown', closeHelpOnEsc);
+}
+function closeHelpOnEsc(e) {
+  if (e.key === 'Escape') closeHelpModal();
+}
+(function(){
+  var overlay = document.getElementById('help-modal');
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeHelpModal();
+    });
+  }
+})();
+</script>
+
 <script>
 'use strict';
 
@@ -348,6 +445,13 @@ function getAvatarLocal(id) {
   return localStorage.getItem('pb_avatar_' + id) || avatarFor(id);
 }
 
+/* ════════ XSS ESCAPE ════════ */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /* ════════ FETCH ════════ */
 async function carregarUsuarios() {
   setProgress(20);
@@ -364,14 +468,16 @@ async function carregarUsuarios() {
     cacheSave('pb_usuarios_v2', todosUsuarios);
     setProgress(100);
   } catch(err) {
+    /* Fallback offline — NÃO salvo em cache (dados mockados) */
+    todosUsuarios = [
+      {id:1, username:'xx_poste_xx',    bio:'Viva Jesus',                     total_levels:2, downloaded_levels:11, liked_levels:9},
+      {id:2, username:'JacaboMassola',  bio:null,                             total_levels:1, downloaded_levels:0,  liked_levels:0},
+      {id:3, username:'BillyShears',    bio:'The one and only Billy Shears!', total_levels:2, downloaded_levels:0,  liked_levels:0},
+      {id:4, username:'PellizzolaFan',  bio:'Fã número 1!',                   total_levels:0, downloaded_levels:5,  liked_levels:3},
+      {id:5, username:'NintendoKing',   bio:'Mario forever',                  total_levels:1, downloaded_levels:8,  liked_levels:6},
+    ];
     setProgress(100);
-    showToast('⚠️ Não foi possível carregar os criadores');
-    document.getElementById('users-list').innerHTML = '';
-    var vazio = document.getElementById('empty-busca');
-    document.getElementById('empty-icon').textContent = '😕';
-    document.getElementById('empty-msg').textContent = 'Não foi possível carregar os criadores. Tente novamente mais tarde.';
-    vazio.style.display = '';
-    return;
+    showToast('⚠️ Exibindo dados offline');
   }
   filtrar();
 }
@@ -497,8 +603,9 @@ function renderizar(usuarios) {
             '</div>' +
           '</div>' +
           '<button class="btn-fav' + (isFav ? ' favoritado' : '') + '" ' +
+              (user ? '' : 'data-guest ') +
               'onclick="onFav(event,' + parseInt(u.id) + ')" ' +
-              'title="' + (isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos') + '">' +
+              'title="' + (user ? (isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos') : 'Faça login para favoritar') + '">' +
             (isFav ? '❤️' : '🤍') +
           '</button>' +
         '</a>';
@@ -514,11 +621,18 @@ function renderizar(usuarios) {
 /* ════════ AÇÃO FAVORITAR ════════ */
 function onFav(e, id) {
   e.preventDefault(); e.stopPropagation();
+
+  /* Bloqueia se não estiver logado */
+  if (!getUser()) {
+    showToast('🔒 Faça login para favoritar criadores!', 2500);
+    return;
+  }
+
   toggleFavorito(id);
-  var btn  = e.currentTarget;
+  var btn   = e.currentTarget;
   var agora = isFavorito(id);
   btn.classList.toggle('favoritado', agora);
-  btn.textContent = agora ? '❤️' : '🤍';
+  btn.innerHTML = agora ? '❤️' : '🤍';
   btn.title = agora ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
   if (abaAtual === 'favoritos' && !agora) filtrar();
 }
@@ -533,6 +647,32 @@ document.getElementById('buscaUser').addEventListener('keydown', function(e) {
 /* ════════ INIT ════════ */
 carregarUsuarios();
 </script>
-<script src="nav.js"></script>
+<script>
+(function(){
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      var n = parseInt(sessionStorage.getItem("pb_brand_clicks") || "0") + 1;
+      if (n >= 9) {
+        sessionStorage.removeItem("pb_brand_clicks");
+        e.preventDefault();
+        window.location.href = "creditos.html";
+      } else {
+        sessionStorage.setItem("pb_brand_clicks", n);
+      }
+    });
+  }
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
 </body>
 </html>

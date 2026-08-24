@@ -249,13 +249,54 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: Informações (Login / Cadastro)
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-info">
+  <div class="modal-box" style="max-width:420px;">
+
+    <div class="modal-header">
+      <span data-i18n="info.titulo">ℹ️ Como funciona esta página</span>
+      <button class="modal-close" onclick="closeInfo()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="recovery-step active" id="info-content-login">
+        <p class="step-desc" style="margin-bottom:12px;" data-i18n="info.login_intro">Nesta aba você entra com uma conta que já existe:</p>
+        <ul class="info-list">
+          <li data-i18n="info.login_item1"><strong>Usuário e senha</strong> — digite os dados da sua conta e clique em Entrar.</li>
+          <li data-i18n="info.login_item2"><strong>Esqueceu a senha?</strong> — use o link abaixo do campo de senha para recuperar o acesso em 3 etapas (usuário, código, nova senha).</li>
+          <li data-i18n="info.login_item3">Após entrar, você é levado direto ao seu perfil.</li>
+        </ul>
+      </div>
+      <div class="recovery-step" id="info-content-register">
+        <p class="step-desc" style="margin-bottom:12px;" data-i18n="info.register_intro">Nesta aba você cria uma conta nova:</p>
+        <ul class="info-list">
+          <li data-i18n="info.register_item1"><strong>Usuário</strong> — escolha um nome sem espaços, será o seu identificador de login.</li>
+          <li data-i18n="info.register_item2"><strong>Bio</strong> — opcional, uma frase curta sobre você exibida no seu perfil.</li>
+          <li data-i18n="info.register_item3"><strong>Senha</strong> — precisa ter mais de 7 caracteres, ao menos uma letra maiúscula, um caractere especial e não pode conter o seu usuário. O medidor abaixo do campo mostra em tempo real o que ainda falta.</li>
+          <li data-i18n="info.register_item4">Depois de cadastrado, você já entra automaticamente na sua conta.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-green btn-sm" onclick="closeInfo()" data-i18n="info.btn_entendi">Entendi</button>
+    </div>
+
+  </div>
+</div>
+
 
 <!-- ══════════════════════════════════════════════════════════
      PÁGINA DE LOGIN / CADASTRO
 ══════════════════════════════════════════════════════════ -->
 <div class="login-page">
   <div class="login-box">
-    <div class="login-header">❖ Pellizzola Brothers</div>
+    <div class="login-header">
+      <span>❖ Pellizzola Brothers</span>
+      <button class="info-btn" onclick="openInfo()" title="O que posso fazer aqui?" data-i18n-title="login.info_tooltip">?</button>
+    </div>
     <div class="login-body">
       <div class="tabs">
         <button class="tab active" onclick="switchTab('login',this)" data-i18n="login.tab_login">Login</button>
@@ -633,7 +674,31 @@ function switchTab(name, el) {
   document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
   el.classList.add('active');
   document.getElementById('panel-' + name).classList.add('active');
+  updateInfoContent(name);
 }
+
+/* ══════════════════════════════════════════════════════════
+   MODAL DE INFORMAÇÕES (Login / Cadastro)
+══════════════════════════════════════════════════════════ */
+function updateInfoContent(name) {
+  document.getElementById('info-content-login').classList.toggle('active', name === 'login');
+  document.getElementById('info-content-register').classList.toggle('active', name === 'register');
+}
+
+function openInfo() {
+  const activePanel = document.querySelector('.panel.active');
+  const name = activePanel && activePanel.id === 'panel-register' ? 'register' : 'login';
+  updateInfoContent(name);
+  document.getElementById('modal-info').classList.remove('hidden');
+}
+
+function closeInfo() {
+  document.getElementById('modal-info').classList.add('hidden');
+}
+
+document.getElementById('modal-info').addEventListener('click', function(e) {
+  if (e.target === this) closeInfo();
+});
 
 function showMsg(id, text, ok) {
   const el = document.getElementById(id);

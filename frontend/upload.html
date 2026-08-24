@@ -167,6 +167,58 @@
     .aviso-login a {
       color: var(--yellow);
     }
+
+    /* ── BOTAO DE AJUDA ── */
+    .help-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      color: var(--yellow);
+      border: 2px solid var(--border);
+      font-family: var(--font-title);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      transition: border-color .12s ease, background .12s ease, color .12s ease;
+    }
+    .help-fab:hover { border-color: var(--yellow); background: var(--bg-card2); }
+    .help-fab:active { background: var(--bg-nav); }
+    .help-modal-box { max-width: 480px; max-height: 82vh; display: flex; flex-direction: column; }
+    .help-modal-box .modal-body { overflow-y: auto; }
+    .help-section { margin-bottom: 16px; }
+    .help-section:last-child { margin-bottom: 0; }
+    .help-section-title {
+      font-family: var(--font-title);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 6px;
+    }
+    .help-section p {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      margin: 0 0 6px;
+    }
+    .help-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .help-list li { margin-bottom: 4px; }
+    .help-list strong { color: var(--yellow); }
   </style>
   <script src="config.js"></script>
   <script src="auth.js"></script>
@@ -236,6 +288,65 @@
     <div class="msg" id="msg"></div>
   </div>
 </div>
+
+<!-- Botão de ajuda da tela Enviar Fase -->
+<button type="button" class="help-fab" id="help-fab" title="Ajuda desta página" aria-haspopup="dialog" aria-controls="help-modal" onclick="openHelpModal()">?</button>
+
+<div class="modal-overlay hidden" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+  <div class="modal-box help-modal-box">
+    <div class="modal-header">
+      <span id="help-modal-title">Ajuda — Enviar Fase</span>
+      <button type="button" class="modal-close" onclick="closeHelpModal()" aria-label="Fechar ajuda">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="help-section">
+        <div class="help-section-title">O que é esta tela</div>
+        <p>Esta página permite que você publique uma nova fase na plataforma, enviando o arquivo e as informações dela.</p>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">O que você encontra aqui</div>
+        <ul class="help-list">
+          <li><strong>Nome da fase</strong>: título obrigatório, com no mínimo 3 caracteres.</li>
+          <li><strong>Descrição</strong>: campo opcional para contar mais sobre a fase.</li>
+          <li><strong>Área de arquivo</strong>: local para selecionar ou arrastar o arquivo da fase (até 10 MB).</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">O que você pode fazer</div>
+        <ul class="help-list">
+          <li>Clicar ou arrastar um arquivo para a área de upload.</li>
+          <li>Preencher nome e, se quiser, uma descrição da fase.</li>
+          <li>Clicar em <strong>Enviar Fase</strong> para publicá-la; você será redirecionado ao perfil da fase quando o envio for concluído.</li>
+          <li>É preciso estar logado para enviar uma fase.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openHelpModal() {
+  var m = document.getElementById('help-modal');
+  m.classList.remove('hidden');
+  document.addEventListener('keydown', closeHelpOnEsc);
+}
+function closeHelpModal() {
+  var m = document.getElementById('help-modal');
+  m.classList.add('hidden');
+  document.removeEventListener('keydown', closeHelpOnEsc);
+}
+function closeHelpOnEsc(e) {
+  if (e.key === 'Escape') closeHelpModal();
+}
+(function(){
+  var overlay = document.getElementById('help-modal');
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeHelpModal();
+    });
+  }
+})();
+</script>
 
 <script>
 

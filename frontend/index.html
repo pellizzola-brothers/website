@@ -230,7 +230,58 @@
       .featured-big-thumb { height: 120px; border-right: none; border-bottom: 2px solid var(--border); }
       .course-grid { grid-template-columns: repeat(2, 1fr); }
     }
-  </style>
+    /* BOTAO DE AJUDA */
+    .help-fab {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      color: var(--yellow);
+      border: 2px solid var(--border);
+      font-family: var(--font-title);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 500;
+      transition: border-color .12s ease, background .12s ease, color .12s ease;
+    }
+    .help-fab:hover { border-color: var(--yellow); background: var(--bg-card2); }
+    .help-fab:active { background: var(--bg-nav); }
+    .help-modal-box { max-width: 480px; max-height: 82vh; display: flex; flex-direction: column; }
+    .help-modal-box .modal-body { overflow-y: auto; }
+    .help-section { margin-bottom: 16px; }
+    .help-section:last-child { margin-bottom: 0; }
+    .help-section-title {
+      font-family: var(--font-title);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 6px;
+    }
+    .help-section p {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      margin: 0 0 6px;
+    }
+    .help-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+        .help-list li { margin-bottom: 4px; }
+    .help-list strong { color: var(--yellow); }
+    </style>
   <script src="i18n/pt_BR.js"></script>
   <script src="i18n/en.js"></script>
   <script src="i18n.js"></script>
@@ -256,6 +307,15 @@
     </li>
   </ul>
 </nav>
+  </style>
+  <script src="i18n/pt_BR.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="i18n.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="navbar.js"></script>
+</head>
+<body>
 
 <div class="page">
   <div class="home-wrap">
@@ -279,7 +339,7 @@
         </div>
       </div>
 
-      <div class="course-world-title" data-i18n="home.fases_recentes">Fases Recentes</div>
+      <div class="course-world-title" data-i18n="home.levels_recentes">Levels Recentes</div>
       <div class="course-grid" id="course-grid">
         <div class="course-card"><div class="course-card-thumb skeleton" style="height:72px;"></div><div class="course-card-body"><div class="skeleton" style="height:12px;width:80%;margin-bottom:5px;"></div><div class="skeleton" style="height:10px;width:55%;"></div></div></div>
         <div class="course-card"><div class="course-card-thumb skeleton" style="height:72px;"></div><div class="course-card-body"><div class="skeleton" style="height:12px;width:65%;margin-bottom:5px;"></div><div class="skeleton" style="height:10px;width:45%;"></div></div></div>
@@ -302,8 +362,66 @@
     </div>
 
   </div>
+
+  <!-- Botão de ajuda da tela Home -->
+  <button type="button" class="help-fab" id="help-fab" title="Ajuda desta página" aria-haspopup="dialog" aria-controls="help-modal" onclick="openHelpModal()">?</button>
+
+  <div class="modal-overlay hidden" id="help-modal" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
+    <div class="modal-box help-modal-box">
+      <div class="modal-header">
+        <span id="help-modal-title">Ajuda — Página Inicial</span>
+        <button type="button" class="modal-close" onclick="closeHelpModal()" aria-label="Fechar ajuda">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="help-section">
+          <div class="help-section-title">O que é esta tela</div>
+          <p>Esta é a Home do Pellizzola Brothers, a porta de entrada do ecossistema. Ela reúne, em um só lugar, o melhor conteúdo criado pela comunidade para você começar a explorar.</p>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">O que você encontra aqui</div>
+          <ul class="help-list">
+            <li><strong>Saudação</strong>: cumprimenta você pelo nome se estiver logado, ou como visitante caso contrário.</li>
+            <li><strong>Level em destaque</strong>: mostra o level em evidência do momento, com descrição, número de downloads e curtidas.</li>
+            <li><strong>Levels recentes</strong>: uma grade com os levels mais novos publicados pela comunidade, com autor, downloads e curtidas de cada um.</li>
+            <li><strong>Criador em destaque</strong>: no painel lateral, exibe um criador da comunidade com sua bio, estatísticas e alguns dos levels que ele publicou.</li>
+          </ul>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">O que você pode fazer</div>
+          <ul class="help-list">
+            <li>Clicar em <strong>Download</strong> no level em destaque para baixá-lo e jogar.</li>
+            <li>Clicar em qualquer card da grade de levels recentes para abrir o perfil completo daquele level.</li>
+            <li>Clicar em <strong>Ver perfil</strong> no card do criador para conhecer mais sobre ele e seus levels.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
+<script>
+function openHelpModal() {
+  var m = document.getElementById('help-modal');
+  m.classList.remove('hidden');
+  document.addEventListener('keydown', closeHelpOnEsc);
+}
+function closeHelpModal() {
+  var m = document.getElementById('help-modal');
+  m.classList.add('hidden');
+  document.removeEventListener('keydown', closeHelpOnEsc);
+}
+function closeHelpOnEsc(e) {
+  if (e.key === 'Escape') closeHelpModal();
+}
+(function(){
+  var overlay = document.getElementById('help-modal');
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closeHelpModal();
+    });
+  }
+})();
+</script>
 <script>
 const EMOJIS = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
 const emojiFor = function(id) { return EMOJIS[(id - 1) % EMOJIS.length]; };
@@ -318,9 +436,6 @@ i18nReady.then(function() {
   const user = getUser();
   if (user) {
     document.getElementById('greeting').textContent = getGreeting(user.username.toUpperCase());
-    document.getElementById('nav-auth').textContent = user.username.toUpperCase();
-    document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
-    document.getElementById('nav-auth').removeAttribute('data-i18n');
   } else {
     document.getElementById('greeting').textContent = getGreeting(t('home.visitante'));
   }
@@ -337,11 +452,15 @@ async function loadHome() {
     ]);
     creator = await fetch(API + '/users/' + featured.author_id).then(function(r){ if(!r.ok) throw new Error('Falha creator'); return r.json(); });
   } catch(e) {
-    document.getElementById('featured-big-wrap').innerHTML =
-      '<div class="empty-state">😕 ' + t('levels.offline') + '</div>';
-    document.getElementById('course-grid').innerHTML = '';
-    document.getElementById('creator-card').innerHTML = '';
-    return;
+    levels   = [
+      {id:1,name:'Meu Level Bacana',description:'Bacanices Bananas',downloads:11,likes:10,author_name:'xx_poste_xx'},
+      {id:2,name:'Meu Level Bacana 2',description:'Os dentes de Berenice',downloads:11,likes:9,author_name:'xx_poste_xx'},
+      {id:3,name:'A Extraordinaria Jornada de Henrique',description:'Um clássico!',downloads:0,likes:0,author_name:'BillyShears'},
+      {id:4,name:'Revolver',description:'The one and only Billy Shears!',downloads:8,likes:6,author_name:'BillyShears'},
+      {id:5,name:'Eu Acompanho as Botas Douradas',description:'Bacanices',downloads:3,likes:2,author_name:'JacaboMassola'},
+    ];
+    featured = levels[0];
+    creator  = {id:1, username:'xx_poste_xx', bio:'Viva Jesus', downloaded_levels:11, liked_levels:9, levels:[levels[0],levels[1]]};
   }
 
   document.getElementById('featured-big-wrap').innerHTML =
@@ -349,11 +468,11 @@ async function loadHome() {
       '<div class="featured-big-thumb">' + emojiFor(featured.id) + '</div>' +
       '<div class="featured-big-body">' +
         '<div class="featured-big-badge">' + t('home.destaque_badge') + '</div>' +
-        '<div class="featured-big-name">' + escHtml(featured.name) + '</div>' +
-        '<div class="featured-big-desc">' + (featured.description ? '"' + escHtml(featured.description) + '"' : '') + '</div>' +
+        '<div class="featured-big-name">' + featured.name + '</div>' +
+        '<div class="featured-big-desc">' + (featured.description ? '"' + featured.description + '"' : '') + '</div>' +
         '<div class="featured-big-stats">' +
           '<div class="featured-big-stat">⬇ Downloads: <strong>' + featured.downloads + '</strong></div>' +
-          '<div class="featured-big-stat">♥ ' + t('perfil.curtidas').replace('Fases c','C').replace('Liked l','L') + ': <strong>' + featured.likes + '</strong></div>' +
+          '<div class="featured-big-stat">♥ ' + t('perfil.curtidas').replace('Levels c','C').replace('Liked l','L') + ': <strong>' + featured.likes + '</strong></div>' +
         '</div>' +
         '<div>' +
           '<a href="perfil_do_jogo.html?id=' + featured.id + '" class="btn btn-green btn-sm">Download</a>' +
@@ -369,8 +488,8 @@ async function loadHome() {
         emojiFor(l.id) +
       '</div>' +
       '<div class="course-card-body">' +
-        '<div class="course-card-name">' + escHtml(l.name) + '</div>' +
-        '<div class="course-card-author">' + t('levels.por') + ' ' + escHtml(l.author_name) + '</div>' +
+        '<div class="course-card-name">' + l.name + '</div>' +
+        '<div class="course-card-author">' + t('levels.por') + ' ' + l.author_name + '</div>' +
       '</div>' +
       '<div class="course-card-footer">' +
         '<span>⬇ ' + l.downloads + '</span>' +
@@ -383,7 +502,7 @@ async function loadHome() {
   var crLevels = (creator.levels || []).slice(0, 3).map(function(l) {
     return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="creator-level-row">' +
       '<div class="creator-level-icon">' + emojiFor(l.id) + '</div>' +
-      '<div class="creator-level-name">' + escHtml(l.name) + '</div>' +
+      '<div class="creator-level-name">' + l.name + '</div>' +
       '<div class="creator-level-dl">⬇ ' + (l.downloads || 0) + '</div>' +
     '</a>';
   }).join('');
@@ -392,16 +511,16 @@ async function loadHome() {
     '<div class="creator-card-header">' + t('home.criador_destaque') + '</div>' +
     '<div class="creator-card-body">' +
       '<div class="creator-avatar">👤</div>' +
-      '<div class="creator-name">' + escHtml(creator.username) + '</div>' +
-      '<div class="creator-bio">' + (creator.bio ? '"' + escHtml(creator.bio) + '"' : '') + '</div>' +
+      '<div class="creator-name">' + creator.username + '</div>' +
+      '<div class="creator-bio">' + (creator.bio ? '"' + creator.bio + '"' : '') + '</div>' +
       '<div class="creator-stats-row">' +
-        '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels||[]).length + '</span><span class="creator-stat-lbl">' + t('home.fases_criadas') + '</span></div>' +
+        '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels||[]).length + '</span><span class="creator-stat-lbl">' + t('home.levels_criadas') + '</span></div>' +
         '<div class="creator-stat"><span class="creator-stat-val">' + creator.downloaded_levels + '</span><span class="creator-stat-lbl">Plays</span></div>' +
         '<div class="creator-stat"><span class="creator-stat-val">' + creator.liked_levels + '</span><span class="creator-stat-lbl">Likes</span></div>' +
       '</div>' +
       '<a href="perfil_do_usuario.html?id=' + creator.id + '" class="btn btn-outline btn-sm" style="width:100%;text-align:center;">' + t('home.ver_perfil') + '</a>' +
     '</div>' +
-    (crLevels ? '<div class="creator-levels-title">' + t('perfil.fases_criadas') + '</div>' + crLevels : '');
+    (crLevels ? '<div class="creator-levels-title">' + t('perfil.levels_criadas') + '</div>' + crLevels : '');
 }
 
 /* loadHome() é chamado dentro de i18nReady.then() acima */
@@ -412,6 +531,28 @@ function navSearch(e) {
   if (q) window.location.href = 'levels.html?q=' + encodeURIComponent(q);
 }
 </script>
-<script src="nav.js"></script>
+<script>
+(function(){
+  // Na home: 1 clique no brand vai direto para créditos
+  var b = document.querySelector(".nav-brand");
+  if (b) {
+    b.addEventListener("click", function(e) {
+      e.preventDefault();
+      window.location.href = "creditos.html";
+    });
+  }
+  // Konami code ainda abre admin
+  var seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  var idx = 0;
+  document.addEventListener("keydown", function(e) {
+    if (e.key === seq[idx]) {
+      idx++;
+      if (idx === seq.length) { idx = 0; window.location.href = "admin.html"; }
+    } else {
+      idx = (e.key === seq[0]) ? 1 : 0;
+    }
+  });
+})();
+</script>
 </body>
 </html>
