@@ -385,11 +385,120 @@
 </div>
 
 
+<!-- ══════════════════════════════════════════════════════════
+     POPUP: CAPTCHA — texto distorcido, mini modal (não é tela cheia)
+══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="modal-captcha">
+  <div class="modal-box" style="max-width:300px;">
+    <div class="modal-header">
+      <span>🔒 Verificação rápida</span>
+      <button class="modal-close" onclick="closeCaptchaModal()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center;">
+      <div class="step-desc" style="margin-bottom:10px;">Digite as letras/números que aparecem na imagem.</div>
+      <div id="captcha-img-wrap" style="display:flex;justify-content:center;margin-bottom:10px;">
+        <img id="captcha-img" alt="Captcha" style="border-radius:var(--radius);border:2px solid var(--border);">
+      </div>
+      <button type="button" class="resend-link" onclick="reloadCaptchaImage()" style="margin-bottom:10px;">🔄 Gerar outra imagem</button>
+      <input class="form-input" id="captcha-ans-input" type="text" autocomplete="off"
+             placeholder="O que você vê na imagem" style="text-align:center;text-transform:uppercase;"
+             onkeydown="if(event.key==='Enter') confirmCaptcha()">
+      <div id="captcha-modal-msg" class="status-msg" style="display:none;margin-top:8px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline btn-sm" onclick="closeCaptchaModal()">Cancelar</button>
+      <button class="btn btn-green btn-sm" onclick="confirmCaptcha()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+
 <script>
 'use strict';
 
 const existing = getUser();
 if (existing) window.location.href = 'perfil_do_usuario.html?id=' + existing.id;
+
+/* ══════════════════════════════════════════════════════════
+   CAPTCHA — texto distorcido, resolvido num popup pequeno (não tela cheia)
+══════════════════════════════════════════════════════════ */
+let loginLockTimer = null;
+let pendingLogin    = null; // { username, password } aguardando o captcha
+let pendingRegister = null; // { username, bio, password } aguardando o captcha
+let captchaToken     = null;
+let captchaTargetFn  = null; // função chamada com (token, answer) ao confirmar
+
+async function fetchCaptcha() {
+  const res  = await fetch(API + '/auth/captcha');
+  return res.json(); // { image, token }
+}
+
+async function reloadCaptchaImage() {
+  const img = document.getElementById('captcha-img');
+  img.src = '';
+  document.getElementById('captcha-ans-input').value = '';
+  document.getElementById('captcha-modal-msg').style.display = 'none';
+  try {
+    const data = await fetchCaptcha();
+    captchaToken = data.token;
+    img.src = data.image;
+  } catch (e) {
+    document.getElementById('captcha-modal-msg').className = 'status-msg status-err';
+    document.getElementById('captcha-modal-msg').textContent = 'Erro ao carregar. Toque em 🔄 para tentar de novo.';
+    document.getElementById('captcha-modal-msg').style.display = '';
+  }
+}
+
+async function openCaptchaModal(onConfirm) {
+  captchaTargetFn = onConfirm;
+  document.getElementById('modal-captcha').classList.remove('hidden');
+  await reloadCaptchaImage();
+  setTimeout(function() { document.getElementById('captcha-ans-input').focus(); }, 100);
+}
+
+function closeCaptchaModal() {
+  document.getElementById('modal-captcha').classList.add('hidden');
+}
+
+async function confirmCaptcha() {
+  const ans = document.getElementById('captcha-ans-input').value.trim();
+  if (!ans) {
+    document.getElementById('captcha-modal-msg').className = 'status-msg status-err';
+    document.getElementById('captcha-modal-msg').textContent = 'Digite o que você vê na imagem.';
+    document.getElementById('captcha-modal-msg').style.display = '';
+    return;
+  }
+  const token = captchaToken;
+  const fn = captchaTargetFn;
+  closeCaptchaModal();
+  if (fn) await fn(token, ans);
+}
+
+function fmtRetryAfter(seconds) {
+  if (seconds < 60) return seconds + 's';
+  if (seconds < 3600) return Math.ceil(seconds / 60) + ' min';
+  return (seconds / 3600).toFixed(1).replace('.0', '') + 'h';
+}
+
+function startLoginLockCountdown(seconds) {
+  clearInterval(loginLockTimer);
+  const loginBtn = document.querySelector('#panel-login .btn-green');
+  let remaining = seconds;
+  function tick() {
+    if (remaining <= 0) {
+      clearInterval(loginLockTimer);
+      loginBtn.disabled = false;
+      loginBtn.textContent = t('login.btn_entrar') || 'Entrar';
+      showMsg('login-msg', 'Você já pode tentar de novo.', true);
+      return;
+    }
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Aguarde ' + fmtRetryAfter(remaining) + '...';
+    remaining--;
+  }
+  tick();
+  loginLockTimer = setInterval(tick, 1000);
+}
 
 /* ══════════════════════════════════════════════════════════
    RECOVERY STATE
@@ -650,6 +759,11 @@ document.getElementById('modal-recovery').addEventListener('click', function(e) 
   if (e.target === this) closeRecovery();
 });
 
+document.getElementById('modal-captcha').addEventListener('click', function(e) {
+  if (e.target === this) closeCaptchaModal();
+});
+
+
 
 /* ══════════════════════════════════════════════════════════
    LOGIN
@@ -711,13 +825,34 @@ async function doLogin() {
   const password = document.getElementById('login-pass').value;
   if (!username || !password) { showMsg('login-msg', 'Preencha todos os campos.', false); return; }
   if (/\s/.test(username)) { showMsg('login-msg', 'O nome de usuário não pode ter espaços.', false); return; }
+
+  pendingLogin = { username, password };
+  await submitLogin(null, null);
+}
+
+async function submitLogin(captcha_token, captcha_answer) {
+  const body = Object.assign({}, pendingLogin);
+  if (captcha_token) { body.captcha_token = captcha_token; body.captcha_answer = captcha_answer; }
+
   try {
     const res  = await fetch(API + '/auth/login', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify(body)
     });
     const data = await res.json();
-    if (!res.ok) { showMsg('login-msg', data.error, false); return; }
+
+    if (!res.ok) {
+      showMsg('login-msg', data.error, false);
+      if (data.locked && data.retry_after) {
+        startLoginLockCountdown(data.retry_after);
+      } else if (data.requires_captcha) {
+        openCaptchaModal(submitLogin);
+      }
+      return;
+    }
+
+    clearInterval(loginLockTimer);
+    pendingLogin = null;
     saveSession(data.user, data.token);
     showMsg('login-msg', t('login.ok_login'), true);
     setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
@@ -821,13 +956,24 @@ async function doRegister() {
   if (!/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(password)) { showMsg('reg-msg', 'A senha deve ter pelo menos um caractere especial (!@#$%...).', false); return; }
   if (password.toLowerCase().includes(username.toLowerCase())) { showMsg('reg-msg', 'A senha não pode conter o nome de usuário.', false); return; }
   if (password !== pass2) { showMsg('reg-msg', 'As senhas não coincidem.', false); return; }
+
+  pendingRegister = { username, bio, password };
+  openCaptchaModal(submitRegister);
+}
+
+async function submitRegister(captcha_token, captcha_answer) {
   try {
     const res  = await fetch(API + '/auth/register', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, bio, password })
+      body: JSON.stringify(Object.assign({}, pendingRegister, { captcha_token, captcha_answer }))
     });
     const data = await res.json();
-    if (!res.ok) { showMsg('reg-msg', data.error, false); return; }
+    if (!res.ok) {
+      showMsg('reg-msg', data.error, false);
+      if (data.requires_captcha) openCaptchaModal(submitRegister);
+      return;
+    }
+    pendingRegister = null;
     saveSession(data.user, data.token);
     showMsg('reg-msg', t('login.ok_cadastro'), true);
     setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);

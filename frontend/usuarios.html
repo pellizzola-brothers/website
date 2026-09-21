@@ -8,7 +8,6 @@
   <script src="config.js"></script>
   <script src="auth.js"></script>
   <script src="cache.js"></script>
-  <script src="navbar.js"></script>
   <style>
     /* ── TABS ── */
     .tabs-wrap {
@@ -236,6 +235,23 @@
   </style>
 </head>
 <body>
+
+<nav>
+  <a href="index.html" class="nav-brand">🎮 Pellizzola Brothers</a>
+  <ul class="nav-links">
+    <li><a href="index.html" data-i18n="nav.home">Home</a></li>
+    <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
+    <li><a href="usuarios.html" class="active" data-i18n="nav.criadores">Criadores</a></li>
+    <li><a href="download.html" data-i18n="nav.download">Download</a></li>
+    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
+    <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
+    <li>
+      <form class="nav-search-form" onsubmit="navSearch(event)">
+        <input class="nav-search-input" id="nav-search" type="text" data-i18n-ph="nav.buscar" placeholder="🔍 Buscar fases..." autocomplete="off">
+      </form>
+    </li>
+  </ul>
+</nav>
 
 <div id="progress-bar"></div>
 <div id="toast"></div>

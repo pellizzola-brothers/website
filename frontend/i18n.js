@@ -38,13 +38,8 @@
     _resolveReady = resolve;
   });
 
-  /* ── Detecta idioma salvo ou padrão ── */
+  /* ── Idioma fixo em PT-BR — sem seletor, sem autodetecção pelo navegador ── */
   function detectLang() {
-    var saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && SUPPORTED.indexOf(saved) !== -1) return saved;
-    var browser = (navigator.language || '').replace('-', '_');
-    if (browser.indexOf('pt') !== -1) return 'pt_BR';
-    if (browser.indexOf('en') !== -1) return 'en';
     return DEFAULT_LANG;
   }
 
@@ -121,46 +116,10 @@
     });
   }
 
-  /* ── Renderiza/atualiza o seletor de idioma na nav ── */
+  /* ── Seletor de idioma na nav: desativado — site é PT-BR apenas ── */
   function renderLangSelector() {
-    var nav = document.querySelector('nav ul.nav-links');
-    if (!nav) return;
-
     var existing = document.getElementById('lang-selector-li');
-    if (existing) {
-      var btn = document.getElementById('lang-btn');
-      if (btn) btn.textContent = _lang === 'en' ? '\ud83c\udde7\ud83c\uddf7 PT' : '\ud83c\uddfa\ud83c\uddf8 EN';
-      return;
-    }
-
-    var li  = document.createElement('li');
-    li.id   = 'lang-selector-li';
-    li.style.cssText = 'display:flex;align-items:center;';
-
-    var btn = document.createElement('button');
-    btn.id  = 'lang-btn';
-    btn.title = t('lang.selector_label');
-    btn.setAttribute('aria-label', t('lang.selector_label'));
-    btn.textContent = _lang === 'en' ? '\ud83c\udde7\ud83c\uddf7 PT' : '\ud83c\uddfa\ud83c\uddf8 EN';
-    btn.style.cssText = [
-      'background:none;border:2px solid var(--border);border-radius:var(--radius);',
-      'color:var(--text-muted);font-family:var(--font-title);font-size:11px;',
-      'font-weight:700;letter-spacing:1px;cursor:pointer;padding:5px 10px;',
-      'transition:border-color .2s,color .2s;white-space:nowrap;'
-    ].join('');
-
-    btn.addEventListener('mouseenter', function () {
-      btn.style.borderColor = 'var(--accent)'; btn.style.color = 'var(--text)';
-    });
-    btn.addEventListener('mouseleave', function () {
-      btn.style.borderColor = 'var(--border)'; btn.style.color = 'var(--text-muted)';
-    });
-    btn.addEventListener('click', function () {
-      switchLang(_lang === 'pt_BR' ? 'en' : 'pt_BR');
-    });
-
-    li.appendChild(btn);
-    nav.appendChild(li);
+    if (existing) existing.remove();
   }
 
   /* ── Troca de idioma ao vivo ── */

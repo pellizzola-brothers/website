@@ -362,20 +362,16 @@
 </head>
 <body>
 
-<!-- Gate de auth -->
+<!-- Gate de auth — checagem real contra o backend, sem senha fixa no HTML -->
 <div id="auth-gate" class="modal-overlay" style="z-index:10000;">
   <div class="modal-box">
     <div class="modal-header">🔒 Acesso Restrito</div>
-    <div class="modal-body">
-      <p style="margin-bottom:14px;">Esta área é restrita a administradores. Digite a senha de admin para continuar.</p>
-      <input class="admin-search" id="admin-pass-input" type="password"
-             placeholder="Senha de admin..." style="width:100%;font-size:14px;padding:9px 12px;"
-             onkeydown="if(event.key==='Enter') checkAdminPass()">
-      <div id="admin-pass-msg" style="font-size:12px;color:#e07070;margin-top:8px;display:none;">Senha incorreta.</div>
+    <div class="modal-body" id="auth-gate-body">
+      <p>Verificando permissão de administrador...</p>
     </div>
-    <div class="modal-footer">
+    <div class="modal-footer" id="auth-gate-footer" style="display:none;">
       <a href="index.html" class="btn btn-outline btn-sm">← Voltar</a>
-      <button class="btn btn-green btn-sm" onclick="checkAdminPass()">Entrar</button>
+      <button class="btn btn-green btn-sm" onclick="checkAccess()">Tentar de novo</button>
     </div>
   </div>
 </div>
@@ -621,27 +617,26 @@
 
       <div class="admin-table-wrap">
         <div class="admin-table-header"><div class="admin-table-title">🔐 Segurança</div></div>
-        <div style="padding:18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div style="padding:12px 18px 4px;font-size:11px;color:var(--text-dim);">
+          Valores fixos no servidor (variáveis de ambiente). Editar aqui exigiria mudar o <code>.env</code> e reiniciar o backend — por isso os campos abaixo são só leitura.
+        </div>
+        <div style="padding:14px 18px 18px;display:grid;grid-template-columns:1fr 1fr;gap:14px;">
           <div>
             <label style="display:block;font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Limite de Rate (req/min)</label>
-            <input class="admin-search" type="number" value="120" style="width:100%;">
+            <input class="admin-search" type="number" value="120" readonly style="width:100%;opacity:.6;">
           </div>
           <div>
             <label style="display:block;font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Max tamanho de arquivo (MB)</label>
-            <input class="admin-search" type="number" value="10" style="width:100%;">
+            <input class="admin-search" type="number" value="10" readonly style="width:100%;opacity:.6;">
           </div>
           <div>
             <label style="display:block;font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Expiração do JWT (dias)</label>
-            <input class="admin-search" type="number" value="7" style="width:100%;">
+            <input class="admin-search" type="number" value="7" readonly style="width:100%;opacity:.6;">
           </div>
           <div>
             <label style="display:block;font-family:var(--font-title);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Rondas bcrypt</label>
-            <input class="admin-search" type="number" value="12" style="width:100%;">
+            <input class="admin-search" type="number" value="12" readonly style="width:100%;opacity:.6;">
           </div>
-        </div>
-        <div style="padding:0 18px 18px;display:flex;justify-content:flex-end;gap:10px;">
-          <button class="btn btn-outline btn-sm" onclick="showToast('⚠️ Alterações descartadas.')">Descartar</button>
-          <button class="btn btn-green btn-sm" onclick="showToast('✅ Configurações salvas! (simulação)')">Salvar</button>
         </div>
       </div>
     </div>
@@ -684,66 +679,75 @@
 <script>
 'use strict';
 
-/* ── AUTH GATE ── */
-var ADMIN_PASS = 'admin123'; // Em produção viria do backend
-var adminAuthed = false;
-
-function checkAdminPass() {
-  var val = document.getElementById('admin-pass-input').value;
-  if (val === ADMIN_PASS) {
-    adminAuthed = true;
-    document.getElementById('auth-gate').classList.add('hidden');
-    initAdmin();
-  } else {
-    document.getElementById('admin-pass-msg').style.display = '';
-    document.getElementById('admin-pass-input').value = '';
-    document.getElementById('admin-pass-input').focus();
-  }
-}
-
-document.getElementById('admin-pass-input').focus();
-
 /* ── NAV AUTH ── */
+var CURRENT_USER = getUser();
 (function() {
-  var user = getUser();
-  if (user) {
+  if (CURRENT_USER) {
     var el = document.getElementById('nav-auth');
-    el.textContent = user.username.toUpperCase();
-    el.href = 'perfil_do_usuario.html?id=' + user.id;
-    document.getElementById('admin-username').textContent = user.username.toUpperCase();
+    el.textContent = CURRENT_USER.username.toUpperCase();
+    el.href = 'perfil_do_usuario.html?id=' + CURRENT_USER.id;
+    document.getElementById('admin-username').textContent = CURRENT_USER.username.toUpperCase();
   }
 })();
 
-/* ── DADOS MOCK ── */
-var MOCK_USERS = [
-  { id:1, username:'xx_poste_xx',   bio:'Viva Jesus',                   total_levels:2, downloaded_levels:11, liked_levels:9,  role:'user' },
-  { id:2, username:'jacobomassola', bio:null,                           total_levels:1, downloaded_levels:0,  liked_levels:0,  role:'user' },
-  { id:3, username:'billyshears',   bio:'The one and only Billy Shears',total_levels:2, downloaded_levels:0,  liked_levels:0,  role:'user' },
-  { id:4, username:'pellizzola',    bio:'Fundador do projeto',          total_levels:1, downloaded_levels:5,  liked_levels:3,  role:'admin' },
-  { id:5, username:'anaclara_dev',  bio:'UI/UX lover',                  total_levels:0, downloaded_levels:2,  liked_levels:1,  role:'user' },
-];
+/* ── FETCH AUTENTICADO ── */
+function adminFetch(path, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({ 'Authorization': 'Bearer ' + getToken() }, opts.headers || {});
+  if (opts.body !== undefined) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(opts.body);
+  }
+  return fetch(API + path, opts).then(function(r) {
+    return r.json().catch(function () { return {}; }).then(function (data) {
+      if (!r.ok) {
+        var err = new Error(data.error || 'Erro na requisição');
+        err.status = r.status;
+        throw err;
+      }
+      return data;
+    });
+  });
+}
 
-var MOCK_LEVELS = [
-  { id:1, name:'Meu Level Bacana',   author:'xx_poste_xx',   downloads:11, likes:10, file_id:1 },
-  { id:2, name:'Meu Level Bacana 2', author:'xx_poste_xx',   downloads:11, likes:9,  file_id:2 },
-  { id:3, name:'A Extraordinaria Jornada de Henrique', author:'billyshears', downloads:0, likes:0, file_id:3 },
-  { id:4, name:'Revolver',           author:'billyshears',   downloads:8,  likes:6,  file_id:null },
-  { id:5, name:'Botas Douradas',     author:'jacobomassola', downloads:3,  likes:2,  file_id:null },
-];
+/* ── GATE DE ACESSO — sem senha fixa: valida token + role='admin' no backend ── */
+function checkAccess() {
+  document.getElementById('auth-gate-body').innerHTML = '<p>Verificando permissão de administrador...</p>';
+  document.getElementById('auth-gate-footer').style.display = 'none';
 
-var MOCK_REPORTS = [
-  { id:1, level_id:4, level_name:'Revolver', reason:'Arquivo malicioso', detail:'O arquivo faz o jogo crashar.', reporter:'anaclara_dev', status:'open' },
-  { id:2, level_id:2, level_name:'Meu Level Bacana 2', reason:'Conteúdo inadequado', detail:'', reporter:'billyshears', status:'open' },
-  { id:3, level_id:1, level_name:'Meu Level Bacana',   reason:'Spam ou enganoso', detail:'Título enganoso.', reporter:'jacobomassola', status:'open' },
-];
+  if (!isLoggedIn()) {
+    window.location.href = 'login.html?next=admin.html';
+    return;
+  }
 
-var MOCK_LOGS = [];
+  adminFetch('/admin/stats')
+    .then(function () {
+      document.getElementById('auth-gate').classList.add('hidden');
+      initAdmin();
+    })
+    .catch(function (err) {
+      if (err.status === 401) {
+        clearSession();
+        window.location.href = 'login.html?next=admin.html';
+        return;
+      }
+      var msg = err.status === 403
+        ? 'Esta conta não tem permissão de administrador.'
+        : 'Não foi possível conectar ao servidor. Tente novamente.';
+      document.getElementById('auth-gate-body').innerHTML = '<p>' + escHtml(msg) + '</p>';
+      document.getElementById('auth-gate-footer').style.display = '';
+    });
+}
+checkAccess();
 
 /* ── TOAST / CONFIRM ── */
 function showToast(msg) {
   var t = document.getElementById('admin-toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+function showError(err) {
+  showToast('⚠️ ' + (err && err.message ? err.message : 'Algo deu errado.'));
 }
 
 var _confirmCb = null;
@@ -764,260 +768,293 @@ function goPage(page, btn) {
   document.querySelectorAll('.sidebar-item').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById('page-' + page).classList.add('active');
   if (btn) btn.classList.add('active');
-  addLog('📂', 'Navegou para a página <strong>' + page + '</strong>');
+
+  if (page === 'users')    renderUsers();
+  if (page === 'levels')   renderLevels();
+  if (page === 'reports')  renderReports();
+  if (page === 'logs')     renderLogs();
+  if (page === 'settings') renderSettings();
 }
 
 /* ── INIT ── */
 function initAdmin() {
   reloadStats();
-  renderUsers();
-  renderLevels();
-  renderReports();
-  renderLogs();
   renderCharts();
   renderRecentActivity();
 }
 
+/* ── HELPERS DE TEMPO ── */
+function timeAgo(iso) {
+  var diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+  if (diff < 60) return 'agora';
+  if (diff < 3600) return Math.floor(diff / 60) + ' min atrás';
+  if (diff < 86400) return Math.floor(diff / 3600) + 'h atrás';
+  return Math.floor(diff / 86400) + 'd atrás';
+}
+function timeHMS(iso) {
+  var d = new Date(iso);
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0') + ':' + String(d.getSeconds()).padStart(2,'0');
+}
+
 /* ── STATS ── */
 function reloadStats() {
-  var stats = [
-    { icon:'👥', val: MOCK_USERS.length,  label:'Usuários', trend:'+2 essa semana', up:true },
-    { icon:'🎮', val: MOCK_LEVELS.length, label:'Fases',    trend:'+1 esse dia', up:true },
-    { icon:'⬇',  val: MOCK_LEVELS.reduce(function(s,l){return s+l.downloads;},0), label:'Downloads totais', trend:'estável', up:null },
-    { icon:'♥',  val: MOCK_LEVELS.reduce(function(s,l){return s+l.likes;},0), label:'Curtidas totais', trend:'+5 essa semana', up:true },
-    { icon:'🚩', val: MOCK_REPORTS.filter(function(r){return r.status==='open';}).length, label:'Denúncias abertas', trend:'requer atenção', up:false },
-    { icon:'📦', val: MOCK_LEVELS.filter(function(l){return !!l.file_id;}).length, label:'Com arquivo', trend:'', up:null },
-  ];
-  var html = stats.map(function(s, i) {
-    var trendHtml = s.trend
-      ? '<div class="stat-card-trend ' + (s.up === true ? 'trend-up' : s.up === false ? 'trend-down' : '') + '">' + s.trend + '</div>'
-      : '';
-    return '<div class="stat-card" style="animation-delay:' + (i * .06) + 's">' +
-      '<div class="stat-card-icon">' + s.icon + '</div>' +
-      '<div class="stat-card-val">' + s.val + '</div>' +
-      '<div class="stat-card-label">' + s.label + '</div>' +
-      trendHtml +
-    '</div>';
-  }).join('');
-  document.getElementById('stats-grid').innerHTML = html;
-
-  // Fetch real
-  try {
-    Promise.all([
-      fetch(API + '/users').then(function(r){ return r.ok ? r.json() : null; }),
-      fetch(API + '/levels').then(function(r){ return r.ok ? r.json() : null; }),
-    ]).then(function(results) {
-      var users  = results[0]; var levels = results[1];
-      if (users)  MOCK_USERS  = users;
-      if (levels) MOCK_LEVELS = levels;
-      reloadStats();
-      renderUsers();
-      renderLevels();
-    }).catch(function(){});
-  } catch(_) {}
+  adminFetch('/admin/stats').then(function (s) {
+    var stats = [
+      { icon:'👥', val: s.users,         label:'Usuários' },
+      { icon:'🎮', val: s.levels,        label:'Fases' },
+      { icon:'⬇',  val: s.downloads,     label:'Downloads totais' },
+      { icon:'♥',  val: s.likes,         label:'Curtidas totais' },
+      { icon:'🚩', val: s.open_reports,  label:'Denúncias abertas' },
+      { icon:'📦', val: s.levels_w_file, label:'Com arquivo' },
+    ];
+    document.getElementById('stats-grid').innerHTML = stats.map(function(st, i) {
+      return '<div class="stat-card" style="animation-delay:' + (i * .06) + 's">' +
+        '<div class="stat-card-icon">' + st.icon + '</div>' +
+        '<div class="stat-card-val">' + st.val + '</div>' +
+        '<div class="stat-card-label">' + st.label + '</div>' +
+      '</div>';
+    }).join('');
+    document.getElementById('reports-badge').textContent = s.open_reports;
+  }).catch(showError);
 }
 
 /* ── TABELA USUÁRIOS ── */
+var _usersCache = [];
 function renderUsers() {
   var tbody = document.getElementById('users-tbody');
-  document.getElementById('users-count-label').textContent = MOCK_USERS.length + ' usuário(s) cadastrado(s)';
-  tbody.innerHTML = MOCK_USERS.map(function(u) {
-    var role = u.role === 'admin' ? 'badge-admin' : 'badge-user';
-    var roleLabel = u.role === 'admin' ? '⭐ Admin' : '👤 User';
-    return '<tr id="user-row-' + u.id + '">' +
-      '<td style="color:var(--text-dim);font-family:var(--font-title);font-size:11px;">#' + u.id + '</td>' +
-      '<td><div class="tbl-name">' + escHtml(u.username) + '</div><div class="tbl-sub">' + escHtml(u.bio || '—') + '</div></td>' +
-      '<td>' + (u.total_levels || 0) + '</td>' +
-      '<td>' + (u.downloaded_levels || 0) + '</td>' +
-      '<td>' + (u.liked_levels || 0) + '</td>' +
-      '<td><span class="tbl-badge ' + role + '">' + roleLabel + '</span></td>' +
-      '<td><div class="tbl-actions">' +
-        '<a href="perfil_do_usuario.html?id=' + u.id + '" class="tbl-btn" target="_blank">Ver</a>' +
-        '<button class="tbl-btn danger" onclick="banUser(' + u.id + ')">Ban</button>' +
-        (u.role !== 'admin'
-          ? '<button class="tbl-btn success" onclick="promoteUser(' + u.id + ')">Admin</button>'
-          : '<button class="tbl-btn danger" onclick="demoteUser(' + u.id + ')">Revogar</button>') +
-      '</div></td>' +
-    '</tr>';
-  }).join('');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Carregando...</td></tr>';
+
+  adminFetch('/admin/users').then(function (users) {
+    _usersCache = users;
+    document.getElementById('users-count-label').textContent = users.length + ' usuário(s) cadastrado(s)';
+    tbody.innerHTML = users.map(function(u) {
+      var roleClass = u.role === 'admin' ? 'badge-admin' : 'badge-user';
+      var roleLabel = u.role === 'admin' ? '⭐ Admin' : '👤 User';
+      var badges = '<span class="tbl-badge ' + roleClass + '">' + roleLabel + '</span>' +
+        (u.banned ? ' <span class="tbl-badge badge-banned">🚫 Banido</span>' : '');
+
+      var isSelf = CURRENT_USER && u.id === CURRENT_USER.id;
+      var banBtn = u.banned
+        ? '<button class="tbl-btn success" onclick="unbanUser(' + u.id + ')">Desbanir</button>'
+        : '<button class="tbl-btn danger"' + (isSelf ? ' disabled title="Você não pode banir a si mesmo"' : '') + ' onclick="banUser(' + u.id + ')">Ban</button>';
+      var roleBtn = u.role !== 'admin'
+        ? '<button class="tbl-btn success" onclick="promoteUser(' + u.id + ')">Admin</button>'
+        : '<button class="tbl-btn danger"' + (isSelf ? ' disabled title="Você não pode revogar seu próprio acesso"' : '') + ' onclick="demoteUser(' + u.id + ')">Revogar</button>';
+
+      return '<tr id="user-row-' + u.id + '">' +
+        '<td style="color:var(--text-dim);font-family:var(--font-title);font-size:11px;">#' + u.id + '</td>' +
+        '<td><div class="tbl-name">' + escHtml(u.username) + '</div><div class="tbl-sub">' + escHtml(u.bio || '—') + '</div></td>' +
+        '<td>' + (u.total_levels || 0) + '</td>' +
+        '<td>' + (u.downloaded_levels || 0) + '</td>' +
+        '<td>' + (u.liked_levels || 0) + '</td>' +
+        '<td>' + badges + '</td>' +
+        '<td><div class="tbl-actions">' +
+          '<a href="perfil_do_usuario.html?id=' + u.id + '" class="tbl-btn" target="_blank">Ver</a>' +
+          banBtn + roleBtn +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }).catch(function (err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#e07070;padding:24px;">Erro ao carregar: ' + escHtml(err.message) + '</td></tr>';
+  });
 }
 
 function banUser(id) {
-  var u = MOCK_USERS.find(function(u){return u.id===id;});
+  var u = _usersCache.find(function(u){return u.id===id;});
   var name = u ? u.username : '';
   openConfirm('Banir o usuário "' + name + '"? Esta ação remove o acesso imediatamente.', function() {
-    addLog('🚫', 'Usuário <strong>' + escHtml(name) + '</strong> foi banido.');
-    showToast('🚫 Usuário ' + name + ' banido (simulação)');
-    var row = document.getElementById('user-row-' + id);
-    if (row) row.style.opacity = '.4';
+    adminFetch('/admin/users/' + id + '/ban', { method: 'POST' })
+      .then(function () { showToast('🚫 Usuário ' + name + ' banido'); renderUsers(); reloadStats(); })
+      .catch(showError);
+  });
+}
+function unbanUser(id) {
+  var u = _usersCache.find(function(u){return u.id===id;});
+  var name = u ? u.username : '';
+  openConfirm('Remover o banimento de "' + name + '"?', function() {
+    adminFetch('/admin/users/' + id + '/unban', { method: 'POST' })
+      .then(function () { showToast('✅ Banimento de ' + name + ' removido'); renderUsers(); reloadStats(); })
+      .catch(showError);
   });
 }
 function promoteUser(id) {
-  var u = MOCK_USERS.find(function(u){return u.id===id;});
+  var u = _usersCache.find(function(u){return u.id===id;});
   var name = u ? u.username : '';
   openConfirm('Promover "' + name + '" a administrador?', function() {
-    addLog('⭐', 'Usuário <strong>' + escHtml(name) + '</strong> promovido a Admin.');
-    showToast('⭐ ' + name + ' é agora admin (simulação)');
-    if (u) { u.role = 'admin'; renderUsers(); }
+    adminFetch('/admin/users/' + id + '/promote', { method: 'POST' })
+      .then(function () { showToast('⭐ ' + name + ' é agora admin'); renderUsers(); })
+      .catch(showError);
   });
 }
 function demoteUser(id) {
-  var u = MOCK_USERS.find(function(u){return u.id===id;});
+  var u = _usersCache.find(function(u){return u.id===id;});
   var name = u ? u.username : '';
   openConfirm('Revogar privilégios de admin de "' + name + '"?', function() {
-    addLog('👤', 'Privilégios de admin de <strong>' + escHtml(name) + '</strong> revogados.');
-    showToast('👤 Admin revogado (simulação)');
-    if (u) { u.role = 'user'; renderUsers(); }
+    adminFetch('/admin/users/' + id + '/demote', { method: 'POST' })
+      .then(function () { showToast('👤 Admin revogado'); renderUsers(); })
+      .catch(showError);
   });
 }
 
 /* ── TABELA FASES ── */
+var _levelsCache = [];
 function renderLevels() {
   var tbody = document.getElementById('levels-tbody');
-  document.getElementById('levels-count-label').textContent = MOCK_LEVELS.length + ' fase(s) publicada(s)';
-  tbody.innerHTML = MOCK_LEVELS.map(function(l) {
-    return '<tr id="level-row-' + l.id + '">' +
-      '<td style="color:var(--text-dim);font-family:var(--font-title);font-size:11px;">#' + l.id + '</td>' +
-      '<td><div class="tbl-name">' + escHtml(l.name) + '</div></td>' +
-      '<td><div class="tbl-sub">' + escHtml(l.author_name || l.author || '—') + '</div></td>' +
-      '<td>⬇ ' + l.downloads + '</td>' +
-      '<td>♥ ' + l.likes + '</td>' +
-      '<td>' + (l.file_id ? '<span class="tbl-badge badge-user">✅ Sim</span>' : '<span class="tbl-badge badge-banned">⚠️ Não</span>') + '</td>' +
-      '<td><div class="tbl-actions">' +
-        '<a href="perfil_do_jogo.html?id=' + l.id + '" class="tbl-btn" target="_blank">Ver</a>' +
-        '<button class="tbl-btn danger" onclick="deleteLevel(' + l.id + ')">Deletar</button>' +
-      '</div></td>' +
-    '</tr>';
-  }).join('');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">Carregando...</td></tr>';
+
+  adminFetch('/admin/levels').then(function (levels) {
+    _levelsCache = levels;
+    document.getElementById('levels-count-label').textContent = levels.length + ' fase(s) publicada(s)';
+    tbody.innerHTML = levels.map(function(l) {
+      return '<tr id="level-row-' + l.id + '">' +
+        '<td style="color:var(--text-dim);font-family:var(--font-title);font-size:11px;">#' + l.id + '</td>' +
+        '<td><div class="tbl-name">' + escHtml(l.name) + '</div></td>' +
+        '<td><div class="tbl-sub">' + escHtml(l.author_name || '—') + '</div></td>' +
+        '<td>⬇ ' + l.downloads + '</td>' +
+        '<td>♥ ' + l.likes + '</td>' +
+        '<td>' + (l.file_id ? '<span class="tbl-badge badge-user">✅ Sim</span>' : '<span class="tbl-badge badge-banned">⚠️ Não</span>') + '</td>' +
+        '<td><div class="tbl-actions">' +
+          '<a href="perfil_do_jogo.html?id=' + l.id + '" class="tbl-btn" target="_blank">Ver</a>' +
+          '<button class="tbl-btn danger" onclick="deleteLevel(' + l.id + ')">Deletar</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }).catch(function (err) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#e07070;padding:24px;">Erro ao carregar: ' + escHtml(err.message) + '</td></tr>';
+  });
 }
 
 function deleteLevel(id) {
-  var l = MOCK_LEVELS.find(function(l){return l.id===id;});
+  var l = _levelsCache.find(function(l){return l.id===id;});
   var name = l ? l.name : '';
   openConfirm('Deletar a fase "' + name + '"? Esta ação não pode ser desfeita.', function() {
-    addLog('🗑', 'Fase <strong>' + escHtml(name) + '</strong> deletada pelo admin.');
-    showToast('🗑 Fase deletada (simulação)');
-    var row = document.getElementById('level-row-' + id);
-    if (row) row.style.opacity = '.4';
+    adminFetch('/admin/levels/' + id, { method: 'DELETE' })
+      .then(function () { showToast('🗑 Fase deletada'); renderLevels(); reloadStats(); })
+      .catch(showError);
   });
 }
 
 /* ── DENÚNCIAS ── */
 function renderReports() {
-  var open = MOCK_REPORTS.filter(function(r){ return r.status === 'open'; });
-  document.getElementById('reports-badge').textContent = open.length;
+  var wrap = document.getElementById('reports-list');
+  wrap.innerHTML = '<div class="admin-table-header"><div class="admin-table-title">Denúncias abertas</div></div>' +
+    '<div style="padding:24px;text-align:center;color:var(--text-muted);">Carregando...</div>';
 
-  var html = open.length
-    ? open.map(function(r) {
-        return '<div class="report-item" id="report-row-' + r.id + '">' +
-          '<div style="font-size:22px;flex-shrink:0;">🚩</div>' +
-          '<div class="report-item-info">' +
-            '<div class="report-level-name">Fase #' + r.level_id + ': ' + escHtml(r.level_name) + '</div>' +
-            '<div class="report-reason"><strong>' + escHtml(r.reason) + '</strong>' + (r.detail ? ' — ' + escHtml(r.detail) : '') + '</div>' +
-            '<div class="report-meta">Denunciado por: ' + escHtml(r.reporter) + '</div>' +
-          '</div>' +
-          '<div class="tbl-actions" style="flex-direction:column;gap:6px;align-items:flex-end;">' +
-            '<button class="tbl-btn success" onclick="resolveReport(' + r.id + ')">✓ Resolver</button>' +
-            '<button class="tbl-btn danger"  onclick="deleteReportedLevel(' + r.id + ')">🗑 Deletar fase</button>' +
-          '</div>' +
-        '</div>';
-      }).join('')
-    : '<div style="padding:28px;text-align:center;color:var(--text-muted);font-style:italic;">✅ Nenhuma denúncia aberta.</div>';
+  adminFetch('/admin/reports?status=open').then(function (reports) {
+    var html = reports.length
+      ? reports.map(function(r) {
+          return '<div class="report-item" id="report-row-' + r.id + '">' +
+            '<div style="font-size:22px;flex-shrink:0;">🚩</div>' +
+            '<div class="report-item-info">' +
+              '<div class="report-level-name">Fase #' + r.level_id + ': ' + escHtml(r.level_name) + '</div>' +
+              '<div class="report-reason"><strong>' + escHtml(r.reason) + '</strong>' + (r.detail ? ' — ' + escHtml(r.detail) : '') + '</div>' +
+              '<div class="report-meta">Denunciado por: ' + escHtml(r.reporter) + ' · ' + timeAgo(r.created_at) + '</div>' +
+            '</div>' +
+            '<div class="tbl-actions" style="flex-direction:column;gap:6px;align-items:flex-end;">' +
+              '<button class="tbl-btn success" onclick="resolveReport(' + r.id + ')">✓ Resolver</button>' +
+              '<button class="tbl-btn danger"  onclick="deleteReportedLevel(' + r.id + ')">🗑 Deletar fase</button>' +
+            '</div>' +
+          '</div>';
+        }).join('')
+      : '<div style="padding:28px;text-align:center;color:var(--text-muted);font-style:italic;">✅ Nenhuma denúncia aberta.</div>';
 
-  document.getElementById('reports-list').innerHTML =
-    '<div class="admin-table-header"><div class="admin-table-title">Denúncias abertas (' + open.length + ')</div></div>' +
-    html;
+    wrap.innerHTML =
+      '<div class="admin-table-header"><div class="admin-table-title">Denúncias abertas (' + reports.length + ')</div></div>' +
+      html;
+  }).catch(function (err) {
+    wrap.innerHTML = '<div style="padding:24px;text-align:center;color:#e07070;">Erro ao carregar: ' + escHtml(err.message) + '</div>';
+  });
 }
 
 function resolveReport(id) {
-  var r = MOCK_REPORTS.find(function(r){return r.id===id;});
-  if (!r) return;
-  r.status = 'closed';
-  addLog('✅', 'Denúncia #' + id + ' marcada como resolvida.');
-  showToast('✅ Denúncia resolvida!');
-  renderReports();
+  adminFetch('/admin/reports/' + id + '/resolve', { method: 'POST' })
+    .then(function () { showToast('✅ Denúncia resolvida!'); renderReports(); reloadStats(); })
+    .catch(showError);
 }
 
 function deleteReportedLevel(reportId) {
-  var r = MOCK_REPORTS.find(function(r){return r.id===reportId;});
-  var levelName = r ? r.level_name : '';
-  openConfirm('Deletar a fase "' + levelName + '" (referente a esta denúncia)?', function() {
-    if (r) r.status = 'closed';
-    addLog('🗑', 'Fase <strong>' + escHtml(levelName) + '</strong> deletada via denúncia #' + reportId);
-    showToast('🗑 Fase deletada e denúncia fechada (simulação)');
-    renderReports();
+  openConfirm('Deletar a fase referente a esta denúncia? Esta ação não pode ser desfeita.', function() {
+    adminFetch('/admin/reports/' + reportId + '/level', { method: 'DELETE' })
+      .then(function () { showToast('🗑 Fase deletada e denúncia fechada'); renderReports(); reloadStats(); })
+      .catch(showError);
   });
 }
 
 /* ── LOGS ── */
-function addLog(icon, text) {
-  var now = new Date();
-  var time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
-  MOCK_LOGS.unshift({ icon: icon, text: text, time: time });
-  if (MOCK_LOGS.length > 50) MOCK_LOGS.pop();
-  renderLogs();
-}
-
 function renderLogs() {
   var el = document.getElementById('logs-list');
-  if (!MOCK_LOGS.length) {
-    el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-style:italic;">Nenhum log ainda.</div>';
-    return;
-  }
-  el.innerHTML = MOCK_LOGS.map(function(l) {
-    return '<div class="log-item">' +
-      '<div class="log-icon">' + l.icon + '</div>' +
-      '<div class="log-text">' + l.text + '</div>' +
-      '<div class="log-time">' + l.time + '</div>' +
-    '</div>';
-  }).join('');
+  el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">Carregando...</div>';
+
+  adminFetch('/admin/logs').then(function (logs) {
+    if (!logs.length) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-style:italic;">Nenhum log ainda.</div>';
+      return;
+    }
+    el.innerHTML = logs.map(function(l) {
+      return '<div class="log-item">' +
+        '<div class="log-icon">' + l.icon + '</div>' +
+        '<div class="log-text">' + l.text + ' <span style="color:var(--text-dim);">— ' + escHtml(l.admin_name) + '</span></div>' +
+        '<div class="log-time">' + timeHMS(l.created_at) + '</div>' +
+      '</div>';
+    }).join('');
+  }).catch(function (err) {
+    el.innerHTML = '<div style="padding:24px;text-align:center;color:#e07070;">Erro ao carregar: ' + escHtml(err.message) + '</div>';
+  });
 }
 
 function clearLogs() {
   openConfirm('Limpar todos os logs? Esta ação não pode ser desfeita.', function() {
-    MOCK_LOGS = [];
-    renderLogs();
-    showToast('🗑 Logs limpos.');
+    adminFetch('/admin/logs', { method: 'DELETE' })
+      .then(function () { showToast('🗑 Logs limpos.'); renderLogs(); })
+      .catch(showError);
   });
 }
 
 /* ── ATIVIDADE RECENTE ── */
 function renderRecentActivity() {
-  var items = [
-    { icon:'👤', text:'<strong>xx_poste_xx</strong> fez login', time:'2 min atrás' },
-    { icon:'📤', text:'<strong>billyshears</strong> publicou a fase "Revolver"', time:'14 min atrás' },
-    { icon:'🚩', text:'<strong>anaclara_dev</strong> denunciou a fase #4', time:'38 min atrás' },
-    { icon:'♥',  text:'<strong>jacobomassola</strong> curtiu "Meu Level Bacana"', time:'1h atrás' },
-    { icon:'🆕', text:'<strong>pellizzola</strong> se cadastrou', time:'3h atrás' },
-  ];
-  document.getElementById('recent-activity').innerHTML = items.map(function(i) {
-    return '<div class="log-item"><div class="log-icon">' + i.icon + '</div>' +
-      '<div class="log-text">' + i.text + '</div>' +
-      '<div class="log-time">' + i.time + '</div></div>';
-  }).join('');
+  var el = document.getElementById('recent-activity');
+  el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">Carregando...</div>';
+
+  adminFetch('/admin/activity').then(function (items) {
+    if (!items.length) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);font-style:italic;">Nenhuma atividade ainda.</div>';
+      return;
+    }
+    var ICONS = { level: '📤', comment: '💬', report: '🚩' };
+    var VERBS = {
+      level:   function(w,e){ return '<strong>' + escHtml(w) + '</strong> publicou a fase "' + escHtml(e) + '"'; },
+      comment: function(w,e){ return '<strong>' + escHtml(w) + '</strong> comentou em "' + escHtml(e) + '"'; },
+      report:  function(w,e){ return '<strong>' + escHtml(w) + '</strong> denunciou a fase "' + escHtml(e) + '"'; },
+    };
+    el.innerHTML = items.map(function(i) {
+      return '<div class="log-item"><div class="log-icon">' + (ICONS[i.kind] || '•') + '</div>' +
+        '<div class="log-text">' + (VERBS[i.kind] ? VERBS[i.kind](i.who, i.extra) : '') + '</div>' +
+        '<div class="log-time">' + timeAgo(i.at) + '</div></div>';
+    }).join('');
+  }).catch(function () {
+    el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-muted);">Não foi possível carregar a atividade recente.</div>';
+  });
 }
 
-/* ── GRÁFICOS (barras simples) ── */
+/* ── GRÁFICOS (barras simples, com dado real do backend) ── */
 function renderCharts() {
-  var dlData  = [4, 7, 3, 11, 9, 5, 8];
-  var likData = [2, 5, 1, 8,  6, 3, 7];
-  var days    = ['D-6','D-5','D-4','D-3','D-2','D-1','Hoje'];
-  var maxDl   = Math.max.apply(null, dlData);
-  var maxLik  = Math.max.apply(null, likData);
-
-  function buildBars(containerId, data, max, yellow) {
-    var el = document.getElementById(containerId);
-    el.innerHTML = data.map(function(v, i) {
-      var pct = Math.round((v / max) * 100);
-      return '<div class="bar-col">' +
-        '<div class="bar-fill' + (yellow ? ' yellow' : '') + '" style="height:' + pct + '%;" title="' + v + '"></div>' +
-        '<div class="bar-label">' + days[i] + '</div>' +
-      '</div>';
-    }).join('');
-  }
-
-  buildBars('bar-downloads', dlData, maxDl, false);
-  buildBars('bar-likes',     likData, maxLik, true);
+  adminFetch('/admin/charts').then(function (data) {
+    function buildBars(containerId, rows, yellow) {
+      var el = document.getElementById(containerId);
+      var max = Math.max.apply(null, rows.map(function(r){return r.n;}).concat([1]));
+      el.innerHTML = rows.map(function(r) {
+        var d = new Date(r.day + 'T00:00:00');
+        var label = ['dom','seg','ter','qua','qui','sex','sáb'][d.getDay()];
+        var pct = Math.round((r.n / max) * 100);
+        return '<div class="bar-col">' +
+          '<div class="bar-fill' + (yellow ? ' yellow' : '') + '" style="height:' + Math.max(pct,4) + '%;" title="' + r.n + '"></div>' +
+          '<div class="bar-label">' + label + '</div>' +
+        '</div>';
+      }).join('');
+    }
+    buildBars('bar-downloads', data.downloads, false);
+    buildBars('bar-likes',     data.likes,     true);
+  }).catch(function () {});
 }
 
 /* ── FILTRO DE TABELA ── */
@@ -1031,16 +1068,30 @@ function filterTable(tbodyId, searchId, col) {
   });
 }
 
-/* ── TOGGLE SETTINGS ── */
+/* ── CONFIGURAÇÕES ── */
+function renderSettings() {
+  adminFetch('/admin/settings').then(function (s) {
+    document.getElementById('toggle-manut').checked    = !!s.maintenance_mode;
+    document.getElementById('toggle-registro').checked = !!s.allow_registration;
+    document.getElementById('toggle-upload').checked   = !!s.allow_upload;
+  }).catch(showError);
+}
+
+function saveSetting(key, value, checkboxEl) {
+  var body = {}; body[key] = value;
+  adminFetch('/admin/settings', { method: 'PUT', body: body })
+    .then(function () { showToast('✅ Configuração salva.'); reloadStats(); })
+    .catch(function (err) { checkboxEl.checked = !value; showError(err); });
+}
+
 document.getElementById('toggle-manut').addEventListener('change', function() {
-  showToast(this.checked ? '⚠️ Modo manutenção ATIVADO (simulação)' : '✅ Modo manutenção desativado');
-  addLog(this.checked ? '🔧' : '✅', 'Modo manutenção ' + (this.checked ? 'ativado' : 'desativado'));
+  saveSetting('maintenance_mode', this.checked, this);
 });
 document.getElementById('toggle-registro').addEventListener('change', function() {
-  showToast(this.checked ? '✅ Registro de usuários ativado' : '⚠️ Registro bloqueado (simulação)');
+  saveSetting('allow_registration', this.checked, this);
 });
 document.getElementById('toggle-upload').addEventListener('change', function() {
-  showToast(this.checked ? '✅ Upload ativado' : '⚠️ Upload bloqueado (simulação)');
+  saveSetting('allow_upload', this.checked, this);
 });
 </script>
 <script src="nav.js"></script>
