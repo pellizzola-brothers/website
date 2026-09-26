@@ -17,8 +17,8 @@ window.PB_I18N['pt_BR'] = {
   "levels.buscar_autor": "\ud83d\udd0d Buscar autor...", "levels.chip_todos": "Todos",
   "levels.chip_com_fases": "Com fases", "levels.chip_top5": "Top 5",
   "levels.limpar": "Limpar", "levels.aplicar": "Aplicar",
-  "levels.filtro_todos": "\ud83d\udce6 Todos", "levels.filtro_com_arq": "\u2705 Com arquivo",
-  "levels.filtro_sem_arq": "\u26a0\ufe0f Sem arquivo",
+ 
+ 
   "levels.ordem_downloads": "\u2b07 Mais baixados", "levels.ordem_likes": "\u2665 Mais curtidos",
   "levels.ordem_nome": "\ud83d\udd24 A \u2192 Z", "levels.ordem_recentes": "\ud83d\udd50 Mais recentes",
   "levels.encontrados_singular": "fase encontrada",
@@ -119,5 +119,24 @@ window.PB_I18N['pt_BR'] = {
   "pass_rules.rule_len": "Mais de 7 caracteres",
   "pass_rules.rule_upper": "Pelo menos uma letra mai\u00fascula",
   "pass_rules.rule_special": "Pelo menos um caractere especial",
-  "lang.selector_label": "Idioma", "lang.pt_BR": "\ud83c\udde7\ud83c\uddf7 Portugu\u00eas", "lang.en": "\ud83c\uddfa\ud83c\uddf8 English"
+  "lang.selector_label": "Idioma", "lang.pt_BR": "\ud83c\udde7\ud83c\uddf7 Portugu\u00eas", "lang.en": "\ud83c\uddfa\ud83c\uddf8 English",
+  "home.levels_recentes": "Fases Recentes",
+  "home.levels_criadas": "Fases",
+  "perfil.levels_criadas": "Fases",
+  "home.vazio_destaque": "\ud83d\udced Nenhuma fase em destaque ainda. Publique a primeira!",
+  "home.vazio_recentes": "\ud83d\udced Nenhuma fase recente ainda.",
+  "home.vazio_criador": "Nenhum criador em destaque ainda.",
+  "home.erro_carregar": "\u26a0\ufe0f N\u00e3o foi poss\u00edvel carregar. Tente novamente mais tarde.",
+  "levels.label_autor": "Autor",
+  "levels.label_ordem": "Ordenar por",
+  "levels.encontrados_para": "para",
+  "levels.de_autores": "de",
+  "levels.e_mais": "e mais {n}",
+  "levels.limpar_filtros": "Limpar filtros",
+  "levels.vazio_geral": "\ud83d\udced Ainda n\u00e3o h\u00e1 fases publicadas.",
+  "levels.vazio_enviar": "Enviar a primeira fase",
+  "levels.vazio_filtros": "\ud83d\ude15 Nenhuma fase encontrada.",
+  "levels.vazio_dica": "Tente outras palavras ou remova os filtros.",
+  "recovery.nova_senha_ph": "Mais de 7 caracteres",
+  "recovery.confirmar_ph": "Repita a nova senha"
 };

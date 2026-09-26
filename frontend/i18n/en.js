@@ -17,8 +17,8 @@ window.PB_I18N['en'] = {
   "levels.buscar_autor": "\ud83d\udd0d Search author...", "levels.chip_todos": "All",
   "levels.chip_com_fases": "With levels", "levels.chip_top5": "Top 5",
   "levels.limpar": "Clear", "levels.aplicar": "Apply",
-  "levels.filtro_todos": "\ud83d\udce6 All", "levels.filtro_com_arq": "\u2705 With file",
-  "levels.filtro_sem_arq": "\u26a0\ufe0f Without file",
+ 
+ 
   "levels.ordem_downloads": "\u2b07 Most downloaded", "levels.ordem_likes": "\u2665 Most liked",
   "levels.ordem_nome": "\ud83d\udd24 A \u2192 Z", "levels.ordem_recentes": "\ud83d\udd50 Most recent",
   "levels.encontrados_singular": "level found", "levels.encontrados_plural": "levels found",
@@ -118,5 +118,24 @@ window.PB_I18N['en'] = {
   "pass_rules.rule_len": "More than 7 characters",
   "pass_rules.rule_upper": "At least one uppercase letter",
   "pass_rules.rule_special": "At least one special character",
-  "lang.selector_label": "Language", "lang.pt_BR": "\ud83c\udde7\ud83c\uddf7 Portugu\u00eas", "lang.en": "\ud83c\uddfa\ud83c\uddf8 English"
+  "lang.selector_label": "Language", "lang.pt_BR": "\ud83c\udde7\ud83c\uddf7 Portugu\u00eas", "lang.en": "\ud83c\uddfa\ud83c\uddf8 English",
+  "home.levels_recentes": "Recent Levels",
+  "home.levels_criadas": "Levels",
+  "perfil.levels_criadas": "Levels",
+  "home.vazio_destaque": "\ud83d\udced No featured level yet. Publish the first one!",
+  "home.vazio_recentes": "\ud83d\udced No recent levels yet.",
+  "home.vazio_criador": "No featured creator yet.",
+  "home.erro_carregar": "\u26a0\ufe0f Could not load. Please try again later.",
+  "levels.label_autor": "Author",
+  "levels.label_ordem": "Sort by",
+  "levels.encontrados_para": "for",
+  "levels.de_autores": "by",
+  "levels.e_mais": "and {n} more",
+  "levels.limpar_filtros": "Clear filters",
+  "levels.vazio_geral": "\ud83d\udced No levels have been published yet.",
+  "levels.vazio_enviar": "Upload the first level",
+  "levels.vazio_filtros": "\ud83d\ude15 No levels found.",
+  "levels.vazio_dica": "Try different words or remove the filters.",
+  "recovery.nova_senha_ph": "More than 7 characters",
+  "recovery.confirmar_ph": "Repeat the new password"
 };

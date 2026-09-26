@@ -33,9 +33,6 @@
   "levels.chip_top5":       "Top 5",
   "levels.limpar":          "Clear",
   "levels.aplicar":         "Apply",
-  "levels.filtro_todos":    "📦 All",
-  "levels.filtro_com_arq":  "✅ With file",
-  "levels.filtro_sem_arq":  "⚠️ Without file",
   "levels.ordem_downloads": "⬇ Most downloaded",
   "levels.ordem_likes":     "♥ Most liked",
   "levels.ordem_nome":      "🔤 A → Z",
@@ -118,7 +115,7 @@
   "upload.err_nome_curto":  "The name must be at least 3 characters.",
   "upload.err_arquivo":     "Please select a file.",
   "upload.err_tamanho":     "File is too large. Maximum size allowed: 10 MB.",
-  "upload.ok_msg":          "✅ Level uploaded successfully! Redirecting...",
+  "upload.ok_msg":          "uploaded successfully! Redirecting...",
   "upload.err_servidor":    "Error: Server failure.",
   "upload.err_conexao":     "Connection error. Check if the server is running.",
 
@@ -182,5 +179,22 @@
 
   "lang.selector_label":    "Language",
   "lang.pt_BR":             "🇧🇷 Português",
-  "lang.en":                "🇺🇸 English"
+  "lang.en":                "🇺🇸 English",
+  "home.levels_recentes": "Recent Levels",
+  "home.levels_criadas": "Levels",
+  "perfil.levels_criadas": "Levels",
+  "home.vazio_destaque": "📭 No featured level yet. Publish the first one!",
+  "home.vazio_recentes": "📭 No recent levels yet.",
+  "home.vazio_criador": "No featured creator yet.",
+  "home.erro_carregar": "⚠️ Could not load. Please try again later.",
+  "levels.label_autor": "Author",
+  "levels.label_ordem": "Sort by",
+  "levels.encontrados_para": "for",
+  "levels.de_autores": "by",
+  "levels.e_mais": "and {n} more",
+  "levels.limpar_filtros": "Clear filters",
+  "levels.vazio_geral": "📭 No levels have been published yet.",
+  "levels.vazio_enviar": "Upload the first level",
+  "levels.vazio_filtros": "😕 No levels found.",
+  "levels.vazio_dica": "Try different words or remove the filters."
 }

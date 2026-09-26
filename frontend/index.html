@@ -281,7 +281,9 @@
     }
         .help-list li { margin-bottom: 4px; }
     .help-list strong { color: var(--yellow); }
-    </style>
+    .home-empty { padding: 22px 16px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius); }
+    .course-grid .home-empty { grid-column: 1 / -1; }
+  </style>
   <script src="i18n/pt_BR.js"></script>
   <script src="i18n/en.js"></script>
   <script src="i18n.js"></script>
@@ -433,76 +435,102 @@ i18nReady.then(function() {
 });
 
 /* loadHome agora é chamado dentro de i18nReady.then() */
+// Cada bloco da home resolve sozinho: dado, "nenhum X encontrado" (vazio) ou erro.
+// Nada fica preso no skeleton de carregamento.
+function emptyMsg(key, extraClass) {
+  return '<div class="home-empty ' + (extraClass || '') + '">' + t(key) + '</div>';
+}
+
+// Retorna JSON, null se 404 (vazio) e lança nos demais erros
+async function getJson(path) {
+  const r = await fetch(API + path);
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  return r.json();
+}
+
 async function loadHome() {
-  let levels = [], featured = null, creator = null;
-  try {
-    [levels, featured] = await Promise.all([
-      fetch(API + '/levels').then(function(r){ if(!r.ok) throw new Error('Falha levels'); return r.json(); }),
-      fetch(API + '/levels/featured').then(function(r){ if(!r.ok) throw new Error('Falha featured'); return r.json(); })
-    ]);
-    creator = await fetch(API + '/users/' + featured.author_id).then(function(r){ if(!r.ok) throw new Error('Falha creator'); return r.json(); });
-  } catch(e) {
-    // Sem dados fictícios de fallback: banco vazio ou API fora do ar mostra aviso, não fases inventadas
-    document.getElementById('featured-big-wrap').innerHTML = '<div class="empty-state">😕 ' + t('levels.nenhum_encontrado') + '</div>';
-    return;
+  const featuredWrap = document.getElementById('featured-big-wrap');
+  const grid         = document.getElementById('course-grid');
+  const creatorCard  = document.getElementById('creator-card');
+
+  const [levelsRes, featuredRes] = await Promise.allSettled([getJson('/levels'), getJson('/levels/featured')]);
+
+  // ── Destaque ──
+  let featured = null;
+  if (featuredRes.status === 'rejected') {
+    featuredWrap.innerHTML = emptyMsg('home.erro_carregar');
+  } else if (!featuredRes.value) {
+    featuredWrap.innerHTML = emptyMsg('home.vazio_destaque');
+  } else {
+    featured = featuredRes.value;
+    featuredWrap.innerHTML =
+      '<div class="featured-big">' +
+        '<div class="featured-big-thumb">' + emojiFor(featured.id) + '</div>' +
+        '<div class="featured-big-body">' +
+          '<div class="featured-big-badge">' + t('home.destaque_badge') + '</div>' +
+          '<div class="featured-big-name">' + escHtml(featured.name) + '</div>' +
+          '<div class="featured-big-desc">' + (featured.description ? '"' + escHtml(featured.description) + '"' : '') + '</div>' +
+          '<div class="featured-big-stats">' +
+            '<div class="featured-big-stat">⬇ Downloads: <strong>' + parseInt(featured.downloads) + '</strong></div>' +
+            '<div class="featured-big-stat">♥ ' + t('perfil.curtidas').replace('Levels c','C').replace('Liked l','L') + ': <strong>' + parseInt(featured.likes) + '</strong></div>' +
+          '</div>' +
+          '<div><a href="perfil_do_jogo.html?id=' + parseInt(featured.id) + '" class="btn btn-green btn-sm">Download</a></div>' +
+        '</div>' +
+      '</div>';
   }
 
-  document.getElementById('featured-big-wrap').innerHTML =
-    '<div class="featured-big">' +
-      '<div class="featured-big-thumb">' + emojiFor(featured.id) + '</div>' +
-      '<div class="featured-big-body">' +
-        '<div class="featured-big-badge">' + t('home.destaque_badge') + '</div>' +
-        '<div class="featured-big-name">' + escHtml(featured.name) + '</div>' +
-        '<div class="featured-big-desc">' + (featured.description ? '"' + escHtml(featured.description) + '"' : '') + '</div>' +
-        '<div class="featured-big-stats">' +
-          '<div class="featured-big-stat">⬇ Downloads: <strong>' + featured.downloads + '</strong></div>' +
-          '<div class="featured-big-stat">♥ ' + t('perfil.curtidas').replace('Levels c','C').replace('Liked l','L') + ': <strong>' + featured.likes + '</strong></div>' +
+  // ── Fases recentes ──
+  if (levelsRes.status === 'rejected') {
+    grid.innerHTML = emptyMsg('home.erro_carregar');
+  } else {
+    const others = (levelsRes.value || []).filter(function(l) { return !featured || l.id !== featured.id; }).slice(0, 6);
+    grid.innerHTML = others.length ? others.map(function(l, i) {
+      return '<a href="perfil_do_jogo.html?id=' + parseInt(l.id) + '" class="course-card card-anim" style="animation-delay:' + (i * 0.06) + 's">' +
+        '<div class="course-card-thumb">' +
+          '<span class="course-card-rank">#' + (i + 1) + '</span>' +
+          emojiFor(l.id) +
         '</div>' +
-        '<div>' +
-          '<a href="perfil_do_jogo.html?id=' + featured.id + '" class="btn btn-green btn-sm">Download</a>' +
+        '<div class="course-card-body">' +
+          '<div class="course-card-name">' + escHtml(l.name) + '</div>' +
+          '<div class="course-card-author">' + t('levels.por') + ' ' + escHtml(l.author_name) + '</div>' +
         '</div>' +
-      '</div>' +
-    '</div>';
+        '<div class="course-card-footer">' +
+          '<span>⬇ ' + parseInt(l.downloads) + '</span>' +
+          '<span>♥ ' + parseInt(l.likes) + '</span>' +
+        '</div>' +
+      '</a>';
+    }).join('') : emptyMsg('home.vazio_recentes');
+  }
 
-  var others = levels.filter(function(l){ return l.id !== featured.id; });
-  var gridHTML = others.slice(0, 6).map(function(l, i) {
-    return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="course-card card-anim" style="animation-delay:' + (i * 0.06) + 's">' +
-      '<div class="course-card-thumb">' +
-        '<span class="course-card-rank">#' + (i + 1) + '</span>' +
-        emojiFor(l.id) +
-      '</div>' +
-      '<div class="course-card-body">' +
-        '<div class="course-card-name">' + escHtml(l.name) + '</div>' +
-        '<div class="course-card-author">' + t('levels.por') + ' ' + escHtml(l.author_name) + '</div>' +
-      '</div>' +
-      '<div class="course-card-footer">' +
-        '<span>⬇ ' + l.downloads + '</span>' +
-        '<span>♥ ' + l.likes + '</span>' +
-      '</div>' +
-    '</a>';
-  }).join('');
-  document.getElementById('course-grid').innerHTML = gridHTML;
+  // ── Criador em destaque (autor do level em destaque) ──
+  const header = '<div class="creator-card-header">' + t('home.criador_destaque') + '</div>';
+  if (featuredRes.status === 'rejected') { creatorCard.innerHTML = header + emptyMsg('home.erro_carregar'); return; }
+  if (!featured) { creatorCard.innerHTML = header + emptyMsg('home.vazio_criador'); return; }
+  let creator;
+  try { creator = await getJson('/users/' + parseInt(featured.author_id)); }
+  catch (_) { creatorCard.innerHTML = header + emptyMsg('home.erro_carregar'); return; }
+  if (!creator) { creatorCard.innerHTML = header + emptyMsg('home.vazio_criador'); return; }
 
-  var crLevels = (creator.levels || []).slice(0, 3).map(function(l) {
-    return '<a href="perfil_do_jogo.html?id=' + l.id + '" class="creator-level-row">' +
+  const crLevels = (creator.levels || []).slice(0, 3).map(function(l) {
+    return '<a href="perfil_do_jogo.html?id=' + parseInt(l.id) + '" class="creator-level-row">' +
       '<div class="creator-level-icon">' + emojiFor(l.id) + '</div>' +
       '<div class="creator-level-name">' + escHtml(l.name) + '</div>' +
-      '<div class="creator-level-dl">⬇ ' + (l.downloads || 0) + '</div>' +
+      '<div class="creator-level-dl">⬇ ' + (parseInt(l.downloads) || 0) + '</div>' +
     '</a>';
   }).join('');
 
-  document.getElementById('creator-card').innerHTML =
-    '<div class="creator-card-header">' + t('home.criador_destaque') + '</div>' +
+  creatorCard.innerHTML = header +
     '<div class="creator-card-body">' +
       '<div class="creator-avatar">👤</div>' +
       '<div class="creator-name">' + escHtml(creator.username) + '</div>' +
       '<div class="creator-bio">' + (creator.bio ? '"' + escHtml(creator.bio) + '"' : '') + '</div>' +
       '<div class="creator-stats-row">' +
-        '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels||[]).length + '</span><span class="creator-stat-lbl">' + t('home.levels_criadas') + '</span></div>' +
-        '<div class="creator-stat"><span class="creator-stat-val">' + creator.downloaded_levels + '</span><span class="creator-stat-lbl">Plays</span></div>' +
-        '<div class="creator-stat"><span class="creator-stat-val">' + creator.liked_levels + '</span><span class="creator-stat-lbl">Likes</span></div>' +
+        '<div class="creator-stat"><span class="creator-stat-val">' + (creator.levels || []).length + '</span><span class="creator-stat-lbl">' + t('home.levels_criadas') + '</span></div>' +
+        '<div class="creator-stat"><span class="creator-stat-val">' + parseInt(creator.downloaded_levels) + '</span><span class="creator-stat-lbl">Plays</span></div>' +
+        '<div class="creator-stat"><span class="creator-stat-val">' + parseInt(creator.liked_levels) + '</span><span class="creator-stat-lbl">Likes</span></div>' +
       '</div>' +
-      '<a href="perfil_do_usuario.html?id=' + creator.id + '" class="btn btn-outline btn-sm" style="width:100%;text-align:center;">' + t('home.ver_perfil') + '</a>' +
+      '<a href="perfil_do_usuario.html?id=' + parseInt(creator.id) + '" class="btn btn-outline btn-sm" style="width:100%;text-align:center;">' + t('home.ver_perfil') + '</a>' +
     '</div>' +
     (crLevels ? '<div class="creator-levels-title">' + t('perfil.levels_criadas') + '</div>' + crLevels : '');
 }

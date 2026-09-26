@@ -33,9 +33,6 @@
   "levels.chip_top5":       "Top 5",
   "levels.limpar":          "Limpar",
   "levels.aplicar":         "Aplicar",
-  "levels.filtro_todos":    "📦 Todos",
-  "levels.filtro_com_arq":  "✅ Com arquivo",
-  "levels.filtro_sem_arq":  "⚠️ Sem arquivo",
   "levels.ordem_downloads": "⬇ Mais baixados",
   "levels.ordem_likes":     "♥ Mais curtidos",
   "levels.ordem_nome":      "🔤 A → Z",
@@ -118,7 +115,7 @@
   "upload.err_nome_curto":  "O nome deve ter pelo menos 3 caracteres.",
   "upload.err_arquivo":     "Selecione um arquivo.",
   "upload.err_tamanho":     "O arquivo é muito grande. Tamanho máximo permitido: 10 MB.",
-  "upload.ok_msg":          "✅ Fase enviada com sucesso! Redirecionando...",
+  "upload.ok_msg":          "enviada com sucesso! Redirecionando...",
   "upload.err_servidor":    "Erro: Falha no servidor.",
   "upload.err_conexao":     "Erro de conexão. Verifique se o servidor está rodando.",
 
@@ -182,5 +179,22 @@
 
   "lang.selector_label":    "Idioma",
   "lang.pt_BR":             "🇧🇷 Português",
-  "lang.en":                "🇺🇸 English"
+  "lang.en":                "🇺🇸 English",
+  "home.levels_recentes": "Fases Recentes",
+  "home.levels_criadas": "Fases",
+  "perfil.levels_criadas": "Fases",
+  "home.vazio_destaque": "📭 Nenhuma fase em destaque ainda. Publique a primeira!",
+  "home.vazio_recentes": "📭 Nenhuma fase recente ainda.",
+  "home.vazio_criador": "Nenhum criador em destaque ainda.",
+  "home.erro_carregar": "⚠️ Não foi possível carregar. Tente novamente mais tarde.",
+  "levels.label_autor": "Autor",
+  "levels.label_ordem": "Ordenar por",
+  "levels.encontrados_para": "para",
+  "levels.de_autores": "de",
+  "levels.e_mais": "e mais {n}",
+  "levels.limpar_filtros": "Limpar filtros",
+  "levels.vazio_geral": "📭 Ainda não há fases publicadas.",
+  "levels.vazio_enviar": "Enviar a primeira fase",
+  "levels.vazio_filtros": "😕 Nenhuma fase encontrada.",
+  "levels.vazio_dica": "Tente outras palavras ou remova os filtros."
 }

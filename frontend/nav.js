@@ -8,6 +8,10 @@
     auth.textContent = user.username.toUpperCase();
     auth.href = 'perfil_do_usuario.html?id=' + encodeURIComponent(user.id);
     auth.removeAttribute('data-i18n');
+    // Destaca o link só na página do próprio usuário (nas demais, o "active" já vem no HTML)
+    var onOwnProfile = /perfil_do_usuario\.html$/.test(location.pathname) &&
+      new URLSearchParams(location.search).get('id') === String(user.id);
+    auth.classList.toggle('active', onOwnProfile);
   }
 
 })();

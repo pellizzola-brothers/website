@@ -32,7 +32,13 @@
       transition: border-color .2s;
     }
     .filtros-wrap select:focus { outline: none; border-color: var(--accent); }
-    .resultado-count { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+    .filtro-campo { display: flex; flex-direction: column; gap: 4px; }
+    .filtro-label { font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: var(--text-muted); }
+    .resultado-count { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+    .resultado-count .limpar-filtros { background: none; border: 0; padding: 0; color: var(--accent); text-decoration: underline; cursor: pointer; font: inherit; }
+    .empty-box { text-align: center; padding: 28px 12px; color: var(--text-muted); }
+    .empty-box a, .empty-box button { color: var(--accent); text-decoration: underline; background: none; border: 0; cursor: pointer; font: inherit; }
+    .empty-box p { margin: 6px 0; }
     .resultado-count strong { color: var(--text); }
     .list-header {
       display: flex;
@@ -352,6 +358,8 @@
 
   <div class="filtros-wrap">
     <!-- Filtro de autor: componente multi-select -->
+    <div class="filtro-campo">
+    <span class="filtro-label" data-i18n="levels.label_autor">Autor</span>
     <div class="autor-filter-wrap" id="autorFilter">
       <div class="autor-trigger" id="autorTrigger" onclick="autorToggle()">
         <span id="autorTriggerLabel">👤 Todos os autores</span>
@@ -381,17 +389,17 @@
       </div>
     </div>
 
-    <select id="filtroArquivo">
-      <option value="" data-i18n="levels.filtro_todos">📦 Todos</option>
-      <option value="sim" data-i18n="levels.filtro_com_arq">✅ Com arquivo</option>
-      <option value="nao" data-i18n="levels.filtro_sem_arq">⚠️ Sem arquivo</option>
-    </select>
+    </div>
+
+    <label class="filtro-campo">
+    <span class="filtro-label" data-i18n="levels.label_ordem">Ordenar por</span>
     <select id="ordenacao">
       <option value="downloads" data-i18n="levels.ordem_downloads">⬇ Mais baixados</option>
       <option value="likes" data-i18n="levels.ordem_likes">♥ Mais curtidos</option>
       <option value="nome" data-i18n="levels.ordem_nome">🔤 A → Z</option>
       <option value="recentes" data-i18n="levels.ordem_recentes">🕐 Mais recentes</option>
     </select>
+    </label>
   </div>
 
   <div class="list-header">
@@ -423,7 +431,7 @@
     </div>
   </div>
 
-  <div id="empty-state" class="empty-state" style="display:none;" data-i18n="levels.nenhum_encontrado">😕 Nenhuma fase encontrada.</div>
+  <div id="empty-state" class="empty-state" style="display:none;"></div>
   <div class="pagination" id="pagination" style="display:none;"></div>
 
   <!-- Botão de ajuda da tela de Fases -->
@@ -445,7 +453,6 @@
           <ul class="help-list">
             <li><strong>Busca</strong>: pesquise fases por nome, descrição ou autor.</li>
             <li><strong>Filtro de autor</strong>: selecione um ou mais criadores para ver só as fases deles — com atalhos para "Com fases" e "Top 5".</li>
-            <li><strong>Filtro de arquivo</strong>: mostre apenas fases com ou sem arquivo disponível para download.</li>
             <li><strong>Ordenação</strong>: organize a lista por mais baixados, mais curtidos, nome (A → Z) ou mais recentes.</li>
             <li><strong>Lista de fases</strong>: cada linha mostra a miniatura, o nome, a descrição, o autor e as estatísticas da fase.</li>
           </ul>
@@ -533,7 +540,6 @@ function saveFilterState() {
   try {
     sessionStorage.setItem(_filterStateKey, JSON.stringify({
       q: document.getElementById('searchInput').value,
-      arquivo: document.getElementById('filtroArquivo').value,
       ordem: document.getElementById('ordenacao').value,
       autores: autorGetSelected()
     }));
@@ -546,15 +552,14 @@ function restoreFilterState() {
     if (!raw) return;
     var state = JSON.parse(raw);
     if (state.q) document.getElementById('searchInput').value = state.q;
-    if (state.arquivo) document.getElementById('filtroArquivo').value = state.arquivo;
     if (state.ordem) document.getElementById('ordenacao').value = state.ordem;
     window._pendingAutores = Array.isArray(state.autores) ? state.autores : [];
   } catch(e) {}
 }
 
-function limparBusca(e) {
-  e.preventDefault();
+function limparFiltros() {
   document.getElementById('searchInput').value = '';
+  autorLimpar();
   aplicarFiltros();
 }
 
@@ -779,10 +784,9 @@ async function carregarNiveis() {
     setProgress(100);
   } catch(err) {
     setProgress(100);
-    showToast(t('levels.offline'));
     document.getElementById('levels-list').innerHTML = '';
     var empty = document.getElementById('empty-state');
-    empty.textContent = '😕 ' + t('levels.offline');
+    empty.textContent = t('home.erro_carregar');
     empty.style.display = '';
     return;
   }
@@ -808,7 +812,6 @@ function aplicarFiltros() {
   saveFilterState();
   var q       = document.getElementById('searchInput').value.toLowerCase().trim();
   var autoresSelecionados = autorGetSelected();
-  var arquivo = document.getElementById('filtroArquivo').value;
   var ordem   = document.getElementById('ordenacao').value;
 
   levelsFiltrados = todosLevels.filter(function(l) {
@@ -817,8 +820,7 @@ function aplicarFiltros() {
       (l.description || '').toLowerCase().indexOf(q) !== -1 ||
       l.author_name.toLowerCase().indexOf(q) !== -1;
     var autorOk = autoresSelecionados.length === 0 || autoresSelecionados.indexOf(l.author_name) !== -1;
-    var arqOk   = !arquivo || (arquivo === 'sim' ? !!l.file_id : !l.file_id);
-    return buscaOk && autorOk && arqOk;
+    return buscaOk && autorOk;
   });
 
   levelsFiltrados.sort(function(a, b) {
@@ -831,10 +833,19 @@ function aplicarFiltros() {
 
   var countEl = document.getElementById('resultado-count');
   var titleEl = document.getElementById('list-title');
-  if (q || autoresSelecionados.length > 0 || arquivo) {
+  var n = levelsFiltrados.length;
+  if (q || autoresSelecionados.length > 0) {
+    // Frase legível: "3 fases encontradas para “mario” de ana, bob e mais 2   [Limpar filtros]"
+    var partes = ['<span><strong>' + n + '</strong> ' + (n !== 1 ? t('levels.encontrados_plural') : t('levels.encontrados_singular')) + '</span>'];
+    if (q) partes.push('<span>' + t('levels.encontrados_para') + ' &ldquo;' + escHtml(q) + '&rdquo;</span>');
+    if (autoresSelecionados.length > 0) {
+      var vis = autoresSelecionados.slice(0, 3).map(escHtml).join(', ');
+      var resto = autoresSelecionados.length - 3;
+      partes.push('<span>' + t('levels.de_autores') + ' ' + vis + (resto > 0 ? ' ' + t('levels.e_mais', { n: resto }) : '') + '</span>');
+    }
+    partes.push('<button type="button" class="limpar-filtros" onclick="limparFiltros()">' + t('levels.limpar_filtros') + '</button>');
     countEl.style.display = '';
-    countEl.innerHTML = '<strong>' + levelsFiltrados.length + '</strong> ' +
-      (levelsFiltrados.length !== 1 ? t('levels.encontrados_plural') : t('levels.encontrados_singular'));
+    countEl.innerHTML = partes.join(' ');
     titleEl.style.display = 'none';
     var titleParts = [];
     if (q) titleParts.push('"' + q + '"');
@@ -843,7 +854,7 @@ function aplicarFiltros() {
   } else {
     countEl.style.display = 'none';
     titleEl.style.display = '';
-    titleEl.textContent = t('levels.todos') + ' (' + levelsFiltrados.length + ')';
+    titleEl.textContent = t('levels.todos') + ' (' + n + ')';
     document.title = t('levels.titulo_pagina');
   }
 
@@ -867,11 +878,11 @@ function renderLevels(niveis) {
   var list  = document.getElementById('levels-list');
   if (!niveis.length) {
     list.innerHTML = '';
-    var q = document.getElementById('searchInput').value.trim();
-    if (q) {
-      empty.innerHTML = '😕 ' + t('levels.nenhum_encontrado').replace('.','') + ' com o nome &ldquo;' + escHtml(q) + '&rdquo;. <a href="#" onclick="limparBusca(event)" style="color:var(--accent);text-decoration:underline;">Ver todos</a>';
+    if (!todosLevels.length) {
+      // Banco sem nenhuma fase: convite em vez de "nenhum resultado"
+      empty.innerHTML = '<div class="empty-box"><p>' + t('levels.vazio_geral') + '</p><p><a href="upload.html">' + t('levels.vazio_enviar') + '</a></p></div>';
     } else {
-      empty.innerHTML = t('levels.nenhum_encontrado');
+      empty.innerHTML = '<div class="empty-box"><p>' + t('levels.vazio_filtros') + '</p><p>' + t('levels.vazio_dica') + '</p><p><button type="button" onclick="limparFiltros()">' + t('levels.limpar_filtros') + '</button></p></div>';
     }
     empty.style.display = '';
     return;
@@ -1013,7 +1024,6 @@ async function handleDl(e, id, fileId, btn, statsId) {
 
 /* ── EVENTOS ── */
 document.getElementById('searchInput').addEventListener('input', onBuscaInput);
-document.getElementById('filtroArquivo').addEventListener('change', aplicarFiltros);
 document.getElementById('ordenacao').addEventListener('change', aplicarFiltros);
 document.getElementById('searchInput').addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { e.target.value = ''; aplicarFiltros(); }
@@ -1030,7 +1040,8 @@ document.getElementById('searchInput').addEventListener('keydown', function(e) {
   }
 })();
 
-carregarNiveis();
+// t() só tem as traduções depois do i18n iniciar (DOMContentLoaded)
+i18nReady.then(carregarNiveis);
 
 function navSearch(e) {
   e.preventDefault();
