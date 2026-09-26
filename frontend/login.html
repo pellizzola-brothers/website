@@ -112,7 +112,6 @@
     <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
-    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" class="active" data-i18n="nav.entrar">Entrar</a></li>
   </ul>
 </nav>
@@ -416,8 +415,14 @@
 <script>
 'use strict';
 
+// Destino pós-login: ?next=pagina.html (só nomes de página locais — evita open redirect)
+function afterLoginUrl(u) {
+  const next = new URLSearchParams(location.search).get('next');
+  return next && /^[\w-]+\.html$/.test(next) ? next : 'perfil_do_usuario.html?id=' + u.id;
+}
+
 const existing = getUser();
-if (existing) window.location.href = 'perfil_do_usuario.html?id=' + existing.id;
+if (existing) window.location.href = afterLoginUrl(existing);
 
 /* ══════════════════════════════════════════════════════════
    CAPTCHA — texto distorcido, resolvido num popup pequeno (não tela cheia)
@@ -855,7 +860,7 @@ async function submitLogin(captcha_token, captcha_answer) {
     pendingLogin = null;
     saveSession(data.user, data.token);
     showMsg('login-msg', t('login.ok_login'), true);
-    setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
+    setTimeout(function() { window.location.href = afterLoginUrl(data.user); }, 1200);
   } catch (e) { showMsg('login-msg', t('login.err_conexao'), false); }
 }
 
@@ -976,7 +981,7 @@ async function submitRegister(captcha_token, captcha_answer) {
     pendingRegister = null;
     saveSession(data.user, data.token);
     showMsg('reg-msg', t('login.ok_cadastro'), true);
-    setTimeout(function() { window.location.href = 'perfil_do_usuario.html?id=' + data.user.id; }, 1200);
+    setTimeout(function() { window.location.href = afterLoginUrl(data.user); }, 1200);
   } catch (e) { showMsg('reg-msg', t('login.err_conexao'), false); }
 }
 </script>

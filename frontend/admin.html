@@ -383,7 +383,6 @@
     <li><a href="levels.html">Fases</a></li>
     <li><a href="usuarios.html">Criadores</a></li>
     <li><a href="download.html">Download</a></li>
-    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
     <li><a href="admin.html" class="active" style="color:#e07070;">🔒 Admin</a></li>
     <li><a href="login.html" id="nav-auth">Entrar</a></li>
   </ul>
@@ -683,9 +682,6 @@
 var CURRENT_USER = getUser();
 (function() {
   if (CURRENT_USER) {
-    var el = document.getElementById('nav-auth');
-    el.textContent = CURRENT_USER.username.toUpperCase();
-    el.href = 'perfil_do_usuario.html?id=' + CURRENT_USER.id;
     document.getElementById('admin-username').textContent = CURRENT_USER.username.toUpperCase();
   }
 })();
@@ -904,18 +900,18 @@ function renderLevels() {
 
   adminFetch('/admin/levels').then(function (levels) {
     _levelsCache = levels;
-    document.getElementById('levels-count-label').textContent = levels.length + ' fase(s) publicada(s)';
+    document.getElementById('levels-count-label').textContent = levels.length + ' fase(s) (inclui apagadas)';
     tbody.innerHTML = levels.map(function(l) {
       return '<tr id="level-row-' + l.id + '">' +
         '<td style="color:var(--text-dim);font-family:var(--font-title);font-size:11px;">#' + l.id + '</td>' +
-        '<td><div class="tbl-name">' + escHtml(l.name) + '</div></td>' +
+        '<td><div class="tbl-name">' + escHtml(l.name) + (l.active ? '' : ' <span class="tbl-badge badge-banned">🗑 Apagada</span>') + '</div></td>' +
         '<td><div class="tbl-sub">' + escHtml(l.author_name || '—') + '</div></td>' +
         '<td>⬇ ' + l.downloads + '</td>' +
         '<td>♥ ' + l.likes + '</td>' +
         '<td>' + (l.file_id ? '<span class="tbl-badge badge-user">✅ Sim</span>' : '<span class="tbl-badge badge-banned">⚠️ Não</span>') + '</td>' +
         '<td><div class="tbl-actions">' +
           '<a href="perfil_do_jogo.html?id=' + l.id + '" class="tbl-btn" target="_blank">Ver</a>' +
-          '<button class="tbl-btn danger" onclick="deleteLevel(' + l.id + ')">Deletar</button>' +
+          (l.active ? '<button class="tbl-btn danger" onclick="deleteLevel(' + l.id + ')">Deletar</button>' : '') +
         '</div></td>' +
       '</tr>';
     }).join('');

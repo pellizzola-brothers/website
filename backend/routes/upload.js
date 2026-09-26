@@ -6,9 +6,9 @@ const path    = require('path');
 const fs      = require('fs');
 const { getPool } = require('../db');
 const { authMiddleware } = require('../middleware/auth');
+const { getSetting } = require('../lib/settings');
 
-const UPLOAD_DIR = path.join(__dirname, '../../levels');
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+const { UPLOAD_DIR } = require('../lib/levels');
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOAD_DIR),
@@ -32,7 +32,11 @@ const upload = multer({
 });
 
 // ── POST /api/upload/level — PROTEGIDO ──────────────────────
-router.post('/level', authMiddleware, upload.single('file'), async (req, res) => {
+router.post('/level', authMiddleware, async (req, res, next) => {
+  if (!(await getSetting('allow_upload')))
+    return res.status(403).json({ error: 'Upload de fases está desativado no momento' });
+  next();
+}, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
       error: 'Nenhum arquivo enviado ou tipo não permitido (.json, .lvl, .dat, .xml, .bin)'
@@ -40,8 +44,10 @@ router.post('/level', authMiddleware, upload.single('file'), async (req, res) =>
   }
 
   const { name, description } = req.body;
-  if (!name || name.trim().length < 3)
+  if (typeof name !== 'string' || name.trim().length < 3) {
+    fs.unlink(req.file.path, () => {});
     return res.status(400).json({ error: 'Nome do level obrigatório (mínimo 3 caracteres)' });
+  }
 
   const userId  = req.user.id;
   const hash    = req.file.filename;

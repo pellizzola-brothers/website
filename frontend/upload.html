@@ -233,7 +233,6 @@
     <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
-    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -268,7 +267,7 @@
       <div class="campo">
         <label data-i18n="upload.arquivo_label">Arquivo da fase *</label>
         <div class="drop-zone" id="drop-zone">
-          <input type="file" id="arquivo" accept="*/*">
+          <input type="file" id="arquivo" accept=".json,.lvl,.dat,.xml,.bin">
           <span class="icon">📁</span>
           <span id="drop-texto" data-i18n="upload.drop_texto">Clique ou arraste o arquivo aqui</span>
           <br><small style="font-size:11px;color:var(--text-dim);" data-i18n="upload.drop_max">Tamanho máximo: 10 MB</small>
@@ -352,10 +351,7 @@ function closeHelpOnEsc(e) {
 
 var usuario = getUser();
 
-if (usuario != null) {
-  document.getElementById('nav-auth').textContent = usuario.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + usuario.id;
-} else {
+if (usuario == null) {
   document.getElementById('form-upload').style.display = 'none';
   document.getElementById('aviso-login').style.display = '';
 }
@@ -413,6 +409,7 @@ function enviar() {
   if (!nome)              { mostrarMsg('erro', t('upload.err_nome')); return; }
   if (nome.length < 3)    { mostrarMsg('erro', t('upload.err_nome_curto')); return; }
   if (!arquivo)           { mostrarMsg('erro', t('upload.err_arquivo')); return; }
+  if (!/\.(json|lvl|dat|xml|bin)$/i.test(arquivo.name)) { mostrarMsg('erro', 'Tipo de arquivo não permitido (.json, .lvl, .dat, .xml, .bin)'); return; }
   if (arquivo.size > 10 * 1024 * 1024) {
     mostrarMsg('erro', t('upload.err_tamanho'));
     return;
@@ -451,6 +448,7 @@ function enviar() {
     try { dados = JSON.parse(xhr.responseText); } catch(e) { dados = {}; }
 
     if (xhr.status === 201 && dados.ok) {
+      sessionStorage.removeItem('pb_niveis_v2'); // lista de levels em cache ficaria sem o novo level por até 2 min
       mostrarMsg('ok',
         '✅ ' + t('entity.fase') + ' <strong>' + escHtml(dados.level.name) + '</strong> ' + t('upload.ok_msg')
       );
@@ -458,7 +456,7 @@ function enviar() {
         window.location.href = 'perfil_do_jogo.html?id=' + dados.level.id;
       }, 1800);
     } else {
-      mostrarMsg('erro', t('upload.err_servidor') + ' ' + (dados.error || ''));
+      mostrarMsg('erro', t('upload.err_servidor') + ' ' + escHtml(dados.error || ''));
     }
   });
 
@@ -479,7 +477,7 @@ function mostrarMsg(tipo, html) {
   var el = document.getElementById('msg');
   el.className = 'msg ' + tipo;
   el.innerHTML = html;
-  el.style.display = '';
+  el.style.display = 'block'; // '' cairia no display:none do CSS de .msg
   el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 </script>

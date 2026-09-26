@@ -133,7 +133,6 @@
     <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
-    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -284,22 +283,11 @@ const emojiFor = id => EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJI
 const loggedUser = getUser();
 const authToken  = getToken();
 
-if (loggedUser) {
-  document.getElementById('nav-auth').textContent = loggedUser.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + loggedUser.id;
-}
-
 const getUserId = () => parseInt(new URLSearchParams(location.search).get('id')) || 1;
 const isOwn     = id => loggedUser && loggedUser.id === id;
 
 function getStoredAvatar(userId) { return localStorage.getItem('pb_avatar_' + userId) || '👤'; }
 function setStoredAvatar(userId, emoji) { localStorage.setItem('pb_avatar_' + userId, emoji); }
-function getStoredBio(userId, fallback) {
-  var v = localStorage.getItem('pb_bio_' + userId);
-  return v !== null ? v : (fallback || '');
-}
-function setStoredBio(userId, bio) { localStorage.setItem('pb_bio_' + userId, bio); }
-function getLikedLevels() { return JSON.parse(localStorage.getItem('pb_liked_levels') || '[]'); }
 
 function showToast(msg, ms) {
   ms = ms || 2000;
@@ -361,19 +349,23 @@ async function saveBio() {
     if (!ok) return;
   }
   try {
-    await fetch(API + '/users/' + currentProfileId, {
+    const resp = await fetch(API + '/users/' + currentProfileId, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
       body: JSON.stringify({ bio })
     });
-    setStoredBio(currentProfileId, bio);
+    if (!resp.ok) {
+      const err = await resp.json().catch(function() { return {}; });
+      showToast('❌ ' + (err.error || resp.status));
+      return;
+    }
     window._currentBio = bio;
     document.querySelectorAll('.user-bio').forEach(function(el) { el.textContent = bio ? '"' + bio + '"' : ''; });
     if (loggedUser && loggedUser.id === currentProfileId) {
       loggedUser.bio = bio;
       saveSession(loggedUser, authToken);
     }
-  } catch (_) { setStoredBio(currentProfileId, bio); }
+  } catch (_) { showToast(t('perfil.toast_del_err')); return; }
   closeModal('modal-bio');
   showToast(t('perfil.toast_perfil'));
 }
@@ -406,18 +398,12 @@ async function changePassword(oldPass, newPass) {
   if (!/[A-Z]/.test(newPass)) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha precisa de letra maiúscula.'; return false; }
   if (!/[!@#$%^&*()+\-=\[\]{};:\'",.<>\/?|]/.test(newPass)) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Nova senha precisa de caractere especial.'; return false; }
   try {
-    const loginResp = await fetch(API + '/auth/login', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: loggedUser.username, password: oldPass })
+    const resp = await fetch(API + '/auth/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+      body: JSON.stringify({ old_password: oldPass, new_password: newPass })
     });
-    if (!loginResp.ok) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Senha atual incorreta.'; return false; }
-    const loginData = await loginResp.json();
-    const tempToken = loginData.token;
-    const resetResp = await fetch(API + '/auth/recovery/reset', {
-      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tempToken },
-      body: JSON.stringify({ password: newPass })
-    });
-    if (!resetResp.ok) { const err = await resetResp.json(); msgEl.style.color = '#e07070'; msgEl.textContent = err.error || 'Erro ao alterar senha.'; return false; }
+    if (!resp.ok) { const err = await resp.json().catch(function() { return {}; }); msgEl.style.color = '#e07070'; msgEl.textContent = err.error || 'Erro ao alterar senha.'; return false; }
     msgEl.style.color = '#5dba60'; msgEl.textContent = '✓ Senha alterada com sucesso!';
     return true;
   } catch (_) { msgEl.style.color = '#e07070'; msgEl.textContent = 'Erro de conexão.'; return false; }
@@ -461,36 +447,38 @@ async function confirmDelete() {
   } catch (_) { showToast(t('perfil.toast_del_err')); }
 }
 
-function renderLikedSection() {
-  const likedIds = getLikedLevels();
-  if (!likedIds.length) return '';
-  const cards = likedIds.map(function(id) {
-    return '<a href="perfil_do_jogo.html?id=' + id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
-      '<div class="created-card-thumb">' + emojiFor(id) + '</div>' +
-      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.curtido_por_vc') + '</div></div>' +
-      '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked(' + id + ',this.closest(\'a\'))">' + t('perfil.remover') + '</button></div>' +
-    '</a>';
-  }).join('');
-  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.fases_curtidas') + '</div><div class="created-strip">' + cards + '</div>';
+function levelStrip(title, levels, sub, removable) {
+  if (!levels.length) return '';
+  return '<div class="created-title" style="margin-top:28px;">' + title + '</div><div class="created-strip">' +
+    levels.map(function(l) {
+      return '<a href="perfil_do_jogo.html?id=' + parseInt(l.id) + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
+        '<div class="created-card-thumb">' + emojiFor(l.id) + '</div>' +
+        '<div class="created-card-info"><div class="created-card-name">' + escHtml(l.name) + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + sub(l) + '</div></div>' +
+        (removable ? '<div class="created-card-foot"><button class="btn-delete-level" style="border-color:var(--text-muted);color:var(--text-muted);" onclick="event.preventDefault();removeLiked(' + parseInt(l.id) + ',this.closest(\'a\'))">' + t('perfil.remover') + '</button></div>' : '') +
+      '</a>';
+    }).join('') + '</div>';
 }
 
-function removeLiked(id, card) {
-  var list = getLikedLevels().filter(function(x) { return x !== id; });
-  localStorage.setItem('pb_liked_levels', JSON.stringify(list));
+async function removeLiked(id, card) {
+  try {
+    const resp = await fetch(API + '/levels/' + id + '/unlike', { method: 'POST', headers: { 'Authorization': 'Bearer ' + authToken } });
+    if (!resp.ok && resp.status !== 409) throw new Error(resp.status);
+  } catch (_) { showToast('❌ ' + t('perfil.toast_del_err')); return; }
   if (card) { card.style.transition = 'opacity .3s'; card.style.opacity = '0'; setTimeout(function() { card.remove(); }, 300); }
 }
 
-function renderDownloadHistory() {
-  const history = JSON.parse(localStorage.getItem('pb_download_history') || '[]');
-  if (!history.length) return '';
-  const cards = history.slice(0, 12).map(function(item) {
-    var date = new Date(item.at).toLocaleDateString(getLang().replace('_','-'), { day:'2-digit', month:'short' });
-    return '<a href="perfil_do_jogo.html?id=' + item.id + '" class="created-card" style="text-decoration:none;color:inherit;display:block;">' +
-      '<div class="created-card-thumb">' + emojiFor(item.id) + '</div>' +
-      '<div class="created-card-info"><div class="created-card-name">' + t('perfil.fase_numero') + item.id + '</div><div class="created-card-desc" style="font-size:11px;color:var(--text-muted);">' + t('perfil.baixado_em') + ' ' + date + '</div></div>' +
-    '</a>';
-  }).join('');
-  return '<div class="created-title" style="margin-top:28px;">' + t('perfil.downloads_rec') + '</div><div class="created-strip">' + cards + '</div>';
+// Curtidas e histórico de downloads vêm do servidor (não do localStorage, que é por navegador e não por conta)
+async function loadOwnLists(id) {
+  const get = function(path) {
+    return fetch(API + '/users/' + id + path, { headers: { 'Authorization': 'Bearer ' + authToken } })
+      .then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; });
+  };
+  const [liked, history] = await Promise.all([get('/liked'), get('/download-history')]);
+  document.getElementById('own-lists').innerHTML =
+    levelStrip(t('perfil.fases_curtidas'), liked, function() { return t('perfil.curtido_por_vc'); }, true) +
+    levelStrip(t('perfil.downloads_rec'), history.slice(0, 12), function(l) {
+      return t('perfil.baixado_em') + ' ' + new Date(l.at).toLocaleDateString(getLang().replace('_', '-'), { day: '2-digit', month: 'short' });
+    }, false);
 }
 
 async function loadProfile() {
@@ -511,7 +499,7 @@ async function loadProfile() {
   document.title = u.username + ' — Pellizzola Brothers';
   const own    = isOwn(u.id);
   const avatar = getStoredAvatar(u.id);
-  const bio    = getStoredBio(u.id, u.bio);
+  const bio    = u.bio || '';
   const levels = u.levels || [];
 
   window._currentBio = bio;
@@ -565,8 +553,8 @@ async function loadProfile() {
     (levels.length > 0
       ? '<div class="created-title">' + t('perfil.fases_criadas') + '</div><div class="created-strip">' + createdCards + moreCard + '</div>'
       : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;margin-top:8px;">' + t('perfil.nenhuma_fase') + '</div>') +
-    (own ? renderLikedSection() : '') +
-    (own ? renderDownloadHistory() : '');
+    '<div id="own-lists"></div>';
+  if (own) loadOwnLists(u.id);
 }
 
 function getFavCreators() { try { return JSON.parse(localStorage.getItem('pb_criadores_fav') || '[]'); } catch(e) { return []; } }

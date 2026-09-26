@@ -5,9 +5,13 @@ const { getPool } = require('../db');
 const { authMiddleware } = require('../middleware/auth');
 const { requireAdmin }   = require('../middleware/admin');
 const { getSettings }    = require('../lib/settings');
+const { deactivateLevel } = require('../lib/levels');
 
 router.use(authMiddleware, requireAdmin);
 
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// `text` é renderizado como HTML no painel — sempre passe nomes vindos de usuário por esc()
 async function log(pool, req, icon, text) {
   await pool.query(
     `INSERT INTO admin_logs (admin_id, admin_name, icon, text) VALUES ($1, $2, $3, $4)`,
@@ -21,9 +25,9 @@ router.get('/stats', async (req, res) => {
     const pool = await getPool();
     const [users, levels, reports, files] = await Promise.all([
       pool.query(`SELECT COUNT(*)::int AS n FROM users`),
-      pool.query(`SELECT COUNT(*)::int AS n, COALESCE(SUM(downloads),0)::int AS downloads, COALESCE(SUM(likes),0)::int AS likes FROM levels`),
+      pool.query(`SELECT COUNT(*)::int AS n, COALESCE(SUM(downloads),0)::int AS downloads, COALESCE(SUM(likes),0)::int AS likes FROM levels WHERE active`),
       pool.query(`SELECT COUNT(*)::int AS n FROM reports WHERE status = 'open'`),
-      pool.query(`SELECT COUNT(*)::int AS n FROM levels WHERE file_id IS NOT NULL`),
+      pool.query(`SELECT COUNT(*)::int AS n FROM levels WHERE file_id IS NOT NULL AND active`),
     ]);
     res.json({
       users:          users.rows[0].n,
@@ -102,7 +106,7 @@ router.get('/users', async (req, res) => {
              u.downloaded_levels, u.liked_levels,
              COUNT(l.id)::int AS total_levels
       FROM users u
-      LEFT JOIN levels l ON l.author = u.id
+      LEFT JOIN levels l ON l.author = u.id AND l.active
       GROUP BY u.id
       ORDER BY u.id
     `);
@@ -126,7 +130,7 @@ router.post('/users/:id/ban', async (req, res) => {
       [id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-    await log(pool, req, '🚫', `Usuário <strong>${result.rows[0].username}</strong> foi banido.`);
+    await log(pool, req, '🚫', `Usuário <strong>${esc(result.rows[0].username)}</strong> foi banido.`);
     res.json({ ok: true });
   } catch (err) {
     console.error('[POST /admin/users/:id/ban]', err);
@@ -146,7 +150,7 @@ router.post('/users/:id/unban', async (req, res) => {
       [id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-    await log(pool, req, '✅', `Usuário <strong>${result.rows[0].username}</strong> teve o banimento removido.`);
+    await log(pool, req, '✅', `Usuário <strong>${esc(result.rows[0].username)}</strong> teve o banimento removido.`);
     res.json({ ok: true });
   } catch (err) {
     console.error('[POST /admin/users/:id/unban]', err);
@@ -166,7 +170,7 @@ router.post('/users/:id/promote', async (req, res) => {
       [id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-    await log(pool, req, '⭐', `Usuário <strong>${result.rows[0].username}</strong> promovido a Admin.`);
+    await log(pool, req, '⭐', `Usuário <strong>${esc(result.rows[0].username)}</strong> promovido a Admin.`);
     res.json({ ok: true });
   } catch (err) {
     console.error('[POST /admin/users/:id/promote]', err);
@@ -192,7 +196,7 @@ router.post('/users/:id/demote', async (req, res) => {
       [id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Usuário não encontrado' });
-    await log(pool, req, '👤', `Privilégios de admin de <strong>${result.rows[0].username}</strong> revogados.`);
+    await log(pool, req, '👤', `Privilégios de admin de <strong>${esc(result.rows[0].username)}</strong> revogados.`);
     res.json({ ok: true });
   } catch (err) {
     console.error('[POST /admin/users/:id/demote]', err);
@@ -205,7 +209,7 @@ router.get('/levels', async (req, res) => {
   try {
     const pool = await getPool();
     const result = await pool.query(`
-      SELECT l.id, l.name, l.downloads, l.likes, l.file_id,
+      SELECT l.id, l.name, l.downloads, l.likes, l.file_id, l.active,
              u.username AS author_name
       FROM levels l
       INNER JOIN users u ON u.id = l.author
@@ -218,16 +222,16 @@ router.get('/levels', async (req, res) => {
   }
 });
 
-// ── DELETE /api/admin/levels/:id — admin pode deletar qualquer fase ──
+// ── DELETE /api/admin/levels/:id — admin desativa qualquer fase (soft delete) ──
 router.delete('/levels/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
     const pool = await getPool();
-    const result = await pool.query(`DELETE FROM levels WHERE id = $1 RETURNING name`, [id]);
-    if (result.rows.length === 0) return res.status(404).json({ error: 'Fase não encontrada' });
-    await log(pool, req, '🗑', `Fase <strong>${result.rows[0].name}</strong> deletada pelo admin.`);
+    const level = await deactivateLevel(pool, id);
+    if (!level) return res.status(404).json({ error: 'Fase não encontrada ou já desativada' });
+    await log(pool, req, '🗑', `Fase <strong>${esc(level.name)}</strong> desativada pelo admin.`);
     res.json({ ok: true });
   } catch (err) {
     console.error('[DELETE /admin/levels/:id]', err);
@@ -290,10 +294,10 @@ router.delete('/reports/:id/level', async (req, res) => {
     if (report.rows.length === 0) return res.status(404).json({ error: 'Denúncia não encontrada' });
 
     const { level_id, name } = report.rows[0];
-    await pool.query(`DELETE FROM levels WHERE id = $1`, [level_id]);
+    await deactivateLevel(pool, level_id);
     await pool.query(`UPDATE reports SET status = 'closed' WHERE id = $1`, [id]);
 
-    await log(pool, req, '🗑', `Fase <strong>${name}</strong> deletada via denúncia #${id}`);
+    await log(pool, req, '🗑', `Fase <strong>${esc(name)}</strong> desativada via denúncia #${id}`);
     res.json({ ok: true });
   } catch (err) {
     console.error('[DELETE /admin/reports/:id/level]', err);

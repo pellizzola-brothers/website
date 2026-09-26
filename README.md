@@ -64,10 +64,10 @@ frontend/          Static pages + vanilla JS
   config.js        API base URL — the one line to switch local ↔ production
   auth.js / util.js / cache.js / nav.js / i18n.js   Shared helpers (see CLAUDE.md for details)
   *.html           One page per route — index, levels, usuarios (creators), login,
-                    upload, perfil_do_usuario/jogo (profiles), little_coffee (lounge), etc.
+                    upload, perfil_do_usuario/jogo (profiles), etc.
 
 levels/            Uploaded level files (multer destination)
-pauro_database.sql Full schema + seed data + migrations
+pauro_database.sql Schema only (fresh database)
 railway.json       Railway build/deploy config
 ```
 
@@ -100,7 +100,7 @@ Copy `.env.example` to `backend/.env` and fill in:
 | `ALLOWED_ORIGINS` | no | comma-separated origins; leave empty in dev to allow all |
 | `PORT` | no | defaults to `3000` |
 
-Load `pauro_database.sql` into your database to get the schema (and seed data, if you want it).
+Load `pauro_database.sql` into your database to create the schema.
 
 ### Running Locally
 

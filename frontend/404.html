@@ -42,7 +42,6 @@
     <li><a href="levels.html">Levels</a></li>
     <li><a href="usuarios.html">Criadores</a></li>
     <li><a href="download.html">Download</a></li>
-    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -69,11 +68,6 @@
 </div>
 
 <script>
-const user = getUser();
-if (user) {
-  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
-}
 function navSearch(e) {
   e.preventDefault();
   const q = document.getElementById('nav-search').value.trim();

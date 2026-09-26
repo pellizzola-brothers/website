@@ -32,4 +32,12 @@ async function requireAdmin(req, res, next) {
   }
 }
 
-module.exports = { requireAdmin };
+// true se o usuário existe e é admin (para rotas públicas que mostram mais coisas a admins)
+async function isAdminUser(userId) {
+  if (!userId) return false;
+  const pool = await getPool();
+  const r = await pool.query(`SELECT 1 FROM users WHERE id = $1 AND role = 'admin' AND NOT banned`, [userId]);
+  return r.rowCount > 0;
+}
+
+module.exports = { requireAdmin, isAdminUser };

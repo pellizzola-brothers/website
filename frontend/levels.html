@@ -331,7 +331,6 @@
     <li><a href="levels.html" class="active" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
-    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -507,12 +506,6 @@ let debounceTimer   = null;
 
 /* ── SESSÃO ── */
 const user = getUser();
-if (user) {
-  const el = document.getElementById('nav-auth');
-  el.textContent = user.username.toUpperCase();
-  el.href = 'perfil_do_usuario.html?id=' + user.id;
-}
-
 /* ── UTILS ── */
 function showToast(msg, ms) {
   ms = ms || 2200;
@@ -647,7 +640,8 @@ function _autorAtivarChip(id) {
 }
 
 /* ── Toggle de seleção de um autor ── */
-function autorToggleOpcao(nome) {
+function autorToggleOpcao(i) {
+  var nome = _autorFiltrados[i].name;
   var idx = _autorSelecionados.indexOf(nome);
   if (idx === -1) _autorSelecionados.push(nome);
   else _autorSelecionados.splice(idx, 1);
@@ -690,11 +684,11 @@ function _autorRenderLista() {
     return;
   }
 
-  lista.innerHTML = page.map(function(a) {
+  lista.innerHTML = page.map(function(a, i) {
     var checked = _autorSelecionados.indexOf(a.name) !== -1;
     return '<label class="autor-option">' +
       '<input type="checkbox" ' + (checked ? 'checked' : '') +
-        ' onchange="autorToggleOpcao(' + JSON.stringify(a.name) + ')" onclick="event.stopPropagation()">' +
+        ' onchange="autorToggleOpcao(' + (ini + i) + ')" onclick="event.stopPropagation()">' +
       '<span class="autor-option-name">' + escHtml(a.name) + '</span>' +
       '<span class="autor-option-count">(' + a.count + ')</span>' +
     '</label>';
@@ -983,8 +977,7 @@ async function handleDl(e, id, fileId, btn, statsId) {
 
   fetch(API + '/levels/' + id + '/download', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(user ? { user_id: user.id } : {})
+    headers: Object.assign({ 'Content-Type': 'application/json' }, getToken() ? { 'Authorization': 'Bearer ' + getToken() } : {})
   }).catch(function() {});
 
   if (!fileId) {
@@ -1003,7 +996,7 @@ async function handleDl(e, id, fileId, btn, statsId) {
     var dados = await resp.json();
     if (dados && !dados.error) {
       var a = document.createElement('a');
-      a.href = API + '/upload/level/' + dados.hash;
+      a.href = API + '/upload/level/' + encodeURIComponent(dados.hash);
       a.download = dados.hash;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       showToast(t('levels.dl_iniciado'));

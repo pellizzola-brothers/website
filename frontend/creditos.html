@@ -279,7 +279,6 @@
     <li><a href="levels.html" data-i18n="nav.fases">Fases</a></li>
     <li><a href="usuarios.html" data-i18n="nav.criadores">Criadores</a></li>
     <li><a href="download.html" data-i18n="nav.download">Download</a></li>
-    <li><a href="little_coffee.html" data-i18n="nav.cafezinho">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth" data-i18n="nav.entrar">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -424,16 +423,6 @@
 </div><!-- /page -->
 
 <script>
-(function() {
-  var user = getUser();
-  if (user) {
-    var el = document.getElementById('nav-auth');
-    el.textContent = user.username.toUpperCase();
-    el.href = 'perfil_do_usuario.html?id=' + user.id;
-    el.removeAttribute('data-i18n');
-  }
-})();
-
 function navSearch(e) {
   e.preventDefault();
   var q = document.getElementById('nav-search').value.trim();

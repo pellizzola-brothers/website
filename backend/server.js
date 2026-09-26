@@ -15,6 +15,21 @@ const levelsRouter = require('./routes/levels');
 const authRouter   = require('./routes/auth');
 const uploadRouter = require('./routes/upload');
 const filesRouter  = require('./routes/files');
+const adminRouter  = require('./routes/admin');
+const { getSetting } = require('./lib/settings');
+
+// Express 4 ignora promises rejeitadas em handlers async: a requisição travava e o
+// Node derrubava o processo (ex.: body {"username": 123} → username.toLowerCase()).
+// Encaminha a rejeição para next(err), tratado no handler de erro no fim do arquivo.
+const Layer = require('express/lib/router/layer');
+const handleRequest = Layer.prototype.handle_request;
+Layer.prototype.handle_request = function (req, res, next) {
+  if (this.handle.length > 3) return handleRequest.call(this, req, res, next);
+  try {
+    const p = this.handle(req, res, next);
+    if (p && typeof p.catch === 'function') p.catch(next);
+  } catch (err) { next(err); }
+};
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +37,7 @@ const PORT = process.env.PORT || 3000;
 // ── Rate limiting global ─────────────────────────────────────
 const globalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
-  max: 120,
+  max: parseInt(process.env.RATE_LIMIT_MAX) || 120,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Muitas requisições. Aguarde um momento.' }
@@ -49,8 +64,24 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
-app.use(globalLimiter);
+// Só a API é limitada: contar CSS/JS/HTML estáticos estourava o limite com poucas páginas abertas
+app.use('/api', globalLimiter);
 app.use(express.static(path.join(__dirname, '../frontend')));
+
+// ── Modo manutenção ───────────────────────────────────────────
+// Bloqueia a API para todo mundo, exceto login e o próprio painel admin
+// (assim um admin sempre consegue entrar e desligar a manutenção).
+// req.path aqui já vem SEM o prefixo /api (Express remove o trecho do mount)
+const MAINTENANCE_ALLOWLIST = ['/health', '/auth/login'];
+app.use('/api', async (req, res, next) => {
+  if (req.path.startsWith('/admin') || MAINTENANCE_ALLOWLIST.includes(req.path))
+    return next();
+  try {
+    if (await getSetting('maintenance_mode'))
+      return res.status(503).json({ error: 'Site em manutenção. Volte em instantes.' });
+  } catch (_) { /* se falhar a checagem, não derruba o site */ }
+  next();
+});
 
 // ── Rotas da API ─────────────────────────────────────────────
 app.use('/api/users',  usersRouter);
@@ -58,6 +89,7 @@ app.use('/api/levels', levelsRouter);
 app.use('/api/auth',   authRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/files',  filesRouter);
+app.use('/api/admin',  adminRouter);
 
 // ── Health-check ─────────────────────────────────────────────
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '6' }));
@@ -70,6 +102,16 @@ app.use('/api/*', (_req, res) => {
 // ── Catch-all para SPA: serve 404.html para rotas desconhecidas
 app.get('*', (_req, res) => {
   res.status(404).sendFile(path.join(__dirname, '../frontend', '404.html'));
+});
+
+// ── Erros não tratados (JSON inválido, multer, rejeições async) ──
+app.use((err, req, res, _next) => {
+  const status = err.status || err.statusCode || (err.name === 'MulterError' ? 400 : 500);
+  if (status >= 500) console.error('[unhandled]', err);
+  const msg = err.name === 'MulterError'
+    ? (err.code === 'LIMIT_FILE_SIZE' ? 'Arquivo excede 10 MB' : 'Erro no upload')
+    : status >= 500 ? 'Erro interno do servidor' : 'Requisição inválida';
+  res.status(status).json({ error: msg });
 });
 
 // ── Inicia servidor ──────────────────────────────────────────

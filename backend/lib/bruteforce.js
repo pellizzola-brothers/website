@@ -38,29 +38,27 @@ function requiresCaptcha(attempt) {
   return attempt.fail_count >= CAPTCHA_THRESHOLD;
 }
 
-// Registra uma falha, incrementa o contador e aplica bloqueio progressivo
-// quando o contador bate um múltiplo de LOCK_EVERY. Retorna a linha atualizada.
+// Registra uma falha com incremento ATÔMICO (INSERT ... ON CONFLICT DO UPDATE): tentativas
+// paralelas não se perdem numa corrida leitura→escrita. Ao bater um múltiplo de LOCK_EVERY
+// aplica o bloqueio progressivo. Retorna a linha atualizada.
 async function registerFailure(username) {
   const pool = await getPool();
-  const current  = await getAttempt(username);
-  const newCount = current.fail_count + 1;
-
-  let lockedUntil = current.locked_until;
-  if (newCount % LOCK_EVERY === 0) {
-    const step = newCount / LOCK_EVERY;
-    const wait = computeWaitSeconds(step);
-    lockedUntil = new Date(Date.now() + wait * 1000);
-  }
-
-  await pool.query(
-    `INSERT INTO login_attempts (username, fail_count, locked_until, updated_at)
-     VALUES ($1, $2, $3, NOW())
+  const r = await pool.query(
+    `INSERT INTO login_attempts (username, fail_count, updated_at)
+     VALUES ($1, 1, NOW())
      ON CONFLICT (username) DO UPDATE
-       SET fail_count = $2, locked_until = $3, updated_at = NOW()`,
-    [username, newCount, lockedUntil]
+       SET fail_count = login_attempts.fail_count + 1, updated_at = NOW()
+     RETURNING fail_count, locked_until`,
+    [username]
   );
+  const failCount = r.rows[0].fail_count;
+  let lockedUntil = r.rows[0].locked_until;
 
-  return { fail_count: newCount, locked_until: lockedUntil };
+  if (failCount % LOCK_EVERY === 0) {
+    lockedUntil = new Date(Date.now() + computeWaitSeconds(failCount / LOCK_EVERY) * 1000);
+    await pool.query(`UPDATE login_attempts SET locked_until = $2 WHERE username = $1`, [username, lockedUntil]);
+  }
+  return { fail_count: failCount, locked_until: lockedUntil };
 }
 
 async function resetAttempts(username) {

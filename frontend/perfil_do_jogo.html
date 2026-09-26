@@ -181,7 +181,6 @@
     <li><a href="levels.html">Níveis</a></li>
     <li><a href="usuarios.html">Criadores</a></li>
     <li><a href="download.html">Download</a></li>
-    <li><a href="little_coffee.html">☕ Cafézinho</a></li>
     <li><a href="login.html" id="nav-auth">Entrar</a></li>
     <li>
       <form class="nav-search-form" onsubmit="navSearch(event)">
@@ -306,11 +305,6 @@ const emojiFor = function(id) { return EMOJIS[((id - 1) % EMOJIS.length + EMOJIS
 const user  = getUser();
 const token = getToken();
 
-if (user) {
-  document.getElementById('nav-auth').textContent = user.username.toUpperCase();
-  document.getElementById('nav-auth').href = 'perfil_do_usuario.html?id=' + user.id;
-}
-
 function navSearch(e) {
   e.preventDefault();
   var q = document.getElementById('nav-search').value.trim();
@@ -348,12 +342,13 @@ async function submitReport() {
   var footerEl = document.getElementById('report-footer');
   footerEl.style.display = 'none';
   try {
-    await fetch(API + '/levels/' + currentLevelId + '/report', {
+    var rr = await fetch(API + '/levels/' + currentLevelId + '/report', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ reason: reason.value, detail })
     });
-  } catch (_) {}
+    if (!rr.ok) throw new Error(rr.status);
+  } catch (_) { footerEl.style.display = ''; showToast('❌ Não foi possível enviar a denúncia.'); return; }
   document.getElementById('report-reasons').style.display = 'none';
   document.getElementById('report-detail').style.display  = 'none';
   var msg = document.getElementById('report-msg');
@@ -440,9 +435,10 @@ async function deleteComment(commentId) {
   if (!user || !token) return;
   if (!confirm('Deletar este comentário?')) return;
   try {
-    await fetch(API + '/levels/' + currentLevelId + '/comment/' + commentId, {
+    var dr = await fetch(API + '/levels/' + currentLevelId + '/comment/' + commentId, {
       method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token }
     });
+    if (!dr.ok) { showToast('❌ Erro ao deletar'); return; }
     commentsData = commentsData.filter(function(c) { return c.id !== commentId; });
     renderComments(commentsData);
   } catch (_) { showToast('❌ Erro ao deletar'); }
@@ -469,19 +465,10 @@ async function loadLevel() {
 
   var alreadyLiked = false;
   if (user) {
-    var localLiked = JSON.parse(localStorage.getItem('pb_liked_levels') || '[]');
-    alreadyLiked = localLiked.includes(level.id);
-    if (!alreadyLiked) {
-      try {
-        var likedResp = await fetch(API + '/levels/' + level.id + '/liked', { headers: { 'Authorization': 'Bearer ' + token } });
-        var likedData = await likedResp.json();
-        alreadyLiked = likedData.liked;
-        if (alreadyLiked && !localLiked.includes(level.id)) {
-          localLiked.push(level.id);
-          localStorage.setItem('pb_liked_levels', JSON.stringify(localLiked));
-        }
-      } catch (_) {}
-    }
+    try {
+      var likedResp = await fetch(API + '/levels/' + level.id + '/liked', { headers: { 'Authorization': 'Bearer ' + token } });
+      if (likedResp.ok) alreadyLiked = !!(await likedResp.json()).liked;
+    } catch (_) {}
   }
 
   var simCards = (level.similar || []).map(function(s, i) {
@@ -518,7 +505,7 @@ async function loadLevel() {
         '</div>' +
         '<div class="level-hero-actions">' +
           '<button class="btn btn-green" id="dl-btn" onclick="handleDownload(' + parseInt(level.id) + ',' + (level.file_id ? parseInt(level.file_id) : 'null') + ')">⬇ Download</button>' +
-          '<button class="btn btn-outline" id="like-btn" style="' + likeBtnStyle + '"' + (!user ? ' disabled title="Faça login para curtir"' : '') + ' onclick="handleLike(' + parseInt(level.id) + ')">' + likeBtnText + '</button>' +
+          '<button class="btn btn-outline" id="like-btn" data-liked="' + (alreadyLiked ? '1' : '0') + '" style="' + likeBtnStyle + '"' + (!user ? ' disabled title="Faça login para curtir"' : '') + ' onclick="handleLike(' + parseInt(level.id) + ')">' + likeBtnText + '</button>' +
           '<button class="btn-share" onclick="shareLevel()">🔗 Compartilhar</button>' +
           '<a href="perfil_do_usuario.html?id=' + parseInt(level.author_id) + '" class="btn btn-outline">👤 ' + escHtml(level.author_name) + '</a>' +
           '<button class="btn-report" onclick="openReportModal()">🚩 Denunciar</button>' +
@@ -544,20 +531,10 @@ async function handleDownload(levelId, fileId) {
   var btn = document.getElementById('dl-btn');
   btn.textContent = '⏳ Baixando...'; btn.disabled = true;
   try {
-    var body = {};
-    if (user) body.user_id = user.id;
-    await fetch(API + '/levels/' + levelId + '/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    await fetch(API + '/levels/' + levelId + '/download', { method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json' }, token ? { 'Authorization': 'Bearer ' + token } : {}) });
   } catch (_) {}
   var el = document.getElementById('dl-count');
   if (el) el.textContent = parseInt(el.textContent || '0') + 1;
-  if (user) {
-    var history = JSON.parse(localStorage.getItem('pb_download_history') || '[]');
-    if (!history.find(function(x) { return x.id === levelId; })) {
-      history.unshift({ id: levelId, at: Date.now() });
-      if (history.length > 100) history.pop();
-      localStorage.setItem('pb_download_history', JSON.stringify(history));
-    }
-  }
   if (!fileId) { showToast('⚠️ Este nível não tem arquivo para baixar.'); btn.textContent = '⬇ Download'; btn.disabled = false; return; }
   try {
     var resp  = await fetch(API + '/files/' + fileId);
@@ -565,7 +542,7 @@ async function handleDownload(levelId, fileId) {
     var dados = await resp.json();
     if (!dados || dados.error) { showToast('❌ Arquivo não encontrado no servidor.'); btn.textContent = '❌ Erro'; btn.style.background = '#c0392b'; setTimeout(function() { btn.textContent = '⬇ Download'; btn.style.background = ''; btn.disabled = false; }, 3000); return; }
     var a = document.createElement('a');
-    a.href = API + '/upload/level/' + dados.hash;
+    a.href = API + '/upload/level/' + encodeURIComponent(dados.hash);
     a.download = dados.hash;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     showToast('✅ Download iniciado!');
@@ -578,38 +555,23 @@ async function handleLike(id) {
   if (!user || !token) return;
   var btn     = document.getElementById('like-btn');
   var countEl = document.getElementById('like-count');
-  var localLiked = JSON.parse(localStorage.getItem('pb_liked_levels') || '[]');
-  var alreadyLiked = localLiked.includes(id);
+  var liked   = btn.dataset.liked === '1';
   btn.disabled = true;
-  if (alreadyLiked) {
-    var updated = localLiked.filter(function(x) { return x !== id; });
-    localStorage.setItem('pb_liked_levels', JSON.stringify(updated));
-    btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = '';
-    btn.textContent = '♡ Curtir';
-    if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent || '0') - 1);
-    try { await fetch(API + '/levels/' + id + '/unlike', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ user_id: user.id }) }); } catch (_) {}
-    btn.disabled = false;
-    return;
-  }
   try {
-    var resp = await fetch(API + '/levels/' + id + '/like', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }, body: JSON.stringify({ user_id: user.id }) });
-    var data = await resp.json();
-    if (resp.status === 409 || data.already_liked || data.ok) {
-      localLiked.push(id);
-      localStorage.setItem('pb_liked_levels', JSON.stringify(localLiked));
-      btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
-      btn.textContent = '♥ Curtido';
-      btn.classList.remove('like-bounce'); void btn.offsetWidth; btn.classList.add('like-bounce');
-      if (countEl && data.likes) countEl.textContent = data.likes;
-      else if (countEl && data.ok) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
-    }
-  } catch (_) {
-    localLiked.push(id);
-    localStorage.setItem('pb_liked_levels', JSON.stringify(localLiked));
-    btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
-    btn.textContent = '♥ Curtido';
-    btn.classList.remove('like-bounce'); void btn.offsetWidth; btn.classList.add('like-bounce');
-    if (countEl) countEl.textContent = parseInt(countEl.textContent || '0') + 1;
+    var resp = await fetch(API + '/levels/' + id + (liked ? '/unlike' : '/like'), { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } });
+    var data = await resp.json().catch(function() { return {}; });
+    // 409 = o servidor já estava no estado pedido (curtido / não curtido): a UI só se alinha
+    if (!resp.ok && resp.status !== 409) throw new Error(data.error || resp.status);
+    var nowLiked = !liked;
+    btn.dataset.liked = nowLiked ? '1' : '0';
+    btn.style.background  = nowLiked ? 'var(--accent)' : '';
+    btn.style.color       = nowLiked ? '#fff' : '';
+    btn.style.borderColor = nowLiked ? 'var(--accent)' : '';
+    btn.textContent = nowLiked ? '♥ Curtido' : '♡ Curtir';
+    if (nowLiked) { btn.classList.remove('like-bounce'); void btn.offsetWidth; btn.classList.add('like-bounce'); }
+    if (countEl && data.likes !== undefined) countEl.textContent = data.likes;
+  } catch (err) {
+    showToast('❌ ' + (err.message || 'Erro de conexão'));
   }
   btn.disabled = false;
 }

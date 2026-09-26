@@ -7,7 +7,13 @@ function getToken() {
   return localStorage.getItem('pb_token') || '';
 }
 
+// Sessão só existe enquanto o token for válido: token expirado/ausente limpa tudo e
+// devolve null, então TODA página que usa getUser() enxerga o mesmo estado de login.
 function getUser() {
+  if (!isTokenValid()) {
+    clearSession();
+    return null;
+  }
   try {
     return JSON.parse(localStorage.getItem('pb_user') || 'null');
   } catch (_) {
@@ -46,7 +52,7 @@ function clearSessionIfExpired() {
 }
 
 function isLoggedIn() {
-  return isTokenValid() && !!getUser();
+  return !!getUser();
 }
 
 function clearSession() {

@@ -20,7 +20,7 @@ router.get('/:id', async (req, res) => {
       ),
       pool.query(
         `SELECT id, name, description, downloads, likes
-         FROM levels WHERE author = $1
+         FROM levels WHERE author = $1 AND active
          ORDER BY downloads DESC, likes DESC`,
         [id]
       ),
@@ -48,7 +48,7 @@ router.get('/', async (req, res) => {
              u.downloaded_levels, u.liked_levels,
              COUNT(l.id) AS total_levels
       FROM users u
-      LEFT JOIN levels l ON l.author = u.id
+      LEFT JOIN levels l ON l.author = u.id AND l.active
       GROUP BY u.id, u.username, u.bio, u.downloaded_levels, u.liked_levels
       ORDER BY total_levels DESC
     `);
@@ -107,7 +107,7 @@ router.get('/:id/download-history', authMiddleware, async (req, res) => {
               l.name, l.description, l.downloads, l.likes
        FROM download_history dh
        INNER JOIN levels l ON l.id = dh.level_id
-       WHERE dh.user_id = $1
+       WHERE dh.user_id = $1 AND l.active
        ORDER BY dh.created_at DESC
        LIMIT 100`,
       [id]
@@ -117,6 +117,23 @@ router.get('/:id/download-history', authMiddleware, async (req, res) => {
     console.error('[GET /users/:id/download-history]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
+});
+
+// ── GET /api/users/:id/liked — PROTEGIDO ───────────────────
+// Levels curtidos pelo usuário (somente o próprio)
+router.get('/:id/liked', authMiddleware, async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+  if (req.user.id !== id) return res.status(403).json({ error: 'Sem permissão' });
+
+  const pool = await getPool();
+  const result = await pool.query(
+    `SELECT id, name, description, downloads, likes
+     FROM levels WHERE active AND liked_by_ids @> ARRAY[$1]::int[]
+     ORDER BY id DESC LIMIT 100`,
+    [id]
+  );
+  res.json(result.rows);
 });
 
 module.exports = router;

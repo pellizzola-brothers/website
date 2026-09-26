@@ -3,7 +3,9 @@ const express   = require('express');
 const router    = express.Router();
 const rateLimit = require('express-rate-limit');
 const { getPool } = require('../db');
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware, optionalAuth } = require('../middleware/auth');
+const { isAdminUser } = require('../middleware/admin');
+const { deactivateLevel } = require('../lib/levels');
 
 // Rate limiter: máximo 20 downloads por IP a cada 15 minutos
 const downloadLimiter = rateLimit({
@@ -24,6 +26,7 @@ router.get('/featured', async (req, res) => {
              u.id AS author_id, u.username AS author_name
       FROM levels l
       INNER JOIN users u ON u.id = l.author
+      WHERE l.active
       ORDER BY l.downloads DESC, l.likes DESC
       LIMIT 1
     `);
@@ -52,7 +55,7 @@ router.get('/', async (req, res) => {
                       u.id AS author_id, u.username AS author_name
                FROM levels l
                INNER JOIN users u ON u.id = l.author
-               WHERE l.author = $1
+               WHERE l.author = $1 AND l.active
                ORDER BY l.downloads DESC, l.likes DESC`;
       params = [author];
     } else {
@@ -61,7 +64,7 @@ router.get('/', async (req, res) => {
                       u.id AS author_id, u.username AS author_name
                FROM levels l
                INNER JOIN users u ON u.id = l.author
-               WHERE l.name ILIKE $1 OR l.description ILIKE $1
+               WHERE l.active AND (l.name ILIKE $1 OR l.description ILIKE $1)
                ORDER BY l.downloads DESC, l.likes DESC`;
       params = [`%${search}%`];
     }
@@ -77,20 +80,22 @@ router.get('/', async (req, res) => {
 // ── GET /api/levels/:id ─────────────────────────────────────
 // comments e similares buscados em paralelo com Promise.all
 // liked_by NÃO é retornado
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
   try {
     const pool = await getPool();
+    // Level desativado (apagado) só é visível para administradores
+    const isAdmin = await isAdminUser(req.user && req.user.id);
     const levelResult = await pool.query(
       `SELECT l.id, l.name, l.description, l.downloads, l.likes,
-              l.file_id,
+              l.file_id, l.created_at, l.active,
               u.id AS author_id, u.username AS author_name, u.bio AS author_bio
        FROM levels l
        INNER JOIN users u ON u.id = l.author
-       WHERE l.id = $1`,
-      [id]
+       WHERE l.id = $1 AND (l.active OR $2)`,
+      [id, isAdmin]
     );
 
     if (levelResult.rows.length === 0)
@@ -116,7 +121,7 @@ router.get('/:id', async (req, res) => {
                 l.file_id, u.username AS author_name
          FROM levels l
          INNER JOIN users u ON u.id = l.author
-         WHERE l.id <> $1
+         WHERE l.id <> $1 AND l.active
          ORDER BY CASE WHEN l.author = $2 THEN 0 ELSE 1 END, l.downloads DESC
          LIMIT 3`,
         [id, level.author_id]
@@ -132,51 +137,25 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// ── POST /api/levels — PROTEGIDO ────────────────────────────
-router.post('/', authMiddleware, async (req, res) => {
-  const { name, description, file_id } = req.body;
-  const author = req.user.id;
-
-  if (!name || !file_id)
-    return res.status(400).json({ error: 'name e file_id são obrigatórios' });
-
-  // Validação de tamanho
-  if (name.length > 200)
-    return res.status(400).json({ error: 'name deve ter no máximo 200 caracteres' });
-  if (description && description.length > 1000)
-    return res.status(400).json({ error: 'description deve ter no máximo 1000 caracteres' });
-
-  try {
-    const pool = await getPool();
-    const result = await pool.query(
-      `INSERT INTO levels (name, description, author, file_id)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id, name, description, downloads, likes, file_id`,
-      [name, description || null, author, file_id]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (err) {
-    console.error('[POST /levels]', err);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
-
 // ── POST /api/levels/:id/download — rate limited ───────────
-router.post('/:id/download', downloadLimiter, async (req, res) => {
+router.post('/:id/download', downloadLimiter, optionalAuth, async (req, res) => {
   const id = parseInt(req.params.id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
-  // user_id é opcional — enviado pelo frontend quando logado
-  const userId = req.body.user_id ? parseInt(req.body.user_id) : null;
+  // Identidade vem do token — nunca do body (senão qualquer um forjaria o histórico de outro usuário)
+  const userId = req.user ? req.user.id : null;
 
   try {
     const pool = await getPool();
 
-    // Incrementa contador do level
-    await pool.query(`UPDATE levels SET downloads = downloads + 1 WHERE id = $1`, [id]);
+    const updated = await pool.query(
+      `UPDATE levels SET downloads = downloads + 1 WHERE id = $1 AND active`, [id]
+    );
+    if (updated.rowCount === 0)
+      return res.status(404).json({ error: 'Level não encontrado' });
 
-    if (userId && !isNaN(userId)) {
-      // Incrementa downloaded_levels do usuário (ignora se já baixou antes via UNIQUE)
+    if (userId) {
+      // UNIQUE (user_id, level_id): só o primeiro download de cada level conta para o usuário
       const inserted = await pool.query(
         `INSERT INTO download_history (user_id, level_id)
          VALUES ($1, $2)
@@ -184,7 +163,6 @@ router.post('/:id/download', downloadLimiter, async (req, res) => {
          RETURNING id`,
         [userId, id]
       );
-      // Só incrementa o contador se foi o primeiro download deste level pelo user
       if (inserted.rowCount > 0) {
         await pool.query(
           `UPDATE users SET downloaded_levels = downloaded_levels + 1 WHERE id = $1`,
@@ -211,7 +189,7 @@ router.get('/:id/liked', authMiddleware, async (req, res) => {
     // Usa array do PostgreSQL para checar de forma atômica
     const result = await pool.query(
       `SELECT (liked_by_ids @> ARRAY[$1]::int[]) AS liked
-       FROM levels WHERE id = $2`,
+       FROM levels WHERE id = $2 AND active`,
       [userId, id]
     );
     if (result.rows.length === 0)
@@ -239,7 +217,7 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
       `UPDATE levels
        SET likes        = likes + 1,
            liked_by_ids = array_append(liked_by_ids, $1)
-       WHERE id = $2
+       WHERE id = $2 AND active
          AND NOT (liked_by_ids @> ARRAY[$1]::int[])
        RETURNING likes`,
       [userId, id]
@@ -247,7 +225,7 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
 
     if (result.rowCount === 0) {
       // Ou o level não existe, ou já curtiu — diferencia:
-      const check = await pool.query(`SELECT id FROM levels WHERE id = $1`, [id]);
+      const check = await pool.query(`SELECT id FROM levels WHERE id = $1 AND active`, [id]);
       if (check.rows.length === 0)
         return res.status(404).json({ error: 'Level não encontrado' });
       return res.status(409).json({ error: 'Você já curtiu este level', already_liked: true });
@@ -258,6 +236,13 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
       `UPDATE users SET liked_levels = liked_levels + 1 WHERE id = $1`,
       [userId]
     );
+
+    // Registra o evento com timestamp — usado pelo gráfico "curtidas por dia" do admin
+    await pool.query(
+      `INSERT INTO like_history (user_id, level_id) VALUES ($1, $2)
+       ON CONFLICT (user_id, level_id) DO NOTHING`,
+      [userId, id]
+    ).catch(() => {});
 
     res.json({ ok: true, likes: result.rows[0].likes });
   } catch (err) {
@@ -280,14 +265,14 @@ router.post('/:id/unlike', authMiddleware, async (req, res) => {
       `UPDATE levels
        SET likes        = GREATEST(0, likes - 1),
            liked_by_ids = array_remove(liked_by_ids, $1)
-       WHERE id = $2
+       WHERE id = $2 AND active
          AND (liked_by_ids @> ARRAY[$1]::int[])
        RETURNING likes`,
       [userId, id]
     );
 
     if (result.rowCount === 0) {
-      const check = await pool.query(`SELECT id FROM levels WHERE id = $1`, [id]);
+      const check = await pool.query(`SELECT id FROM levels WHERE id = $1 AND active`, [id]);
       if (check.rows.length === 0)
         return res.status(404).json({ error: 'Level não encontrado' });
       return res.status(409).json({ error: 'Você ainda não curtiu este level' });
@@ -298,6 +283,11 @@ router.post('/:id/unlike', authMiddleware, async (req, res) => {
       `UPDATE users SET liked_levels = GREATEST(0, liked_levels - 1) WHERE id = $1`,
       [userId]
     );
+
+    await pool.query(
+      `DELETE FROM like_history WHERE user_id = $1 AND level_id = $2`,
+      [userId, id]
+    ).catch(() => {});
 
     res.json({ ok: true, likes: result.rows[0].likes });
   } catch (err) {
@@ -320,10 +310,12 @@ router.post('/:id/comment', authMiddleware, async (req, res) => {
     const pool = await getPool();
     const result = await pool.query(
       `INSERT INTO comments (level_id, user_id, content)
-       VALUES ($1, $2, $3)
+       SELECT $1, $2, $3 WHERE EXISTS (SELECT 1 FROM levels WHERE id = $1 AND active)
        RETURNING id, content, created_at`,
       [levelId, userId, content]
     );
+    if (result.rowCount === 0)
+      return res.status(404).json({ error: 'Level não encontrado' });
     res.status(201).json({ ok: true, comment: { ...result.rows[0], username: req.user.username, user_id: userId } });
   } catch (err) {
     console.error('[POST /levels/:id/comment]', err);
@@ -364,13 +356,14 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
   try {
     const pool  = await getPool();
-    const check = await pool.query(`SELECT author FROM levels WHERE id = $1`, [id]);
+    const check = await pool.query(`SELECT author FROM levels WHERE id = $1 AND active`, [id]);
     if (check.rows.length === 0)
       return res.status(404).json({ error: 'Level não encontrado' });
     if (check.rows[0].author !== userId)
       return res.status(403).json({ error: 'Você não tem permissão para deletar este level' });
 
-    await pool.query(`DELETE FROM levels WHERE id = $1`, [id]);
+    // Soft delete: a linha continua no banco (só admins veem), o arquivo sai de levels/
+    await deactivateLevel(pool, id);
     res.json({ ok: true });
   } catch (err) {
     console.error('[DELETE /levels/:id]', err);
@@ -394,7 +387,7 @@ router.post('/:id/report', authMiddleware, async (req, res) => {
     const pool = await getPool();
 
     // Checa se o level existe
-    const check = await pool.query(`SELECT id FROM levels WHERE id = $1`, [levelId]);
+    const check = await pool.query(`SELECT id FROM levels WHERE id = $1 AND active`, [levelId]);
     if (check.rows.length === 0)
       return res.status(404).json({ error: 'Level não encontrado' });
 

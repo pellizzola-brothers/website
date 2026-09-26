@@ -1,6 +1,7 @@
 backend/node_modules/*
 node_modules/*
 .DS_Store
+.claude/*
 
 # ── SEGURANÇA: nunca versionar arquivos .env ─────────────────
 .env
@@ -9,3 +10,5 @@ node_modules/*
 backend/.env
 backend/.env.*
 !backend/.env.example
+tests/node_modules/
+tests/output/

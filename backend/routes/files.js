@@ -12,7 +12,9 @@ router.get('/:id', async (req, res) => {
   try {
     const pool = await getPool();
     const result = await pool.query(
-      `SELECT id, user_id, hash, created_at FROM files WHERE id = $1`,
+      `SELECT f.id, f.user_id, f.hash, f.created_at
+       FROM files f INNER JOIN levels l ON l.file_id = f.id
+       WHERE f.id = $1 AND l.active`,
       [id]
     );
 
