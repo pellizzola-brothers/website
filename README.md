@@ -23,7 +23,6 @@ Vanilla-JS frontend, Express/PostgreSQL backend, no build step.
 - [API Overview](#api-overview)
 - [Internationalization](#internationalization)
 - [Deployment](#deployment)
-- [Known Limitations](#known-limitations)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -140,11 +139,6 @@ Translations live in `frontend/i18n/en.json` / `pt_BR.json`, additionally compil
 ## Deployment
 
 Deployed on [Railway](https://railway.app). `railway.json` builds with `cd backend && npm install` and starts with `node backend/server.js`; the same Express process serves the API and the static frontend, so there's only one service to deploy.
-
-## Known Limitations
-
-- **No test suite.** Manual testing against a local Postgres instance is the norm — see [CLAUDE.md](./CLAUDE.md).
-- **`admin.html`** is an unlinked UI mockup, not a real admin panel — its password gate and every action (ban/delete/promote) are client-side decoration with no backend authorization behind them.
 
 ## Contributing
 
