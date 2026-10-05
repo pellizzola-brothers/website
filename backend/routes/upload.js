@@ -7,6 +7,7 @@ const fs      = require('fs');
 const { getPool } = require('../db');
 const { authMiddleware } = require('../middleware/auth');
 const { getSetting } = require('../lib/settings');
+const { checkLvl } = require('../lib/lvlhash');
 
 const { UPLOAD_DIR } = require('../lib/levels');
 
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
   filename:    (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
 });
 
-const ALLOWED_EXTENSIONS = ['.json', '.lvl', '.dat', '.xml', '.bin'];
+const ALLOWED_EXTENSIONS = ['.lvl'];
 
 const upload = multer({
   storage,
@@ -39,7 +40,7 @@ router.post('/level', authMiddleware, async (req, res, next) => {
 }, upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({
-      error: 'Nenhum arquivo enviado ou tipo não permitido (.json, .lvl, .dat, .xml, .bin)'
+      error: 'Nenhum arquivo enviado ou tipo não permitido (.lvl)'
     });
   }
 
@@ -47,6 +48,13 @@ router.post('/level', authMiddleware, async (req, res, next) => {
   if (typeof name !== 'string' || name.trim().length < 3) {
     fs.unlink(req.file.path, () => {});
     return res.status(400).json({ error: 'Nome do level obrigatório (mínimo 3 caracteres)' });
+  }
+
+  // O arquivo já está em disco; lê, verifica e descarta se for inválido
+  const lvlError = checkLvl(fs.readFileSync(req.file.path));
+  if (lvlError) {
+    fs.unlink(req.file.path, () => {});
+    return res.status(400).json({ error: lvlError });
   }
 
   const userId  = req.user.id;

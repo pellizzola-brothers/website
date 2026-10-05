@@ -267,7 +267,7 @@
       <div class="campo">
         <label data-i18n="upload.arquivo_label">Arquivo da fase *</label>
         <div class="drop-zone" id="drop-zone">
-          <input type="file" id="arquivo" accept=".json,.lvl,.dat,.xml,.bin">
+          <input type="file" id="arquivo" accept=".lvl">
           <span class="icon">📁</span>
           <span id="drop-texto" data-i18n="upload.drop_texto">Clique ou arraste o arquivo aqui</span>
           <br><small style="font-size:11px;color:var(--text-dim);" data-i18n="upload.drop_max">Tamanho máximo: 10 MB</small>
@@ -409,7 +409,7 @@ function enviar() {
   if (!nome)              { mostrarMsg('erro', t('upload.err_nome')); return; }
   if (nome.length < 3)    { mostrarMsg('erro', t('upload.err_nome_curto')); return; }
   if (!arquivo)           { mostrarMsg('erro', t('upload.err_arquivo')); return; }
-  if (!/\.(json|lvl|dat|xml|bin)$/i.test(arquivo.name)) { mostrarMsg('erro', 'Tipo de arquivo não permitido (.json, .lvl, .dat, .xml, .bin)'); return; }
+  if (!/\.lvl$/i.test(arquivo.name)) { mostrarMsg('erro', 'Tipo de arquivo não permitido (.lvl)'); return; }
   if (arquivo.size > 10 * 1024 * 1024) {
     mostrarMsg('erro', t('upload.err_tamanho'));
     return;

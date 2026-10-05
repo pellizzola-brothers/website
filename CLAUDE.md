@@ -47,13 +47,14 @@ backend/           Express API (Node.js)
   lib/
     captcha.js     SVG captcha with AES-GCM token
     bruteforce.js  login attempt throttling (captcha after 3 fails, lockouts)
+    lvlhash.js     .lvl structure check + level_hash verification (same recipe as studio/lvl.js hashfiles — change both together)
     settings.js    global flags (maintenance_mode, allow_registration, allow_upload)
   routes/
     admin.js       admin dashboard API (/api/admin/*)
     auth.js        register, login, password recovery (bcrypt + JWT)
     users.js       user profile CRUD
     levels.js      level listing, likes/unlikes (atomic PostgreSQL arrays), comments, reports, downloads
-    upload.js      multer file upload → saves to /levels dir + inserts into DB
+    upload.js      multer upload (.lvl only) → checkLvl() → saves to /levels dir + inserts into DB
     files.js       serve uploaded level files
 
 frontend/          Static HTML pages + vanilla JS

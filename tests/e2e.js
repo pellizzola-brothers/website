@@ -91,7 +91,18 @@ async function uiLogin(user, pass = PASS) {
   await (await $('#login-pass')).sendKeys(pass);
   await (await $('#panel-login .btn-green')).click();
 }
-async function makeLevelFile(name, content = '{"e2e":true}') {
+// .lvl válido e assinado, como o PB Studio grava (receita em backend/lib/lvlhash.js)
+function buildLvl({ hash = true, tamper = false } = {}) {
+  const { zipSync, strToU8 } = bReq('fflate');
+  const { hashFiles } = bReq('./lib/lvlhash.js');
+  const j = { level: { information: { name: 'e2e', description: '', author: '' },
+    block_data: [new Array(540).fill('000')], entity_definitions: [], entities: [], backgrounds: ['foo'] } };
+  const files = { 'level.json': strToU8(JSON.stringify(j)) };
+  if (hash) j.level.information.level_hash = hashFiles(files);
+  if (tamper) j.level.block_data[0][0] = '001';
+  return Buffer.from(zipSync({ 'level.json': strToU8(JSON.stringify(j)) }));
+}
+async function makeLevelFile(name, content = buildLvl()) {
   const f = path.join(os.tmpdir(), name); fs.writeFileSync(f, content); return f;
 }
 async function uiUpload(user, levelName, file) {
@@ -224,7 +235,7 @@ async function main() {
   let levelId;
   await test('upload de level pela UI cria o level e grava o arquivo em LEVELS_DIR', async () => {
     await waitUrl(/perfil_do_usuario/);
-    await uiUpload(U1, LV, await makeLevelFile('e2e-' + RUN + '.json'));
+    await uiUpload(U1, LV, await makeLevelFile('e2e-' + RUN + '.lvl'));
     await waitUrl(/perfil_do_jogo\.html\?id=\d+/, 12000); await waitFor('.level-hero-name'); await driver.wait(async () => (await text('.level-hero-name')).length > 0, 5000); await snap('level-criado');
     levelId = parseInt((await driver.getCurrentUrl()).match(/id=(\d+)/)[1]);
     assert((await text('.level-hero-name')).toLowerCase() === LV.toLowerCase(), 'nome do level: ' + await text('.level-hero-name'));
@@ -240,10 +251,21 @@ async function main() {
     const r = await fetch(BASE + '/api/upload/level', { method: 'POST', headers: { Authorization: 'Bearer ' + await driver.executeScript('return localStorage.getItem("pb_token")') }, body: (() => { const f = new FormData(); f.append('name', 'Servidor ' + RUN); f.append('file', new Blob(['MZ']), 'x.exe'); return f; })() });
     assert(r.status === 400, 'servidor deveria recusar .exe, status ' + r.status);
   });
+  await test('upload de .lvl sem hash, com hash adulterado ou que não é ZIP é recusado e não deixa arquivo', async () => {
+    const before = fs.readdirSync(LEVELS_DIR).length;
+    const token = await driver.executeScript('return localStorage.getItem("pb_token")');
+    for (const [buf, re] of [[buildLvl({ hash: false }), /level_hash/], [buildLvl({ tamper: true }), /não confere/], [Buffer.from('nao sou zip'), /ZIP/]]) {
+      const f = new FormData(); f.append('name', 'Invalido ' + RUN); f.append('file', new Blob([buf]), 'z.lvl');
+      const r = await fetch(BASE + '/api/upload/level', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: f });
+      assert(r.status === 400 && re.test((await r.json()).error), 'esperava 400 /' + re + '/, status ' + r.status);
+    }
+    await sleep(300);
+    assert(fs.readdirSync(LEVELS_DIR).length === before, 'arquivo órfão em LEVELS_DIR');
+  });
   await test('upload sem nome válido não deixa arquivo órfão', async () => {
     const before = fs.readdirSync(LEVELS_DIR).length;
     const token = await driver.executeScript('return localStorage.getItem("pb_token")');
-    const f = new FormData(); f.append('name', 'ab'); f.append('file', new Blob(['{}']), 'y.json');
+    const f = new FormData(); f.append('name', 'ab'); f.append('file', new Blob([buildLvl()]), 'y.lvl');
     const r = await fetch(BASE + '/api/upload/level', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: f });
     await sleep(300);
     assert(r.status === 400 && fs.readdirSync(LEVELS_DIR).length === before, 'status ' + r.status + ' / arquivos ' + fs.readdirSync(LEVELS_DIR).length);
@@ -303,7 +325,7 @@ async function main() {
   await test('XSS: nome de level malicioso é escapado em index, levels e perfil', async () => {
     const evil = `<img src=x onerror="window.__xss=1"> ${RUN}`;
     const tok = (await api('POST', '/auth/login', { body: { username: U1, password: PASS } })).data.token;
-    const f = new FormData(); f.append('name', evil); f.append('file', new Blob(['{}']), 'xss.json');
+    const f = new FormData(); f.append('name', evil); f.append('file', new Blob([buildLvl()]), 'xss.lvl');
     assert((await fetch(BASE + '/api/upload/level', { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: f })).status === 201, 'upload xss');
     await driver.executeScript('sessionStorage.clear()');
     for (const p of ['index.html', 'levels.html', 'usuarios.html']) {
@@ -360,7 +382,7 @@ async function main() {
   });
   await test('admin apaga level de outro usuário (soft delete + arquivo removido) e log é escapado', async () => {
     const tok = (await api('POST', '/auth/login', { body: { username: U1, password: PASS } })).data.token;
-    const f = new FormData(); f.append('name', 'Alvo <b>admin</b> ' + RUN); f.append('file', new Blob(['{}']), 'alvo.json');
+    const f = new FormData(); f.append('name', 'Alvo <b>admin</b> ' + RUN); f.append('file', new Blob([buildLvl()]), 'alvo.lvl');
     const lv = (await (await fetch(BASE + '/api/upload/level', { method: 'POST', headers: { Authorization: 'Bearer ' + tok }, body: f })).json()).level;
     const row = (await pool.query('SELECT f.hash FROM levels l JOIN files f ON f.id=l.file_id WHERE l.id=$1', [lv.id])).rows[0];
     const a = (await api('POST', '/auth/login', { body: { username: ADM, password: PASS } })).data.token;
