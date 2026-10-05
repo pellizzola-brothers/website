@@ -47,7 +47,7 @@ backend/           Express API (Node.js)
   lib/
     captcha.js     SVG captcha with AES-GCM token
     bruteforce.js  login attempt throttling (captcha after 3 fails, lockouts)
-    lvlhash.js     .lvl structure check + level_hash verification (same recipe as studio/lvl.js hashfiles — change both together)
+    lvlhash.js     .lvl structure check + level_hash verification (the hash recipe below)
     settings.js    global flags (maintenance_mode, allow_registration, allow_upload)
   routes/
     admin.js       admin dashboard API (/api/admin/*)
@@ -74,6 +74,10 @@ frontend/          Static HTML pages + vanilla JS
 levels/            Uploaded level files stored on disk (multer destination)
 pauro_database.sql Schema only (fresh database)
 ```
+
+## The level_hash recipe
+
+`information.level_hash` in a `.lvl`'s `level.json` must equate to a SHA-256 (hex) over the archive's contents: every file sorted by name (directory entries skipped), each fed as `name NUL byte-length NUL bytes`, with `level.json` replaced by compact `JSON.stringify()` of its parse minus `level_hash`. Zip timestamps, compression and `level.json`'s layout never matter. `backend/lib/lvlhash.js` implements this and `routes/upload.js` rejects any `.lvl` that is missing the hash, has an invalid one, or doesn't match.
 
 ## Key design decisions
 

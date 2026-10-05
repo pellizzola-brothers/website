@@ -1,5 +1,5 @@
 // lib/lvlhash.js — valida um .lvl (estrutura + information.level_hash).
-// A receita do hash é a mesma de studio/lvl.js (hashfiles): mude os dois juntos.
+// Receita do hash: ver "The level_hash recipe" no CLAUDE.md.
 const crypto = require('crypto');
 const { unzipSync, strFromU8, strToU8 } = require('fflate');
 
