@@ -7,6 +7,7 @@ const { authMiddleware } = require('../middleware/auth');
 const { getSetting } = require('../lib/settings');
 const { generateCaptcha, verifyCaptcha } = require('../lib/captcha');
 const bruteforce = require('../lib/bruteforce');
+const { clientIp } = require('../lib/blacklist');
 
 const BCRYPT_ROUNDS = 12;
 const JWT_EXPIRES   = '7d';
@@ -62,10 +63,10 @@ router.post('/register', async (req, res) => {
     const pool = await getPool();
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
     const result = await pool.query(
-      `INSERT INTO users (username, bio, password_hash)
-       VALUES ($1, $2, $3)
+      `INSERT INTO users (username, bio, password_hash, last_ip)
+       VALUES ($1, $2, $3, $4)
        RETURNING id, username, bio`,
-      [username.toLowerCase(), bio ? bio.trim() : null, hash]
+      [username.toLowerCase(), bio ? bio.trim() : null, hash, clientIp(req)]
     );
     const user = result.rows[0];
     res.status(201).json({ user, token: makeToken(user) });
@@ -128,6 +129,7 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'Esta conta está banida' });
 
     await bruteforce.resetAttempts(uname);
+    await pool.query(`UPDATE users SET last_ip = $1 WHERE id = $2`, [clientIp(req), user.id]);
     res.json({ user: { id: user.id, username: user.username, role: user.role }, token: makeToken(user) });
   } catch (err) {
     console.error('[POST /auth/login]', err);

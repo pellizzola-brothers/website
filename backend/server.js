@@ -17,6 +17,7 @@ const uploadRouter = require('./routes/upload');
 const filesRouter  = require('./routes/files');
 const adminRouter  = require('./routes/admin');
 const { getSetting } = require('./lib/settings');
+const blacklist = require('./lib/blacklist');
 
 // Express 4 ignora promises rejeitadas em handlers async: a requisição travava e o
 // Node derrubava o processo (ex.: body {"username": 123} → username.toLowerCase()).
@@ -33,6 +34,13 @@ Layer.prototype.handle_request = function (req, res, next) {
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
+
+// Atrás do proxy da Railway, req.ip seria o IP do proxy (blacklist e rate limit
+// agiriam sobre todo mundo). Local não tem proxy: confiar no X-Forwarded-For deixaria
+// qualquer cliente forjar o próprio IP. Se mudar a infra, ajuste aqui (nº de proxies na frente).
+if (process.env.RAILWAY_ENVIRONMENT) app.set('trust proxy', 1);
+
+app.use(blacklist.guard);
 
 // ── Rate limiting global ─────────────────────────────────────
 const globalLimiter = rateLimit({

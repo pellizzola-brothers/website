@@ -6,6 +6,7 @@ const { authMiddleware } = require('../middleware/auth');
 const { requireAdmin }   = require('../middleware/admin');
 const { getSettings }    = require('../lib/settings');
 const { deactivateLevel } = require('../lib/levels');
+const bl = require('../lib/blacklist');
 
 router.use(authMiddleware, requireAdmin);
 
@@ -102,7 +103,7 @@ router.get('/users', async (req, res) => {
   try {
     const pool = await getPool();
     const result = await pool.query(`
-      SELECT u.id, u.username, u.bio, u.role, u.banned,
+      SELECT u.id, u.username, u.bio, u.role, u.banned, host(u.last_ip) AS last_ip,
              u.downloaded_levels, u.liked_levels,
              COUNT(l.id)::int AS total_levels
       FROM users u
@@ -364,6 +365,50 @@ router.put('/settings', async (req, res) => {
     console.error('[PUT /admin/settings]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
+});
+
+
+// ── Blacklist de IPs ──────────────────────────────────────────
+router.get('/blacklist', async (req, res) => {
+  const pool = await getPool();
+  await pool.query(`DELETE FROM blacklist WHERE expires_at <= NOW()`);
+  const r = await pool.query(`SELECT host(ip) AS ip, expires_at FROM blacklist ORDER BY expires_at NULLS FIRST, ip`);
+  res.json(r.rows);
+});
+
+router.post('/blacklist', async (req, res) => {
+  const { ip, minutes } = req.body;
+  if (typeof ip !== 'string' || !bl.isIP(ip.trim())) return res.status(400).json({ error: 'IP inválido' });
+  const expires = bl.expiryFrom(minutes);
+  if (expires === undefined) return res.status(400).json({ error: 'Duração inválida' });
+  await bl.addIp(ip.trim(), expires);
+  const pool = await getPool();
+  await log(pool, req, '⛔', `IP <strong>${esc(ip.trim())}</strong> foi adicionado à blacklist (${expires ? 'até ' + expires.toISOString() : 'permanente'}).`);
+  res.status(201).json({ ok: true });
+});
+
+router.delete('/blacklist/:ip', async (req, res) => {
+  if (!bl.isIP(req.params.ip)) return res.status(400).json({ error: 'IP inválido' });
+  const pool = await getPool();
+  const r = await pool.query(`DELETE FROM blacklist WHERE ip = $1`, [req.params.ip]);
+  if (!r.rowCount) return res.status(404).json({ error: 'IP não está na blacklist' });
+  await bl.reload();
+  await log(pool, req, '✅', `IP <strong>${esc(req.params.ip)}</strong> foi removido da blacklist.`);
+  res.json({ ok: true });
+});
+
+// IP-ban: bloqueia o último IP conhecido do usuário (login/cadastro); não bane a conta.
+router.post('/users/:id/ip-ban', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const expires = bl.expiryFrom(req.body.minutes);
+  if (expires === undefined) return res.status(400).json({ error: 'Duração inválida' });
+  const pool = await getPool();
+  const r = await pool.query(`SELECT username, host(last_ip) AS ip FROM users WHERE id = $1`, [id]);
+  if (!r.rows.length) return res.status(404).json({ error: 'Usuário não encontrado' });
+  if (!r.rows[0].ip) return res.status(400).json({ error: 'Nenhum IP conhecido para este usuário (ele ainda não fez login)' });
+  await bl.addIp(r.rows[0].ip, expires);
+  await log(pool, req, '⛔', `IP <strong>${esc(r.rows[0].ip)}</strong> de <strong>${esc(r.rows[0].username)}</strong> foi banido (${expires ? 'até ' + expires.toISOString() : 'permanente'}).`);
+  res.json({ ok: true, ip: r.rows[0].ip });
 });
 
 module.exports = router;
