@@ -48,7 +48,7 @@ backend/           Express API (Node.js)
     captcha.js     SVG captcha with AES-GCM token
     bruteforce.js  login attempt throttling (captcha after 3 fails, lockouts)
     lvlhash.js     .lvl structure check + level_hash verification (the hash recipe below)
-    blacklist.js   IP blacklist guard (first middleware in server.js), in-memory cache of the `blacklist` table
+    blacklist.js   IP blacklist guard (first middleware in server.js), in-memory `net.BlockList` of the `blacklist` table
     settings.js    global flags (maintenance_mode, allow_registration, allow_upload)
   routes/
     admin.js       admin dashboard API (/api/admin/*)
@@ -92,7 +92,7 @@ pauro_database.sql Schema only (fresh database)
 
 **Likes**: Stored as a PostgreSQL `INT[]` column (`liked_by_ids`) with a GIN index. Like/unlike are single atomic `UPDATE ... WHERE NOT (liked_by_ids @> ARRAY[$1]::int[])` queries — no separate join table, no race condition.
 
-**IP blacklist**: `blacklist(ip INET, expires_at)`, `expires_at NULL` = permanent. `lib/blacklist.js` `guard` runs before everything: blocked IPs get a redirect to `forbidden.html` (pages) or 403 JSON (`/api`); static assets and `admin.html` pass; admins (Bearer token, role checked in DB) bypass the API block. The set is cached in memory (30s TTL, reloaded on admin changes). Managed from admin.html (Blacklist page, and "IP-Ban" on users, which bans `users.last_ip` — set at login/register — without banning the account). `server.js` sets `trust proxy` to 1 only when `RAILWAY_ENVIRONMENT` is set; change it there if the proxy setup changes, or `req.ip` will be wrong/spoofable.
+**IP blacklist**: `blacklist(ip INET, expires_at)`, `expires_at NULL` = permanent. `ip` may be a single address or a CIDR range (`192.0.0.0/8`; `/0` rejected) — ranges are added only via the Blacklist page form, the user "IP-Ban" button is always one exact IP. Matching uses `net.BlockList` in memory. `lib/blacklist.js` `guard` runs before everything: blocked IPs get a redirect to `forbidden.html` (pages) or 403 JSON (`/api`); static assets and `admin.html` pass; admins (Bearer token, role checked in DB) bypass the API block. The set is cached in memory (30s TTL, reloaded on admin changes). Managed from admin.html (Blacklist page, and "IP-Ban" on users, which bans `users.last_ip` — set at login/register — without banning the account). `server.js` sets `trust proxy` to 1 only when `RAILWAY_ENVIRONMENT` is set; change it there if the proxy setup changes, or `req.ip` will be wrong/spoofable.
 
 **Password recovery**: Generates a 6-digit code, hashes it with bcrypt, stores it with a 15-minute expiry. In non-production, the code is returned in the response for testing.
 

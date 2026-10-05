@@ -372,28 +372,29 @@ router.put('/settings', async (req, res) => {
 router.get('/blacklist', async (req, res) => {
   const pool = await getPool();
   await pool.query(`DELETE FROM blacklist WHERE expires_at <= NOW()`);
-  const r = await pool.query(`SELECT host(ip) AS ip, expires_at FROM blacklist ORDER BY expires_at NULLS FIRST, ip`);
+  const r = await pool.query(`SELECT CASE WHEN masklen(ip) = max_masklen(ip) THEN host(ip) ELSE network(ip)::text END AS ip, expires_at FROM blacklist ORDER BY expires_at NULLS FIRST, ip`);
   res.json(r.rows);
 });
 
 router.post('/blacklist', async (req, res) => {
-  const { ip, minutes } = req.body;
-  if (typeof ip !== 'string' || !bl.isIP(ip.trim())) return res.status(400).json({ error: 'IP inválido' });
+  const ip = bl.parseTarget(req.body.ip), { minutes } = req.body;
+  if (!ip) return res.status(400).json({ error: 'IP ou faixa CIDR inválido (ex: 203.0.113.7 ou 192.0.0.0/8)' });
   const expires = bl.expiryFrom(minutes);
   if (expires === undefined) return res.status(400).json({ error: 'Duração inválida' });
-  await bl.addIp(ip.trim(), expires);
+  await bl.addIp(ip, expires);
   const pool = await getPool();
-  await log(pool, req, '⛔', `IP <strong>${esc(ip.trim())}</strong> foi adicionado à blacklist (${expires ? 'até ' + expires.toISOString() : 'permanente'}).`);
+  await log(pool, req, '⛔', `IP <strong>${esc(ip)}</strong> foi adicionado à blacklist (${expires ? 'até ' + expires.toISOString() : 'permanente'}).`);
   res.status(201).json({ ok: true });
 });
 
 router.delete('/blacklist/:ip', async (req, res) => {
-  if (!bl.isIP(req.params.ip)) return res.status(400).json({ error: 'IP inválido' });
+  const ip = bl.parseTarget(req.params.ip);
+  if (!ip) return res.status(400).json({ error: 'IP inválido' });
   const pool = await getPool();
-  const r = await pool.query(`DELETE FROM blacklist WHERE ip = $1`, [req.params.ip]);
+  const r = await pool.query(`DELETE FROM blacklist WHERE ip = network($1::inet)::inet`, [ip]);
   if (!r.rowCount) return res.status(404).json({ error: 'IP não está na blacklist' });
   await bl.reload();
-  await log(pool, req, '✅', `IP <strong>${esc(req.params.ip)}</strong> foi removido da blacklist.`);
+  await log(pool, req, '✅', `IP <strong>${esc(ip)}</strong> foi removido da blacklist.`);
   res.json({ ok: true });
 });
 

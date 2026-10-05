@@ -582,9 +582,9 @@
       </div>
 
       <div class="admin-table-wrap" style="margin-bottom:16px;">
-        <div class="admin-table-header"><div class="admin-table-title">Adicionar IP</div></div>
+        <div class="admin-table-header"><div class="admin-table-title">Adicionar IP ou faixa</div></div>
         <div style="padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
-          <input class="admin-search" type="text" id="bl-ip" placeholder="IP (ex: 203.0.113.7)" style="flex:1;min-width:180px;">
+          <input class="admin-search" type="text" id="bl-ip" placeholder="IP ou faixa CIDR (ex: 203.0.113.7 ou 192.0.0.0/8)" style="flex:1;min-width:180px;">
           <input class="admin-search" type="number" id="bl-dur" min="1" value="1" style="width:90px;">
           <select class="admin-search" id="bl-unit" style="width:130px;">
             <option value="1">minutos</option><option value="60">horas</option>
@@ -597,7 +597,7 @@
       <div class="admin-table-wrap">
         <div class="admin-table-header"><div class="admin-table-title">IPs bloqueados</div></div>
         <table class="admin-table">
-          <thead><tr><th>IP</th><th>Expira em</th><th>Ações</th></tr></thead>
+          <thead><tr><th>IP / faixa</th><th>Expira em</th><th>Ações</th></tr></thead>
           <tbody id="blacklist-tbody"></tbody>
         </table>
       </div>
