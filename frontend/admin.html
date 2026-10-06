@@ -586,7 +586,7 @@
         <div style="padding:14px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
           <input class="admin-search" type="text" id="bl-ip" placeholder="IP ou faixa CIDR (ex: 203.0.113.7 ou 192.0.0.0/8)" style="flex:1;min-width:180px;">
           <input class="admin-search" type="number" id="bl-dur" min="1" value="1" style="width:90px;">
-          <select class="admin-search" id="bl-unit" style="width:130px;">
+          <select class="admin-search" id="bl-unit" style="width:130px;" onchange="syncDur('bl-dur',this)">
             <option value="1">minutos</option><option value="60">horas</option>
             <option value="1440" selected>dias</option><option value="">permanente</option>
           </select>
@@ -697,7 +697,7 @@
       <div id="ipban-text" style="margin-bottom:12px;"></div>
       <div style="display:flex;gap:10px;">
         <input class="admin-search" type="number" id="ipban-dur" min="1" value="1" style="width:90px;">
-        <select class="admin-search" id="ipban-unit" style="flex:1;">
+        <select class="admin-search" id="ipban-unit" style="flex:1;" onchange="syncDur('ipban-dur',this)">
           <option value="1">minutos</option><option value="60">horas</option>
           <option value="1440" selected>dias</option><option value="">permanente</option>
         </select>
@@ -889,7 +889,7 @@ function renderUsers() {
       var banBtn = u.banned
         ? '<button class="tbl-btn success" onclick="unbanUser(' + u.id + ')">Desbanir</button>'
         : '<button class="tbl-btn danger"' + (isSelf ? ' disabled title="Você não pode banir a si mesmo"' : '') + ' onclick="banUser(' + u.id + ')">Ban</button>';
-      var ipBtn = '<button class="tbl-btn danger"' + (u.last_ip ? '' : ' disabled title="IP desconhecido (usuário ainda não fez login)"') + ' onclick="ipBanUser(' + u.id + ')">IP-Ban</button>';
+      var ipBtn = '<button class="tbl-btn danger"' + (isSelf ? ' disabled title="Você não pode banir o próprio IP"' : u.last_ip ? '' : ' disabled title="IP desconhecido (usuário ainda não fez login)"') + ' onclick="ipBanUser(' + u.id + ')">IP-Ban</button>';
       var roleBtn = u.role !== 'admin'
         ? '<button class="tbl-btn success" onclick="promoteUser(' + u.id + ')">Admin</button>'
         : '<button class="tbl-btn danger"' + (isSelf ? ' disabled title="Você não pode revogar seu próprio acesso"' : '') + ' onclick="demoteUser(' + u.id + ')">Revogar</button>';
@@ -1117,6 +1117,9 @@ function toMinutes(durId, unitId) {
   return u === '' ? null : parseInt(document.getElementById(durId).value, 10) * parseInt(u, 10);
 }
 
+// "permanente" não tem número: esconde o campo de duração
+function syncDur(durId, sel) { document.getElementById(durId).style.display = sel.value === '' ? 'none' : ''; }
+
 function renderBlacklist() {
   var tbody = document.getElementById('blacklist-tbody');
   adminFetch('/admin/blacklist').then(function (rows) {
@@ -1149,6 +1152,7 @@ function ipBanUser(id) {
   var u = _usersCache.find(function (u) { return u.id === id; });
   if (!u) return;
   _ipBanId = id;
+  document.getElementById('ipban-dur').style.display = document.getElementById('ipban-unit').value === '' ? 'none' : '';
   document.getElementById('ipban-text').textContent = 'Banir o IP ' + u.last_ip + ' (último IP de "' + u.username + '")? A conta não será banida.';
   document.getElementById('modal-ipban').classList.remove('hidden');
 }

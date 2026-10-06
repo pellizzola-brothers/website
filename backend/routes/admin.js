@@ -369,10 +369,11 @@ router.put('/settings', async (req, res) => {
 
 
 // ── Blacklist de IPs ──────────────────────────────────────────
+const PROTECTED_MSG = 'Não é possível bloquear o IP de um administrador ou do servidor';
 router.get('/blacklist', async (req, res) => {
   const pool = await getPool();
   await pool.query(`DELETE FROM blacklist WHERE expires_at <= NOW()`);
-  const r = await pool.query(`SELECT CASE WHEN masklen(ip) = max_masklen(ip) THEN host(ip) ELSE network(ip)::text END AS ip, expires_at FROM blacklist ORDER BY expires_at NULLS FIRST, ip`);
+  const r = await pool.query(`SELECT CASE WHEN masklen(ip) = CASE family(ip) WHEN 4 THEN 32 ELSE 128 END THEN host(ip) ELSE network(ip)::text END AS ip, expires_at FROM blacklist ORDER BY expires_at NULLS FIRST, ip`);
   res.json(r.rows);
 });
 
@@ -381,6 +382,7 @@ router.post('/blacklist', async (req, res) => {
   if (!ip) return res.status(400).json({ error: 'IP ou faixa CIDR inválido (ex: 203.0.113.7 ou 192.0.0.0/8)' });
   const expires = bl.expiryFrom(minutes);
   if (expires === undefined) return res.status(400).json({ error: 'Duração inválida' });
+  if (await bl.isProtected(ip, bl.clientIp(req))) return res.status(400).json({ error: PROTECTED_MSG });
   await bl.addIp(ip, expires);
   const pool = await getPool();
   await log(pool, req, '⛔', `IP <strong>${esc(ip)}</strong> foi adicionado à blacklist (${expires ? 'até ' + expires.toISOString() : 'permanente'}).`);
@@ -401,12 +403,14 @@ router.delete('/blacklist/:ip', async (req, res) => {
 // IP-ban: bloqueia o último IP conhecido do usuário (login/cadastro); não bane a conta.
 router.post('/users/:id/ip-ban', async (req, res) => {
   const id = parseInt(req.params.id, 10);
+  if (id === req.user.id) return res.status(400).json({ error: 'Você não pode banir o próprio IP' });
   const expires = bl.expiryFrom(req.body.minutes);
   if (expires === undefined) return res.status(400).json({ error: 'Duração inválida' });
   const pool = await getPool();
   const r = await pool.query(`SELECT username, host(last_ip) AS ip FROM users WHERE id = $1`, [id]);
   if (!r.rows.length) return res.status(404).json({ error: 'Usuário não encontrado' });
   if (!r.rows[0].ip) return res.status(400).json({ error: 'Nenhum IP conhecido para este usuário (ele ainda não fez login)' });
+  if (await bl.isProtected(r.rows[0].ip, bl.clientIp(req))) return res.status(400).json({ error: PROTECTED_MSG });
   await bl.addIp(r.rows[0].ip, expires);
   await log(pool, req, '⛔', `IP <strong>${esc(r.rows[0].ip)}</strong> de <strong>${esc(r.rows[0].username)}</strong> foi banido (${expires ? 'até ' + expires.toISOString() : 'permanente'}).`);
   res.json({ ok: true, ip: r.rows[0].ip });
