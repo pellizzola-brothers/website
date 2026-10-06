@@ -211,17 +211,6 @@ async function main() {
     assert(/incorretos/i.test(await text('#login-msg')), 'mensagem de erro');
     await clearStorage(); await uiLogin(U1); await waitUrl(/perfil_do_usuario/);
   });
-  await test('3 erros de senha exigem captcha (força bruta)', async () => {
-    const bf = 'e2e_bf' + RUN;
-    const cap = (await api('GET', '/auth/captcha')).data;
-    await api('POST', '/auth/register', { body: { username: bf, password: PASS, captcha_token: cap.token, captcha_answer: solveCaptcha(cap.token) } });
-    await uiLogin(bf, 'Errada@1');
-    for (let i = 0; i < 2; i++) { await (await $('#panel-login .btn-green')).click(); await sleep(2500); }
-    // 3º erro = bloqueio de 30s (botão vira contagem regressiva); captcha passa a valer depois do bloqueio
-    await driver.wait(async () => /aguarde/i.test(await text('#panel-login .btn-green')), 6000); await snap('login-bloqueado');
-    const r = await api('POST', '/auth/login', { body: { username: bf, password: PASS } });
-    assert(r.status === 429 && r.data.locked && r.data.requires_captcha, 'API: 429 locked + requires_captcha, veio ' + r.status);
-  });
   await test('?next= respeita só páginas locais (sem open redirect)', async () => {
     await clearStorage(); await driver.get(BASE + '/login.html?next=https://evil.com');
     await (await $('#login-user')).sendKeys(U1); await (await $('#login-pass')).sendKeys(PASS);
@@ -390,6 +379,18 @@ async function main() {
     assert(!fs.existsSync(path.join(LEVELS_DIR, row.hash)), 'arquivo removido');
     const logs = (await api('GET', '/admin/logs', { token: a })).data;
     assert(logs.some(l => l.text.includes('&lt;b&gt;admin&lt;/b&gt;')) && !logs.some(l => l.text.includes('<b>admin</b>')), 'log escapado');
+  });
+  await test('3 erros de senha exigem captcha (força bruta, por IP)', async () => {
+    // Roda por último: o IP do teste fica em timeout e travaria os logins seguintes.
+    const bf = 'e2e_bf' + RUN;
+    const cap = (await api('GET', '/auth/captcha')).data;
+    await api('POST', '/auth/register', { body: { username: bf, password: PASS, captcha_token: cap.token, captcha_answer: solveCaptcha(cap.token) } });
+    await clearStorage(); await uiLogin(bf, 'Errada@1');
+    for (let i = 0; i < 2; i++) { await (await $('#panel-login .btn-green')).click(); await sleep(2500); }
+    // 3º erro (contando o do teste anterior) = timeout de 1 min (botão vira contagem regressiva); captcha passa a valer depois do bloqueio
+    await driver.wait(async () => /aguarde/i.test(await text('#panel-login .btn-green')), 6000); await snap('login-bloqueado');
+    const r = await api('POST', '/auth/login', { body: { username: bf, password: PASS } });
+    assert(r.status === 429 && r.data.locked && r.data.requires_captcha, 'API: 429 locked + requires_captcha, veio ' + r.status);
   });
 }
 
