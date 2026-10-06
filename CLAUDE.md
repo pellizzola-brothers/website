@@ -46,7 +46,7 @@ backend/           Express API (Node.js)
     admin.js       requireAdmin (role check)
   lib/
     captcha.js     SVG captcha with AES-GCM token
-    bruteforce.js  login attempt throttling (captcha after 3 fails, lockouts)
+    bruteforce.js  per-IP login throttling, in memory (captcha after 3 fails; 3 fails = timeout 1min/15min/24h)
     lvlhash.js     .lvl structure check + level_hash verification (the hash recipe below)
     blacklist.js   IP blacklist guard (first middleware in server.js), in-memory `net.BlockList` of the `blacklist` table
     settings.js    global flags (maintenance_mode, allow_registration, allow_upload)

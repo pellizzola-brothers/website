@@ -1,73 +1,41 @@
-// lib/bruteforce.js — controle de tentativas de login (por username).
+// lib/bruteforce.js — controle de tentativas de login (por IP, em memória).
 //
-// Regra: a partir do 3º erro, captcha passa a ser exigido em toda tentativa
-// seguinte. A cada múltiplo de 3 erros (3, 6, 9, ... 60), a conta é bloqueada
-// por um tempo que cresce a cada vez, até travar em 8h no 60º erro.
-const { getPool } = require('../db');
+// Regra: a partir do 3º erro, captcha passa a ser exigido. A cada 3 erros o IP
+// fica em timeout: 1º = 1 min, 2º = 15 min, 3º = 24h. Os contadores zeram 24h
+// após o 1º erro da janela. Login bem-sucedido NÃO zera (senão bastaria logar
+// na própria conta para recomeçar).
+// ponytail: em memória — reiniciar o servidor zera tudo, e com mais de uma instância cada uma conta separado. Mover para o banco se isso importar.
+const WINDOW_MS     = 24 * 60 * 60 * 1000;
+const WAITS_SECONDS = [60, 15 * 60, 24 * 60 * 60]; // por timeout
+const CAPTCHA_THRESHOLD = 3;
+const LOCK_EVERY        = 3;
 
-const CAPTCHA_THRESHOLD = 3;   // a partir daqui, captcha obrigatório
-const LOCK_EVERY        = 3;   // a cada N erros, bloqueia de novo
-const BASE_WAIT_SECONDS = 30;  // espera no 1º bloqueio (3 erros)
-const MAX_WAIT_SECONDS  = 8 * 60 * 60; // 8h
-const MAX_STEPS         = 20;  // passo 20 == 60 erros == já no teto de 8h
+const attempts = new Map(); // ip -> { fail_count, locked_until (ms), since (ms) }
 
-function computeWaitSeconds(step) {
-  if (step >= MAX_STEPS) return MAX_WAIT_SECONDS;
-  const ratio = MAX_WAIT_SECONDS / BASE_WAIT_SECONDS;
-  return Math.round(BASE_WAIT_SECONDS * Math.pow(ratio, (step - 1) / (MAX_STEPS - 1)));
+function getAttempt(ip) {
+  const a = attempts.get(ip);
+  if (a && a.locked_until <= Date.now() && Date.now() - a.since > WINDOW_MS) attempts.delete(ip);
+  return attempts.get(ip) || { fail_count: 0, locked_until: 0 };
 }
 
-async function getAttempt(username) {
-  const pool = await getPool();
-  const result = await pool.query(
-    `SELECT fail_count, locked_until FROM login_attempts WHERE username = $1`,
-    [username]
-  );
-  return result.rows[0] || { fail_count: 0, locked_until: null };
-}
+const isLocked = a => a.locked_until > Date.now();
+const retryAfterSeconds = a => Math.max(1, Math.ceil((a.locked_until - Date.now()) / 1000));
+const requiresCaptcha = a => a.fail_count >= CAPTCHA_THRESHOLD;
 
-function isLocked(attempt) {
-  return !!attempt.locked_until && new Date(attempt.locked_until).getTime() > Date.now();
-}
-
-function retryAfterSeconds(attempt) {
-  return Math.max(1, Math.ceil((new Date(attempt.locked_until).getTime() - Date.now()) / 1000));
-}
-
-function requiresCaptcha(attempt) {
-  return attempt.fail_count >= CAPTCHA_THRESHOLD;
-}
-
-// Registra uma falha com incremento ATÔMICO (INSERT ... ON CONFLICT DO UPDATE): tentativas
-// paralelas não se perdem numa corrida leitura→escrita. Ao bater um múltiplo de LOCK_EVERY
-// aplica o bloqueio progressivo. Retorna a linha atualizada.
-async function registerFailure(username) {
-  const pool = await getPool();
-  const r = await pool.query(
-    `INSERT INTO login_attempts (username, fail_count, updated_at)
-     VALUES ($1, 1, NOW())
-     ON CONFLICT (username) DO UPDATE
-       SET fail_count = login_attempts.fail_count + 1, updated_at = NOW()
-     RETURNING fail_count, locked_until`,
-    [username]
-  );
-  const failCount = r.rows[0].fail_count;
-  let lockedUntil = r.rows[0].locked_until;
-
-  if (failCount % LOCK_EVERY === 0) {
-    lockedUntil = new Date(Date.now() + computeWaitSeconds(failCount / LOCK_EVERY) * 1000);
-    await pool.query(`UPDATE login_attempts SET locked_until = $2 WHERE username = $1`, [username, lockedUntil]);
+function registerFailure(ip) {
+  const a = getAttempt(ip);
+  const next = { fail_count: a.fail_count + 1, locked_until: a.locked_until, since: a.since || Date.now() };
+  if (next.fail_count % LOCK_EVERY === 0) {
+    const step = Math.min(next.fail_count / LOCK_EVERY, WAITS_SECONDS.length);
+    next.locked_until = Date.now() + WAITS_SECONDS[step - 1] * 1000;
   }
-  return { fail_count: failCount, locked_until: lockedUntil };
+  attempts.set(ip, next);
+  return next;
 }
 
-async function resetAttempts(username) {
-  const pool = await getPool();
-  await pool.query(`DELETE FROM login_attempts WHERE username = $1`, [username]).catch(() => {});
-}
+// Evita crescimento infinito do Map.
+setInterval(() => {
+  for (const [ip, a] of attempts) if (a.locked_until <= Date.now() && Date.now() - a.since > WINDOW_MS) attempts.delete(ip);
+}, 60 * 60 * 1000).unref();
 
-module.exports = {
-  getAttempt, isLocked, retryAfterSeconds, requiresCaptcha,
-  registerFailure, resetAttempts, computeWaitSeconds,
-  CAPTCHA_THRESHOLD,
-};
+module.exports = { getAttempt, isLocked, retryAfterSeconds, requiresCaptcha, registerFailure };

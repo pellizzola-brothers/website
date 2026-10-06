@@ -102,13 +102,6 @@ CREATE TABLE admin_logs (
 );
 CREATE INDEX ix_admin_logs_created ON admin_logs(created_at DESC);
 
-CREATE TABLE login_attempts (
-    username     VARCHAR(100) PRIMARY KEY,
-    fail_count   INT          NOT NULL DEFAULT 0,
-    locked_until TIMESTAMPTZ,
-    updated_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
-);
-
 -- expires_at NULL = permanent. Expired rows are ignored and purged when the admin lists them.
 CREATE TABLE blacklist (
     ip         INET         PRIMARY KEY,

@@ -124,7 +124,6 @@ async function startServer() {
 async function cleanup() {
   try {
     if (pool) {
-      await pool.query(`DELETE FROM login_attempts WHERE username LIKE 'e2e\\_%'`);
       await pool.query(`DELETE FROM admin_logs WHERE admin_name LIKE 'e2e\\_%'`);
       await pool.query(`DELETE FROM users WHERE username LIKE 'e2e\\_%'`); // cascata: files, levels, comments, reports...
       await pool.end();

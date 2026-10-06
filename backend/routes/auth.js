@@ -79,8 +79,8 @@ router.post('/register', async (req, res) => {
 });
 
 // ── POST /api/auth/login ─────────────────────────────────────
-// Defesa contra força bruta: a partir do 3º erro exige captcha; a cada
-// múltiplo de 3 erros, bloqueia por um tempo crescente (até 8h no 60º erro).
+// Defesa contra força bruta (por IP): a partir do 3º erro exige captcha; a cada
+// 3 erros, timeout de 1 min, 15 min e 24h (ver lib/bruteforce.js).
 router.post('/login', async (req, res) => {
   const { username, password, captcha_token, captcha_answer } = req.body;
   if (typeof username !== 'string' || typeof password !== 'string' || !username || !password)
@@ -89,7 +89,8 @@ router.post('/login', async (req, res) => {
   const uname = username.toLowerCase();
 
   try {
-    const attempt = await bruteforce.getAttempt(uname);
+    const ip = clientIp(req);
+    const attempt = bruteforce.getAttempt(ip);
 
     if (bruteforce.isLocked(attempt)) {
       return res.status(429).json({
@@ -117,7 +118,7 @@ router.post('/login', async (req, res) => {
     const ok   = user && await bcrypt.compare(password, user.password_hash || '');
 
     if (!ok) {
-      const updated = await bruteforce.registerFailure(uname);
+      const updated = bruteforce.registerFailure(ip);
       return res.status(401).json({
         error: 'Usuário ou senha incorretos',
         requires_captcha: bruteforce.requiresCaptcha(updated),
@@ -128,8 +129,7 @@ router.post('/login', async (req, res) => {
     if (user.banned)
       return res.status(403).json({ error: 'Esta conta está banida' });
 
-    await bruteforce.resetAttempts(uname);
-    await pool.query(`UPDATE users SET last_ip = $1 WHERE id = $2`, [clientIp(req), user.id]);
+    await pool.query(`UPDATE users SET last_ip = $1 WHERE id = $2`, [ip, user.id]);
     res.json({ user: { id: user.id, username: user.username, role: user.role }, token: makeToken(user) });
   } catch (err) {
     console.error('[POST /auth/login]', err);
