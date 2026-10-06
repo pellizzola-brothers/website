@@ -15,7 +15,7 @@ cd backend && npm run dev
 cd backend && npm start
 
 # Lint frontend JS
-npx eslint frontend/
+npx eslint frontend/   (flat config: eslint.config.js)
 ```
 
 End-to-end tests (headless Chrome via Selenium) live in `tests/`:
