@@ -96,10 +96,10 @@ function buildLvl({ hash = true, tamper = false } = {}) {
   const { zipSync, strToU8 } = bReq('fflate');
   const { hashFiles } = bReq('./lib/lvlhash.js');
   const j = { level: { information: { name: 'e2e', description: '', author: '' },
-    block_data: [new Array(540).fill('000')], entity_definitions: [], entities: [], backgrounds: ['foo'] } };
+    scenes: { 0: new Array(240).fill('000') }, entity_definitions: [], entities: [], backgrounds: ['foo'] } };
   const files = { 'level.json': strToU8(JSON.stringify(j)) };
   if (hash) j.level.information.level_hash = hashFiles(files);
-  if (tamper) j.level.block_data[0][0] = '001';
+  if (tamper) j.level.scenes[0][0] = '001';
   return Buffer.from(zipSync({ 'level.json': strToU8(JSON.stringify(j)) }));
 }
 async function makeLevelFile(name, content = buildLvl()) {

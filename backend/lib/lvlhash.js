@@ -3,7 +3,8 @@
 const crypto = require('crypto');
 const { unzipSync, strFromU8, strToU8 } = require('fflate');
 
-const W = 540;                       // colunas por linha de block_data
+const SCENECOLS = 20;                // colunas por cena (tabuleiro de 540 = 27 cenas)
+const NSCENES = 27;
 const MAX_ENTRY = 20 * 1024 * 1024;  // limite por arquivo descompactado (zip bomb)
 const BG = ['foo', 'bar', 'baz'];
 const isStr = v => typeof v === 'string';
@@ -46,9 +47,12 @@ function checkLvl(buf) {
   const i = l.information;
   if (!i || typeof i !== 'object' || !['name', 'description', 'author'].every(k => isStr(i[k])))
     return bad('information precisa de name, description e author (texto)');
-  if (!Array.isArray(l.block_data) || !l.block_data.length) return bad('block_data vazio');
-  if (!l.block_data.every(r => Array.isArray(r) && r.length === W && r.every(c => isStr(c) && /^\d{3}$/.test(c))))
-    return bad(`cada linha de block_data deve ter exatamente ${W} ids de 3 dígitos`);
+  // scenes: { "<n>": [ids] }, só cenas não vazias; cada cena = linhas x SCENECOLS ids, linha a linha
+  const sc = l.scenes;
+  if (!sc || typeof sc !== 'object' || Array.isArray(sc) || !Object.keys(sc).length) return bad('scenes vazio');
+  if (!Object.entries(sc).every(([n, a]) => /^\d+$/.test(n) && +n < NSCENES
+      && Array.isArray(a) && a.length && a.length % SCENECOLS === 0 && a.every(c => isStr(c) && /^\d{3}$/.test(c))))
+    return bad(`cada cena de scenes deve ter número de 0 a ${NSCENES - 1} e linhas de ${SCENECOLS} ids de 3 dígitos`);
   if (!Array.isArray(l.entity_definitions) || !l.entity_definitions.every(d => d && isStr(d.id) && isStr(d.script)))
     return bad('entity_definitions inválido');
   const defs = new Set(l.entity_definitions.map(d => d.id));

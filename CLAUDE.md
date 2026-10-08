@@ -80,6 +80,8 @@ pauro_database.sql Schema only (fresh database)
 
 `information.level_hash` in a `.lvl`'s `level.json` must equate to a SHA-256 (hex) over the archive's contents: every file sorted by name (directory entries skipped), each fed as `name NUL byte-length NUL bytes`, with `level.json` replaced by compact `JSON.stringify()` of its parse minus `level_hash`. Zip timestamps, compression and `level.json`'s layout never matter. `backend/lib/lvlhash.js` implements this and `routes/upload.js` rejects any `.lvl` that is missing the hash, has an invalid one, or doesn't match.
 
+`level.json` stores the grid as `level.scenes`, not `block_data`: an object keyed by 0-based scene number (0-26) holding only the non-empty scenes, each a flat row-major array of `rows x 20` three-digit ids. `checkLvl()` enforces that shape.
+
 ## Key design decisions
 
 **API prefix**: All API routes live under `/api/*`. The frontend must prefix every fetch with the `API` constant from `config.js` (e.g., `${API}/auth/login`), never a bare path.
