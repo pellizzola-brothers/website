@@ -13,3 +13,14 @@ function escHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+/**
+ * Emojis aceitos como avatar — mesma lista de backend/lib/avatars.js.
+ * O avatar fica em users.avatar (NULL = ainda não escolheu = '👤').
+ */
+const AVATARS = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
+
+/** Avatar de um usuário vindo da API ({ avatar }) — sempre usar este helper. */
+function avatarOf(u) {
+  return (u && u.avatar) || AVATARS[0];
+}

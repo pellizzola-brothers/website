@@ -522,7 +522,7 @@ async function loadHome() {
 
   creatorCard.innerHTML = header +
     '<div class="creator-card-body">' +
-      '<div class="creator-avatar">👤</div>' +
+      '<div class="creator-avatar">' + escHtml(avatarOf(creator)) + '</div>' +
       '<div class="creator-name">' + escHtml(creator.username) + '</div>' +
       '<div class="creator-bio">' + (creator.bio ? '"' + escHtml(creator.bio) + '"' : '') + '</div>' +
       '<div class="creator-stats-row">' +

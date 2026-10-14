@@ -277,7 +277,6 @@ function closeHelpOnEsc(e) {
 'use strict';
 
 const EMOJIS  = ['🌴','🎯','🎵','⭐','🏆','🍄','🎮','🔷','🧩','🎪'];
-const AVATARS = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
 const emojiFor = id => EMOJIS[((id - 1) % EMOJIS.length + EMOJIS.length) % EMOJIS.length];
 
 const loggedUser = getUser();
@@ -285,9 +284,6 @@ const authToken  = getToken();
 
 const getUserId = () => parseInt(new URLSearchParams(location.search).get('id')) || 1;
 const isOwn     = id => loggedUser && loggedUser.id === id;
-
-function getStoredAvatar(userId) { return localStorage.getItem('pb_avatar_' + userId) || '👤'; }
-function setStoredAvatar(userId, emoji) { localStorage.setItem('pb_avatar_' + userId, emoji); }
 
 function showToast(msg, ms) {
   ms = ms || 2000;
@@ -298,6 +294,7 @@ function showToast(msg, ms) {
 
 let pendingDeleteId  = null;
 let currentProfileId = null;
+let currentAvatar    = AVATARS[0];
 let selectedAvatar   = null;
 
 function openModal(id)  { document.getElementById(id).classList.remove('hidden'); }
@@ -307,22 +304,35 @@ document.querySelectorAll('.modal-overlay').forEach(function(ov) {
 });
 
 function openAvatarModal() {
-  const current = getStoredAvatar(currentProfileId);
-  selectedAvatar = current;
-  document.getElementById('avatar-grid').innerHTML = AVATARS.map(function(a) {
-    return '<div class="avatar-opt' + (a === current ? ' selected' : '') + '" onclick="selectAvatar(this,\'' + a + '\')">' + a + '</div>';
+  selectedAvatar = currentAvatar;
+  document.getElementById('avatar-grid').innerHTML = AVATARS.map(function(a, i) {
+    return '<div class="avatar-opt' + (a === currentAvatar ? ' selected' : '') + '" onclick="selectAvatar(this,' + i + ')">' + a + '</div>';
   }).join('');
   openModal('modal-avatar');
 }
-function selectAvatar(el, emoji) {
+function selectAvatar(el, idx) {
   document.querySelectorAll('.avatar-opt').forEach(function(o) { o.classList.remove('selected'); });
   el.classList.add('selected');
-  selectedAvatar = emoji;
+  selectedAvatar = AVATARS[idx];
 }
-function saveAvatar() {
+async function putAvatar(emoji) {
+  const resp = await fetch(API + '/users/' + currentProfileId + '/avatar', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken },
+    body: JSON.stringify({ avatar: emoji })
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(function() { return {}; });
+    throw new Error(err.error || resp.status);
+  }
+  currentAvatar = emoji;
+  sessionStorage.removeItem('pb_usuarios_v3'); // lista de usuarios.html em cache
+}
+async function saveAvatar() {
   if (!selectedAvatar) return;
-  setStoredAvatar(currentProfileId, selectedAvatar);
-  document.querySelectorAll('.user-avatar').forEach(function(el) { el.textContent = selectedAvatar; });
+  try { await putAvatar(selectedAvatar); }
+  catch (e) { showToast('❌ ' + e.message); return; }
+  document.querySelectorAll('.user-avatar').forEach(function(el) { el.textContent = currentAvatar; });
   closeModal('modal-avatar');
   showToast(t('perfil.toast_avatar'));
 }
@@ -498,7 +508,21 @@ async function loadProfile() {
 
   document.title = u.username + ' — Pellizzola Brothers';
   const own    = isOwn(u.id);
-  const avatar = getStoredAvatar(u.id);
+
+  // Avatar escolhido quando ainda ficava só no localStorage do dono: envia uma vez ao banco
+  const legacyAvatar = own && localStorage.getItem('pb_avatar_' + u.id);
+  if (legacyAvatar) {
+    try {
+      if (!u.avatar && legacyAvatar !== AVATARS[0] && AVATARS.indexOf(legacyAvatar) !== -1) {
+        await putAvatar(legacyAvatar);
+        u.avatar = legacyAvatar;
+      }
+      localStorage.removeItem('pb_avatar_' + u.id);
+    } catch (_) { /* tenta de novo na próxima visita */ }
+  }
+
+  currentAvatar = avatarOf(u);
+  const avatar = currentAvatar;
   const bio    = u.bio || '';
   const levels = u.levels || [];
 

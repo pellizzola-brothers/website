@@ -14,6 +14,7 @@ CREATE TABLE users (
     role              VARCHAR(20)   NOT NULL DEFAULT 'user' CHECK (role IN ('user','admin')),
     banned            BOOLEAN       NOT NULL DEFAULT false,
     last_ip           INET,
+    avatar            VARCHAR(16),
     created_at        TIMESTAMPTZ   NOT NULL DEFAULT NOW()
 );
 
@@ -111,3 +112,4 @@ CREATE TABLE blacklist (
 -- Migration for an existing database:
 --   ALTER TABLE users ADD COLUMN last_ip INET;
 --   CREATE TABLE blacklist (ip INET PRIMARY KEY, expires_at TIMESTAMPTZ);
+--   ALTER TABLE users ADD COLUMN avatar VARCHAR(16);

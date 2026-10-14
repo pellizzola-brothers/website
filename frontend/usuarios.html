@@ -399,15 +399,9 @@ function closeHelpOnEsc(e) {
 'use strict';
 
 /* ════════ CONSTANTES ════════ */
-const AVATARS   = ['👤','🦊','🐯','🐸','🦁','🐧','🐺','🤖','👾','🦄','🐉','🎭','💀','🧙','🕵️','🧑‍🚀','👻','🦸','🧛','🐮','🐱','🐻','🐼','🦋','🌟','🔥','😎','🤠','👑','⚡','🎃','🌈'];
 const MEDALHAS  = ['🥇','🥈','🥉'];
 const CACHE_TTL = 60 * 1000; // 1 minuto
 const DEBOUNCE  = 250;
-
-/* Retorna o avatar emoji de um usuário pelo id */
-const avatarFor = function(id) {
-  return AVATARS[((id - 1) % AVATARS.length + AVATARS.length) % AVATARS.length];
-};
 
 /* ════════ ESTADO ════════ */
 let todosUsuarios = [];
@@ -450,15 +444,10 @@ function toggleFavorito(id) {
   localStorage.setItem('pb_criadores_fav', JSON.stringify(favs));
 }
 
-/* ════════ AVATAR armazenado localmente ════════ */
-function getAvatarLocal(id) {
-  return localStorage.getItem('pb_avatar_' + id) || avatarFor(id);
-}
-
 /* ════════ FETCH ════════ */
 async function carregarUsuarios() {
   setProgress(20);
-  var cached = cacheLoad('pb_usuarios_v2', CACHE_TTL);
+  var cached = cacheLoad('pb_usuarios_v3', CACHE_TTL);
   if (cached) {
     todosUsuarios = cached; setProgress(100);
     filtrar(); return;
@@ -468,7 +457,7 @@ async function carregarUsuarios() {
     var resp = await fetch(API + '/users');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     todosUsuarios = await resp.json();
-    cacheSave('pb_usuarios_v2', todosUsuarios);
+    cacheSave('pb_usuarios_v3', todosUsuarios);
     setProgress(100);
   } catch(err) {
     /* Sem fallback com dados fictícios: mostra o erro em vez de inventar criadores */
@@ -563,7 +552,7 @@ function renderizar(usuarios) {
       var totalDl    = parseInt(u.downloaded_levels) || 0;
       var totalLikes = parseInt(u.liked_levels) || 0;
       var isFav      = isFavorito(u.id);
-      var avatar     = getAvatarLocal(u.id);
+      var avatar     = avatarOf(u);
 
       /* Trunca bio em 60 chars conforme requisito */
       var bio = u.bio || '';

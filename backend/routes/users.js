@@ -3,6 +3,7 @@ const express = require('express');
 const router  = express.Router();
 const { getPool } = require('../db');
 const { authMiddleware } = require('../middleware/auth');
+const { AVATARS } = require('../lib/avatars');
 
 // ── GET /api/users/:id ──────────────────────────────────────
 router.get('/:id', async (req, res) => {
@@ -14,7 +15,7 @@ router.get('/:id', async (req, res) => {
 
     const [userResult, levelsResult] = await Promise.all([
       pool.query(
-        `SELECT id, username, bio, downloaded_levels, liked_levels
+        `SELECT id, username, bio, avatar, downloaded_levels, liked_levels
          FROM users WHERE id = $1`,
         [id]
       ),
@@ -44,12 +45,12 @@ router.get('/', async (req, res) => {
   try {
     const pool = await getPool();
     const result = await pool.query(`
-      SELECT u.id, u.username, u.bio,
+      SELECT u.id, u.username, u.bio, u.avatar,
              u.downloaded_levels, u.liked_levels,
              COUNT(l.id) AS total_levels
       FROM users u
       LEFT JOIN levels l ON l.author = u.id AND l.active
-      GROUP BY u.id, u.username, u.bio, u.downloaded_levels, u.liked_levels
+      GROUP BY u.id, u.username, u.bio, u.avatar, u.downloaded_levels, u.liked_levels
       ORDER BY total_levels DESC
     `);
     res.json(result.rows);
@@ -89,6 +90,30 @@ router.put('/:id', authMiddleware, async (req, res) => {
     res.json(result.rows[0]);
   } catch (err) {
     console.error('[PUT /users/:id]', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// ── PUT /api/users/:id/avatar — PROTEGIDO ──────────────────
+// Só aceita emojis da lista AVATARS; '👤' (o padrão) é gravado como NULL
+router.put('/:id/avatar', authMiddleware, async (req, res) => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+  if (req.user.id !== id) return res.status(403).json({ error: 'Sem permissão' });
+
+  const avatar = req.body.avatar;
+  if (!AVATARS.includes(avatar))
+    return res.status(400).json({ error: 'Avatar inválido' });
+
+  try {
+    const pool = await getPool();
+    const result = await pool.query(
+      `UPDATE users SET avatar = $1 WHERE id = $2 RETURNING id, avatar`,
+      [avatar === AVATARS[0] ? null : avatar, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('[PUT /users/:id/avatar]', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
